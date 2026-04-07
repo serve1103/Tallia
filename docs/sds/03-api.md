@@ -154,7 +154,7 @@
     "successCount": 498,
     "errorCount": 2,
     "errors": [
-      { "examineeNo": "20260015", "message": "D유형 매핑 테이블에 일치하는 항목 없음" }
+      { "examineeNo": "20260015", "message": "D유형 점수 변환표에 일치하는 항목 없음" }
     ],
     "calculatedAt": "2026-01-15T10:30:00Z"
   }
@@ -195,14 +195,14 @@ Query: ?includeIntermediate=true
 Response: Excel file (Content-Disposition: attachment)
 ```
 
-### 3.10 매핑 테이블 (D유형)
+### 3.10 점수 변환표 (D유형)
 
 | Method | Path | 설명 |
 |--------|------|------|
-| GET | /evaluations/:id/mapping-table | 매핑 테이블 조회 (entries 포함) |
-| PUT | /evaluations/:id/mapping-table | 매핑 테이블 전체 저장 |
-| POST | /evaluations/:id/mapping-table/upload | 매핑 테이블 엑셀 업로드 |
-| GET | /evaluations/:id/mapping-table/download | 매핑 테이블 엑셀 다운로드 |
+| GET | /evaluations/:id/mapping-table | 점수 변환표 조회 (entries 포함) |
+| PUT | /evaluations/:id/mapping-table | 점수 변환표 전체 저장 |
+| POST | /evaluations/:id/mapping-table/upload | 점수 변환표 엑셀 업로드 |
+| GET | /evaluations/:id/mapping-table/download | 점수 변환표 엑셀 다운로드 |
 
 ### 3.11 B유형 전용
 

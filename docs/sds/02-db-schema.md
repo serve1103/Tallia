@@ -160,7 +160,7 @@ tenants ──< audit_logs
 
 ### 2.3 evaluation.config JSONB 구조 (유형별)
 
-#### A유형 — 위원 점수 집계형
+#### A유형 — 위원 평가
 
 ```jsonc
 {
@@ -188,7 +188,7 @@ tenants ──< audit_logs
 }
 ```
 
-#### B유형 — 자동 채점형
+#### B유형 — 자동 채점
 
 ```jsonc
 {
@@ -217,7 +217,7 @@ tenants ──< audit_logs
 }
 ```
 
-#### C유형 — 문항 점수 계산형
+#### C유형 — 문항별 채점
 
 ```jsonc
 {
@@ -238,7 +238,7 @@ tenants ──< audit_logs
 }
 ```
 
-#### D유형 — 매핑 테이블형
+#### D유형 — 점수 변환표
 
 ```jsonc
 {

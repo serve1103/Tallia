@@ -20,7 +20,7 @@
 | bcrypt 해싱 | auth 모듈, salt rounds 12 |
 | JWT 인증 | JwtAuthGuard, 1시간 만료 + 리프레시 |
 | 멀티테넌트 격리 | TenantGuard, 모든 쿼리에 tenant_id 조건 |
-| 커스텀 블록 샌드박스 | mathjs 제한 실행, AST 화이트리스트 검증, 100ms 타임아웃 |
+| 사용자 정의 단계 샌드박스 | mathjs 제한 실행, AST 화이트리스트 검증, 100ms 타임아웃 |
 | HTTPS | 배포 환경에서 리버스 프록시(nginx) TLS 종료 |
 | XSS 방지 | React 기본 이스케이프 + Helmet 미들웨어 |
 | SQL Injection | Prisma 파라미터 바인딩 (raw query 사용 금지) |
@@ -50,7 +50,7 @@
 |------------------|-------------------|
 | 멀티테넌트 대학 공간 | §2 tenants 테이블, §6 TenantGuard |
 | 회원가입 (도메인 이메일 + 초대 코드) | §3.2 /auth/signup, §6.1 인증 흐름 |
-| A유형 — 위원 점수 집계형 | §2.3 config, §4.5 블록 상세, §5.2 양식 |
+| A유형 — 위원 평가 | §2.3 config, §4.5 블록 상세, §5.2 양식 |
 | A유형 — 위원 수별 조건부 파이프라인 | §2.4 pipeline_config conditions, §4.4 조건부 실행 |
 | A유형 — 등급 입력 + 매핑 | §2.3 gradeMapping, §4.5 grade_to_score 블록 |
 | A유형 — 대항목/소항목 계층 | §2.3 items.subItems |
@@ -60,13 +60,13 @@
 | B유형 — 채점 검증 감사 로그 | §4.6 auto_grade 감사 로그, §8.3 |
 | C유형 — 문항/소문항 계층 | §2.3 questions.subQuestions |
 | C유형 — 복수 채점위원 (A블록 재활용) | §4.7 위원 집계 블록 |
-| D유형 — 매핑 테이블 | §2.2 mapping_tables/entries, §4.8 mapping_lookup |
+| D유형 — 점수 변환표 | §2.2 mapping_tables/entries, §4.8 mapping_lookup |
 | D유형 — 매칭 실패 처리 | §4.8 error_flag, §5.3 D유형 검증 |
-| D유형 — 매핑 테이블 엑셀 업로드 | §3.10 /mapping-table/upload |
-| 커스텀 블록 (템플릿 + 수식) | §4.10 커스텀 블록, 샌드박스 |
-| 커스텀 블록 보안 (화이트리스트, 샌드박스) | §4.10 수식 샌드박스, §8.2 |
-| 파이프라인 빌더 — 블록 유효성 검증 | §4.11 validatePipeline |
-| 파이프라인 빌더 — 경로1/2 혼용 불가 | §4.11 검증 규칙 3 |
+| D유형 — 점수 변환표 엑셀 업로드 | §3.10 /mapping-table/upload |
+| 사용자 정의 단계 (템플릿 + 수식) | §4.10 사용자 정의 단계, 샌드박스 |
+| 사용자 정의 단계 보안 (화이트리스트, 샌드박스) | §4.10 수식 샌드박스, §8.2 |
+| 계산 과정 설정 — 블록 유효성 검증 | §4.11 validatePipeline |
+| 계산 과정 설정 — 위원 총점 방식/항목별 계산 방식 혼용 불가 | §4.11 검증 규칙 3 |
 | 엑셀 양식 자동 생성 | §5.2 유형별 양식 구조 |
 | 엑셀 업로드 검증 | §5.3 검증 항목 |
 | 재업로드 / 롤백 | §2.2 score_uploads.is_current, §3.7 rollback API |

@@ -46,7 +46,7 @@ interface DecimalConfig {
 
 interface BlockInput {
   data: unknown;                         // DataShape에 따른 데이터
-  context: ExecutionContext;              // 평가 설정, 매핑 테이블 등 참조
+  context: ExecutionContext;              // 평가 설정, 점수 변환표 등 참조
 }
 
 interface BlockOutput {
@@ -132,7 +132,7 @@ FSD에 정의됨. 여기서는 type 식별자를 확정한다.
 |------|------|------|------|
 | `grade_to_score` | 등급→점수 변환 | GRADE_MATRIX | MATRIX |
 
-**경로1 — 위원 총점 기준:**
+**위원 총점 방식:**
 
 | type | 이름 | 입력 | 출력 |
 |------|------|------|------|
@@ -144,7 +144,7 @@ FSD에 정의됨. 여기서는 type 식별자를 확정한다.
 | `committee_average` | 위원 평균 | ARRAY | SCALAR |
 | `committee_sum` | 위원 합산 | ARRAY | SCALAR |
 
-**경로2 — 항목별 기준:**
+**항목별 계산 방식:**
 
 | type | 이름 | 입력 | 출력 |
 |------|------|------|------|
@@ -188,7 +188,7 @@ B유형 파이프라인 예시:
 
 C유형은 A유형의 위원 집계 블록을 재활용하며, 문항 집계용 블록을 추가한다.
 
-**위원 집계 (채점위원이 있을 때) — A유형 경로2 블록 재활용:**
+**위원 집계 (채점위원이 있을 때) — A유형 항목별 계산 방식 블록 재활용:**
 
 | type | 이름 | 입력 | 출력 |
 |------|------|------|------|
@@ -225,7 +225,7 @@ C유형 파이프라인 예시 (단일 채점):
 
 | type | 이름 | 입력 | 출력 | 설명 |
 |------|------|------|------|------|
-| `mapping_lookup` | 매핑 테이블 조회 | MAPPING_INPUT | SCALAR | 조건 값으로 매핑 테이블에서 점수 조회. 매칭 실패 시 error_flag 설정 |
+| `mapping_lookup` | 점수 변환표 조회 | MAPPING_INPUT | SCALAR | 조건 값으로 점수 변환표에서 점수 조회. 매칭 실패 시 error_flag 설정 |
 
 D유형 파이프라인 예시:
 ```
@@ -250,7 +250,7 @@ D유형 파이프라인 예시:
 | `normalize_to_max` | 만점 기준 환산 | SCALAR | SCALAR | `score / maxScore × 100` → 원점수 |
 | `apply_converted_max` | 환산 만점 적용 | SCALAR | SCALAR | `rawScore × (convertedMax / 100)` → 환산점수 |
 
-### 4.10 커스텀 블록
+### 4.10 사용자 정의 단계
 
 두 가지 방식:
 
@@ -312,7 +312,7 @@ function validatePipeline(
     }
   }
 
-  // 3. 경로1/경로2 혼용 검사 (A유형)
+  // 3. 위원 총점 방식/항목별 계산 방식 혼용 검사 (A유형)
   // 4. 필수 블록 누락 검사 (normalize_to_max)
   // 5. 등급 데이터인데 grade_to_score 누락 검사
   // 6. 최종 출력이 SCALAR인지 검사

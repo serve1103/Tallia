@@ -901,7 +901,7 @@
           </div>
           <div class="type-card">
             <div class="type-card-icon">&#128203;</div>
-            <div class="type-card-name">D. 매핑 테이블</div>
+            <div class="type-card-name">D. 점수 변환표</div>
             <div class="type-card-desc">자격증, 어학, 전적대학</div>
           </div>
         </div>
@@ -933,14 +933,14 @@
     </div>
   </div>
 
-  <!-- 5A. 위원 점수 집계형 설정 -->
+  <!-- 5A. 위원 평가 설정 -->
   <div class="screen" id="screen-setting-a">
     <div class="settings-layout">
       <div class="settings-sidebar">
         <div class="sidebar-item active">기본 정보</div>
         <div class="sidebar-item">항목 구조</div>
         <div class="sidebar-item">등급 매핑</div>
-        <div class="sidebar-item" style="font-weight:700; color:#6c63ff;">파이프라인 빌더</div>
+        <div class="sidebar-item" style="font-weight:700; color:#6c63ff;">계산 과정 설정</div>
         <div class="sidebar-item">소수점 처리</div>
         <div class="sidebar-item">샘플 미리보기</div>
       </div>
@@ -948,7 +948,7 @@
 
         <!-- 기본 정보 -->
         <div class="card">
-          <div class="card-title">A. 위원 점수 집계형 — 기본 정보</div>
+          <div class="card-title">A. 위원 평가 — 기본 정보</div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">평가명</label>
@@ -1013,10 +1013,10 @@
           </div>
         </div>
 
-        <!-- 파이프라인 빌더 -->
+        <!-- 계산 과정 설정 -->
         <div class="card">
-          <div class="card-title">계산 파이프라인 빌더</div>
-          <div class="card-subtitle">연산 블록을 드래그하여 계산 순서를 구성하세요. 경로1과 경로2는 혼용할 수 없습니다.</div>
+          <div class="card-title">계산 과정 설정</div>
+          <div class="card-subtitle">계산 단계를 드래그하여 계산 순서를 구성하세요. 위원 총점 방식과 항목별 계산 방식은 혼용할 수 없습니다.</div>
 
           <!-- 블록 팔레트 -->
           <div class="block-palette" id="preprocess-palette" style="border: 1px dashed #f0c8a0;">
@@ -1024,7 +1024,7 @@
             <span class="pipeline-block preprocess">등급&rarr;점수 변환</span>
           </div>
           <div class="block-palette">
-            <div class="block-palette-title">경로1 &mdash; 위원 총점 기준</div>
+            <div class="block-palette-title">위원 총점 방식 &mdash; 위원 총점 기준</div>
             <span class="pipeline-block route1">위원별 항목 합산</span>
             <span class="pipeline-block route1">위원별 항목 가중합산</span>
             <span class="pipeline-block route1">가상 위원 추가</span>
@@ -1034,7 +1034,7 @@
             <span class="pipeline-block route1">위원 합산</span>
           </div>
           <div class="block-palette">
-            <div class="block-palette-title">경로2 &mdash; 항목별 기준</div>
+            <div class="block-palette-title">항목별 계산 방식 &mdash; 항목별 기준</div>
             <span class="pipeline-block route2">항목별 최고점 제외</span>
             <span class="pipeline-block route2">항목별 최저점 제외</span>
             <span class="pipeline-block route2">항목별 위원 평균</span>
@@ -1179,10 +1179,10 @@
     </div>
   </div>
 
-  <!-- 5B. 자동 채점형 설정 -->
+  <!-- 5B. 자동 채점 설정 -->
   <div class="screen" id="screen-setting-b">
     <div class="card">
-      <div class="card-title">B. 자동 채점형 — 설정</div>
+      <div class="card-title">B. 자동 채점 — 설정</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">평가명</label>
@@ -1288,10 +1288,10 @@
       <button class="btn btn-secondary btn-sm" style="margin-top:12px;">+ 오류 문항 추가</button>
     </div>
 
-    <!-- B 파이프라인 빌더 -->
+    <!-- B 계산 과정 설정 -->
     <div class="card">
-      <div class="card-title">계산 파이프라인 빌더</div>
-      <div class="card-subtitle">연산 블록을 조합하여 계산 흐름을 구성하세요. 커스텀 블록도 추가할 수 있습니다.</div>
+      <div class="card-title">계산 과정 설정</div>
+      <div class="card-subtitle">연산 블록을 조합하여 계산 흐름을 구성하세요. 사용자 정의 단계도 추가할 수 있습니다.</div>
       <div class="block-palette">
         <div class="block-palette-title">B유형 블록</div>
         <span class="pipeline-block route1">정답 대조 채점</span>
@@ -1301,7 +1301,7 @@
         <span class="pipeline-block post">전체 과락 판정</span>
         <span class="pipeline-block post">만점 기준 환산</span>
         <span class="pipeline-block post">환산 만점 적용</span>
-        <span class="pipeline-block preprocess" style="border-style:dashed; cursor:pointer;">+ 커스텀 블록 추가</span>
+        <span class="pipeline-block preprocess" style="border-style:dashed; cursor:pointer;">+ 사용자 정의 단계 추가</span>
       </div>
       <div class="pipeline">
         <span class="pipeline-block route1">정답 대조 채점</span>
@@ -1340,10 +1340,10 @@
     </div>
   </div>
 
-  <!-- 5C. 문항 점수 계산형 설정 -->
+  <!-- 5C. 문항별 채점 설정 -->
   <div class="screen" id="screen-setting-c">
     <div class="card">
-      <div class="card-title">C. 문항 점수 계산형 — 설정</div>
+      <div class="card-title">C. 문항별 채점 — 설정</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">평가명</label>
@@ -1426,9 +1426,9 @@
       </div>
     </div>
 
-    <!-- C 파이프라인 빌더 -->
+    <!-- C 계산 과정 설정 -->
     <div class="card">
-      <div class="card-title">계산 파이프라인 빌더</div>
+      <div class="card-title">계산 과정 설정</div>
       <div class="card-subtitle">연산 블록을 조합하여 계산 흐름을 구성하세요.</div>
       <div class="block-palette">
         <div class="block-palette-title">C유형 블록</div>
@@ -1442,7 +1442,7 @@
         <span class="pipeline-block post">전체 과락 판정</span>
         <span class="pipeline-block post">만점 기준 환산</span>
         <span class="pipeline-block post">환산 만점 적용</span>
-        <span class="pipeline-block preprocess" style="border-style:dashed; cursor:pointer;">+ 커스텀 블록 추가</span>
+        <span class="pipeline-block preprocess" style="border-style:dashed; cursor:pointer;">+ 사용자 정의 단계 추가</span>
       </div>
       <div class="pipeline">
         <span class="pipeline-block route2">위원 집계</span>
@@ -1483,10 +1483,10 @@
     </div>
   </div>
 
-  <!-- 5D. 매핑 테이블형 설정 -->
+  <!-- 5D. 점수 변환표 설정 -->
   <div class="screen" id="screen-setting-d">
     <div class="card">
-      <div class="card-title">D. 매핑 테이블형 — 설정</div>
+      <div class="card-title">D. 점수 변환표 — 설정</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">평가명</label>
@@ -1516,19 +1516,19 @@
     </div>
 
     <div class="card">
-      <div class="card-title">매핑 테이블 — 공인어학</div>
+      <div class="card-title">점수 변환표 — 공인어학</div>
 
       <!-- 어학유형 관리 -->
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
         <span style="font-size:13px; font-weight:600; color:#555;">어학유형:</span>
         <button class="btn btn-primary btn-sm">+ 어학유형 추가</button>
-        <span style="font-size:12px; color:#888;">유형별로 별도 매핑 테이블을 설정합니다</span>
+        <span style="font-size:12px; color:#888;">유형별로 별도 점수 변환표을 설정합니다</span>
       </div>
 
       <!-- 매핑 데이터 업로드 -->
       <div style="display:flex; gap:8px; margin-bottom:16px; padding:12px; background:#f8f8f8; border-radius:8px;">
         <button class="btn btn-secondary btn-sm">&#x2B07; 매핑 양식 다운로드</button>
-        <button class="btn btn-secondary btn-sm">&#x2B06; 매핑 테이블 엑셀 업로드</button>
+        <button class="btn btn-secondary btn-sm">&#x2B06; 점수 변환표 엑셀 업로드</button>
         <span style="font-size:12px; color:#888; align-self:center;">엑셀로 구간→점수 데이터를 일괄 업로드, 아래에서 확인/수정 가능</span>
       </div>
 
@@ -1580,23 +1580,23 @@
         </tbody>
       </table>
       <button class="btn btn-secondary btn-sm" style="margin-top:8px;">+ 구간 추가</button>
-      <div class="form-hint" style="margin-top:8px;">매핑 테이블에 없는 값이 업로드되면 해당 행은 오류로 표시됩니다</div>
+      <div class="form-hint" style="margin-top:8px;">점수 변환표에 없는 값이 업로드되면 해당 행은 오류로 표시됩니다</div>
     </div>
 
-    <!-- D 파이프라인 빌더 -->
+    <!-- D 계산 과정 설정 -->
     <div class="card">
-      <div class="card-title">계산 파이프라인 빌더</div>
+      <div class="card-title">계산 과정 설정</div>
       <div class="card-subtitle">연산 블록을 조합하여 계산 흐름을 구성하세요.</div>
       <div class="block-palette">
         <div class="block-palette-title">D유형 블록</div>
-        <span class="pipeline-block route1">매핑 테이블 조회</span>
+        <span class="pipeline-block route1">점수 변환표 조회</span>
         <span class="pipeline-block post">전체 과락 판정</span>
         <span class="pipeline-block post">만점 기준 환산</span>
         <span class="pipeline-block post">환산 만점 적용</span>
-        <span class="pipeline-block preprocess" style="border-style:dashed; cursor:pointer;">+ 커스텀 블록 추가</span>
+        <span class="pipeline-block preprocess" style="border-style:dashed; cursor:pointer;">+ 사용자 정의 단계 추가</span>
       </div>
       <div class="pipeline">
-        <span class="pipeline-block route1">매핑 테이블 조회</span>
+        <span class="pipeline-block route1">점수 변환표 조회</span>
         <span class="pipeline-arrow">&rarr;</span>
         <span class="pipeline-block post">전체 과락 판정</span>
         <span class="pipeline-arrow">&rarr;</span>

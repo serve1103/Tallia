@@ -72,7 +72,7 @@ packages/backend/src/
 │   └── block-registry.ts
 ├── excel/                    # 양식 생성 / 업로드 파싱 / 결과 내보내기
 ├── scores/                   # 계산 실행, 결과 조회
-├── mapping-tables/           # D유형 매핑 테이블 CRUD
+├── mapping-tables/           # D유형 점수 변환표 CRUD
 └── audit/                    # 감사 로그
 ```
 

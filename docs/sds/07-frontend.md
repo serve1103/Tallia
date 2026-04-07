@@ -7,7 +7,7 @@
 | 빌드 | Vite | 빠른 HMR, ESM 네이티브 |
 | 라우팅 | React Router v7 | 표준 SPA 라우팅 |
 | 서버 상태 | TanStack Query v5 | 캐싱, 자동 재검증, 낙관적 업데이트 |
-| 클라이언트 상태 | Zustand | 파이프라인 빌더 등 복잡한 로컬 상태 관리 |
+| 클라이언트 상태 | Zustand | 계산 과정 설정 등 복잡한 로컬 상태 관리 |
 | UI 컴포넌트 | Ant Design v5 | 관리자 도구에 적합한 풍부한 컴포넌트 |
 | HTTP | axios | 인터셉터 기반 인증 토큰 관리 |
 | 폼 | React Hook Form + Zod | 유효성 검증 공유 (shared 패키지) |
@@ -31,7 +31,7 @@ packages/frontend/src/
 │   ├── evaluation/
 │   │   ├── CreatePage.tsx
 │   │   ├── ConfigPage.tsx        # 유형별 설정
-│   │   ├── PipelinePage.tsx      # 파이프라인 빌더
+│   │   ├── PipelinePage.tsx      # 계산 과정 설정
 │   │   └── UploadPage.tsx        # 엑셀 업로드
 │   └── results/
 │       ├── ResultListPage.tsx
@@ -68,7 +68,7 @@ packages/frontend/src/
 │   └── useScores.ts
 ├── stores/
 │   ├── authStore.ts              # 토큰, 사용자 정보
-│   └── pipelineStore.ts          # 파이프라인 빌더 편집 상태
+│   └── pipelineStore.ts          # 계산 과정 설정 편집 상태
 ├── api/
 │   ├── client.ts                 # axios 인스턴스 + 인터셉터
 │   ├── auth.ts
@@ -79,7 +79,7 @@ packages/frontend/src/
 └── types/                        # @tallia/shared re-export + 프론트 전용 타입
 ```
 
-### 7.3 파이프라인 빌더 UI
+### 7.3 계산 과정 설정 UI
 
 핵심 UX:
 
@@ -109,7 +109,7 @@ packages/frontend/src/
 
 **구현 상세:**
 - 드래그앤드롭: `@dnd-kit/core` (경량, 접근성 지원)
-- 블록 팔레트: 평가 유형에 따라 사용 가능한 블록만 표시, 경로1/경로2 혼용 불가 필터
+- 블록 팔레트: 평가 유형에 따라 사용 가능한 블록만 표시, 위원 총점 방식/항목별 계산 방식 혼용 불가 필터
 - 실시간 유효성: `@tallia/shared`의 `validatePipeline()` 호출, 입출력 호환성 뱃지 표시
 - 조건부 탭 (A유형): 위원 수별 탭 전환, 각 탭에 독립 파이프라인
 - 블록 파라미터: BlockCard 클릭 시 Drawer로 파라미터 편집 (threshold, method 등)
@@ -122,7 +122,7 @@ packages/frontend/src/
 |------|------|------|
 | 인증 (토큰, 유저) | Zustand + persist | 새로고침 후에도 유지 |
 | 서버 데이터 (평가 목록, 결과 등) | TanStack Query | 캐싱, 자동 재검증, 페이지네이션 |
-| 파이프라인 빌더 편집 상태 | Zustand | 복잡한 중첩 상태, 실시간 유효성 검증, 빈번한 업데이트 |
+| 계산 과정 설정 편집 상태 | Zustand | 복잡한 중첩 상태, 실시간 유효성 검증, 빈번한 업데이트 |
 | 폼 상태 (설정 편집) | React Hook Form | 유효성 검증, dirty 상태, 제출 관리 |
 
 ### 7.5 반응형
@@ -130,4 +130,4 @@ packages/frontend/src/
 - Ant Design의 Grid 시스템 활용
 - 브레이크포인트: xs(< 576px), sm, md, lg(≥ 992px), xl
 - 모바일: 결과 조회 중심 (테이블을 카드 뷰로 전환)
-- 파이프라인 빌더: 데스크톱 전용 (최소 lg 이상)
+- 계산 과정 설정: 데스크톱 전용 (최소 lg 이상)
