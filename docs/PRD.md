@@ -83,7 +83,7 @@ Tallia (탈리아)
 | 엑셀 업로드 | 양식 다운로드, 파일 업로드, 검증 미리보기, 업로드 이력/롤백 |
 | 결과 조회 | 계산 실행, 원점수+환산점수 테이블, 중간 결과 펼침, 엑셀 다운로드 |
 
-> 상세 UI는 [wireframe.html](./wireframe.html) 참조
+> 상세 UI는 [wireframe.html](./design/mockups/wireframe.html) 참조
 
 ## 6. 결과 정의
 
@@ -181,6 +181,6 @@ Tallia (탈리아)
 | 문서 | 설명 |
 |------|------|
 | [FSD.md](./FSD.md) | 기능 명세서 — 계산 과정 설정 공통, 유형별 설정 상세/블록 정의/엑셀 양식, 흐름 예시, 검증 |
-| [wireframe.html](./wireframe.html) | 화면별 UI 와이어프레임 (10개 화면) |
+| [wireframe.html](./design/mockups/wireframe.html) | 화면별 UI 와이어프레임 (10개 화면) |
 | [SDS.md](./SDS.md) | 시스템 설계 명세서 — 모노레포, DB 스키마, API, 계산 과정 엔진, 프론트엔드 아키텍처 |
 | [SDS — 보안 설계](./sds/09-security.md) | 서버 보안, 인증/인가, 개인정보 보호 기술 설계 |
