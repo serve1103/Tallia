@@ -77,6 +77,7 @@ packages/backend/src/
 │   └── repository-impl/
 ├── users/
 │   ├── controller/
+│   ├── application/
 │   ├── service/
 │   ├── repository/
 │   └── repository-impl/
@@ -124,6 +125,7 @@ packages/backend/src/
 │   └── repository-impl/
 ├── mapping-tables/                → [03-api.md §3.10]
 │   ├── controller/
+│   ├── application/
 │   ├── service/
 │   ├── repository/
 │   └── repository-impl/
