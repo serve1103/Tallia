@@ -11,73 +11,127 @@
 | UI 컴포넌트 | Ant Design v5 | 관리자 도구에 적합한 풍부한 컴포넌트 |
 | HTTP | axios | 인터셉터 기반 인증 토큰 관리 |
 | 폼 | React Hook Form + Zod | 유효성 검증 공유 (shared 패키지) |
+| 드래그앤드롭 | @dnd-kit/core | 경량, 접근성 지원 (파이프라인 빌더) |
 
 ### 7.2 디렉토리 구조
+
+도메인별 co-location 방식 — 관련 코드를 도메인 폴더에 함께 배치하여 비대화를 방지한다.
 
 ```
 packages/frontend/src/
 ├── main.tsx
 ├── App.tsx
-├── routes/
-│   ├── index.tsx                 # 라우트 정의
+│
+├── domains/                          # 도메인별 모듈
 │   ├── auth/
-│   │   ├── LoginPage.tsx
-│   │   └── SignupPage.tsx
+│   │   ├── components/
+│   │   │   ├── LoginForm.tsx
+│   │   │   └── SignupForm.tsx
+│   │   ├── hooks/
+│   │   │   └── useAuth.ts
+│   │   ├── api/
+│   │   │   └── auth.ts
+│   │   └── stores/
+│   │       └── authStore.ts
 │   ├── admin/
-│   │   ├── TenantListPage.tsx
-│   │   └── TenantDetailPage.tsx
-│   ├── dashboard/
-│   │   └── DashboardPage.tsx     # 평가 목록
+│   │   ├── components/
+│   │   │   ├── TenantList.tsx
+│   │   │   └── TenantDetail.tsx
+│   │   ├── hooks/
+│   │   │   └── useTenants.ts
+│   │   └── api/
+│   │       └── tenants.ts
 │   ├── evaluation/
-│   │   ├── CreatePage.tsx
-│   │   ├── ConfigPage.tsx        # 유형별 설정
-│   │   ├── PipelinePage.tsx      # 계산 과정 설정
-│   │   └── UploadPage.tsx        # 엑셀 업로드
-│   └── results/
-│       ├── ResultListPage.tsx
-│       └── ResultDetailPage.tsx
-├── components/
-│   ├── layout/
-│   │   ├── AppLayout.tsx         # Ant Design Layout + Sider
-│   │   └── AuthLayout.tsx
-│   ├── evaluation/
-│   │   ├── TypeAConfigForm.tsx
-│   │   ├── TypeBConfigForm.tsx
-│   │   ├── TypeCConfigForm.tsx
-│   │   └── TypeDConfigForm.tsx
-│   ├── pipeline-builder/
-│   │   ├── PipelineBuilder.tsx   # 메인 빌더 컴포넌트
-│   │   ├── BlockPalette.tsx      # 블록 팔레트 (유형별 필터)
-│   │   ├── BlockCard.tsx         # 개별 블록 카드
-│   │   ├── BlockParamEditor.tsx  # 블록 파라미터 편집
-│   │   ├── ConditionalTabs.tsx   # A유형 위원 수별 탭
-│   │   ├── ValidationBadge.tsx   # 실시간 유효성 표시
-│   │   └── PreviewPanel.tsx      # 샘플 데이터 미리보기
+│   │   ├── components/
+│   │   │   ├── TypeAConfigForm.tsx
+│   │   │   ├── TypeBConfigForm.tsx
+│   │   │   ├── TypeCConfigForm.tsx
+│   │   │   └── TypeDConfigForm.tsx
+│   │   ├── hooks/
+│   │   │   └── useEvaluations.ts
+│   │   ├── api/
+│   │   │   └── evaluations.ts
+│   │   └── models/
+│   │       └── evaluation.ts          # 도메인 모델 변환, 뷰 모델
+│   ├── pipeline/
+│   │   ├── components/
+│   │   │   ├── PipelineBuilder.tsx     # 메인 빌더 컴포넌트
+│   │   │   ├── BlockPalette.tsx        # 블록 팔레트 (유형별 필터)
+│   │   │   ├── BlockCard.tsx           # 개별 블록 카드
+│   │   │   ├── BlockParamEditor.tsx    # 블록 파라미터 편집
+│   │   │   ├── ConditionalTabs.tsx     # A유형 위원 수별 탭
+│   │   │   ├── ValidationBadge.tsx     # 실시간 유효성 표시
+│   │   │   └── PreviewPanel.tsx        # 샘플 데이터 미리보기
+│   │   ├── hooks/
+│   │   │   └── usePipeline.ts
+│   │   ├── api/
+│   │   │   └── pipeline.ts
+│   │   ├── models/
+│   │   │   └── pipeline.ts            # 블록 헬퍼, 유효성 검증 결과 해석
+│   │   └── stores/
+│   │       └── pipelineStore.ts        # 편집 상태
 │   ├── excel/
-│   │   ├── UploadDropzone.tsx
-│   │   ├── ValidationPreview.tsx
-│   │   └── UploadHistory.tsx
-│   └── results/
-│       ├── ScoreTable.tsx
-│       ├── IntermediateDetail.tsx
-│       └── DownloadButton.tsx
-├── hooks/
-│   ├── useAuth.ts
-│   ├── useEvaluations.ts
-│   ├── usePipeline.ts
-│   └── useScores.ts
-├── stores/
-│   ├── authStore.ts              # 토큰, 사용자 정보
-│   └── pipelineStore.ts          # 계산 과정 설정 편집 상태
-├── api/
-│   ├── client.ts                 # axios 인스턴스 + 인터셉터
-│   ├── auth.ts
-│   ├── evaluations.ts
-│   ├── pipeline.ts
-│   ├── excel.ts
-│   └── scores.ts
-└── types/                        # @tallia/shared re-export + 프론트 전용 타입
+│   │   ├── components/
+│   │   │   ├── UploadDropzone.tsx
+│   │   │   ├── ValidationPreview.tsx
+│   │   │   └── UploadHistory.tsx
+│   │   ├── hooks/
+│   │   │   └── useExcel.ts
+│   │   └── api/
+│   │       └── excel.ts
+│   └── score/
+│       ├── components/
+│       │   ├── ScoreTable.tsx
+│       │   ├── IntermediateDetail.tsx
+│       │   └── DownloadButton.tsx
+│       ├── hooks/
+│       │   └── useScores.ts
+│       ├── api/
+│       │   └── scores.ts
+│       └── models/
+│           └── score.ts               # 점수 포맷, 과락 판정 헬퍼
+│
+├── shared/                           # 도메인 무관한 공용
+│   ├── components/
+│   │   ├── AppLayout.tsx              # Ant Design Layout + Sider
+│   │   └── AuthLayout.tsx
+│   ├── lib/
+│   │   ├── api-client.ts             # axios 인스턴스 + 인터셉터
+│   │   ├── format.ts                 # 숫자/날짜 포맷 유틸
+│   │   └── decimal.ts                # 소수점 처리 유틸
+│   └── types/                        # @tallia/shared re-export + 프론트 전용 타입
+│
+└── routes/                           # 페이지 (domains 조합)
+    ├── index.tsx                      # 라우트 정의
+    ├── auth/
+    │   ├── LoginPage.tsx
+    │   └── SignupPage.tsx
+    ├── admin/
+    │   ├── TenantListPage.tsx
+    │   └── TenantDetailPage.tsx
+    ├── dashboard/
+    │   └── DashboardPage.tsx          # 평가 목록
+    ├── evaluation/
+    │   ├── CreatePage.tsx
+    │   ├── ConfigPage.tsx             # 유형별 설정
+    │   ├── PipelinePage.tsx           # 계산 과정 설정
+    │   └── UploadPage.tsx             # 엑셀 업로드
+    └── results/
+        ├── ResultListPage.tsx
+        └── ResultDetailPage.tsx
 ```
+
+**의존 방향 규칙** (ESLint `import/no-restricted-paths`로 강제):
+
+```
+routes/ → domains/ → shared/
+```
+
+- routes/는 domains/와 shared/를 import 가능
+- domains/는 shared/만 import 가능, 다른 domain은 import 불가
+- shared/는 외부 라이브러리와 `@tallia/shared`만 import 가능
+
+**확장 시**: 새 도메인(학생부, 수능 등)은 `domains/student-record/`, `domains/suneung/` 폴더를 추가하면 됨. 기존 코드 변경 없음.
 
 ### 7.3 계산 과정 설정 UI
 
@@ -118,12 +172,17 @@ packages/frontend/src/
 
 ### 7.4 상태 관리 전략
 
-| 상태 | 도구 | 이유 |
-|------|------|------|
-| 인증 (토큰, 유저) | Zustand + persist | 새로고침 후에도 유지 |
-| 서버 데이터 (평가 목록, 결과 등) | TanStack Query | 캐싱, 자동 재검증, 페이지네이션 |
-| 계산 과정 설정 편집 상태 | Zustand | 복잡한 중첩 상태, 실시간 유효성 검증, 빈번한 업데이트 |
-| 폼 상태 (설정 편집) | React Hook Form | 유효성 검증, dirty 상태, 제출 관리 |
+| 상태 | 도구 | 위치 | 이유 |
+|------|------|------|------|
+| 인증 (토큰, 유저) | Zustand + persist | domains/auth/stores/ | 새로고침 후에도 유지 |
+| 서버 데이터 (평가 목록, 결과 등) | TanStack Query | domains/*/hooks/ | 캐싱, 자동 재검증, 페이지네이션 |
+| 계산 과정 설정 편집 상태 | Zustand | domains/pipeline/stores/ | 복잡한 중첩 상태, 실시간 유효성 검증 |
+| 폼 상태 (설정 편집) | React Hook Form | domains/evaluation/components/ | 유효성 검증, dirty 상태, 제출 관리 |
+
+**규칙:**
+- TanStack Query 훅은 **API 호출 + 캐시 설정만** 담당
+- 데이터 변환/가공 로직은 `models/`에서 처리
+- hooks에 비즈니스 로직이 누적되지 않도록 분리
 
 ### 7.5 반응형
 

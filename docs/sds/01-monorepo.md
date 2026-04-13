@@ -38,11 +38,15 @@ tallia/
 │       ├── tsconfig.json
 │       ├── vite.config.ts
 │       └── src/
-│           └── ...           # §7 참조
+│           ├── domains/      # 도메인별 co-location (§7 참조)
+│           ├── shared/       # 공용 컴포넌트, 유틸
+│           └── routes/       # 페이지
 └── docs/
 ```
 
 ### 1.2 백엔드 모듈 구조
+
+3계층 레이어드 아키텍처 + Repository 패턴. 상세는 [06-backend.md](06-backend.md) 참조.
 
 ```
 packages/backend/src/
@@ -55,10 +59,20 @@ packages/backend/src/
 │   ├── filters/              # GlobalExceptionFilter
 │   └── pipes/                # ZodValidationPipe
 ├── auth/                     # 회원가입, 로그인, JWT
+│   ├── controller/
+│   ├── application/
+│   ├── service/
+│   ├── repository/           # Interface
+│   └── repository-impl/      # Prisma 구현
 ├── tenants/                  # 대학 공간 CRUD
 ├── users/                    # 사용자 관리
 ├── evaluations/              # 평가 CRUD + 복사
-│   └── configs/              # 유형별 설정 핸들러
+│   ├── controller/
+│   ├── application/
+│   ├── service/
+│   │   └── config-handlers/  # 유형별 설정 핸들러
+│   ├── repository/
+│   └── repository-impl/
 ├── pipeline/                 # 파이프라인 엔진 (§4)
 │   ├── blocks/               # 블록 구현
 │   │   ├── common/
@@ -75,6 +89,8 @@ packages/backend/src/
 ├── mapping-tables/           # D유형 점수 변환표 CRUD
 └── audit/                    # 감사 로그
 ```
+
+> 각 모듈은 controller/ → application/ → service/ → repository/ → repository-impl/ 레이어 구조를 따른다. pipeline/은 블록 레지스트리 패턴을 사용하므로 예외.
 
 ### 1.3 공유 설정
 
