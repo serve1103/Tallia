@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ExcelController } from './controller/excel.controller';
 
-/** Excel 모듈 골격 — Phase 6에서 양식 생성/업로드 파싱 구현 */
 @Module({
-  controllers: [],
+  controllers: [ExcelController],
   providers: [],
   exports: [],
 })
