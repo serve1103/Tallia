@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tallia - Premium UI Design (Feedback Applied)</title>
+  
+  <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* 앱의 기본 배경은 완전한 흰색으로, 사이드바는 살짝 어둡게(Zinc-50/100) 분리 */
+      --bg-body: #ffffff; 
+      --bg-sidebar: #f8f8fa; 
+      --bg-surface: #ffffff;
+      
+      /* 호버 색상은 좀 더 대비감 있게 */
+      --bg-hover: #f1f1f4;
+      --bg-card-hover: #fafafa;
+      
+      --border-light: #f4f4f5;
+      --border-base: #e4e4e7;
+      --border-dark: #d4d4d8;
+      
+      --text-main: #09090b;
+      --text-muted: #71717a;
+      --text-faint: #a1a1aa;
+      
+      --primary: #18181b;
+      --primary-hover: #27272a;
+      
+      --font-ui: 'Inter', 'Pretendard', sans-serif;
+      
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-xl: 12px;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-base);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .logo-container {
+      display: flex; align-items: center; gap: 10px; padding: 0 12px; margin-bottom: 36px;
+    }
+    .logo-icon {
+      width: 24px; height: 24px; background-color: var(--primary); color: #fff;
+      border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px;
+    }
+    .logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+    
+    .nav-group { margin-bottom: 24px; }
+    .nav-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint);
+      font-weight: 600; padding: 0 12px; margin-bottom: 8px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-md);
+      color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 13px; margin-bottom: 2px;
+      transition: all 0.15s ease; cursor: pointer;
+    }
+    .nav-item:hover { background-color: var(--bg-hover); color: var(--text-main); }
+    .nav-item.active { background-color: var(--bg-hover); color: var(--text-main); font-weight: 600; }
+    .nav-icon { width: 16px; height: 16px; opacity: 0.7; }
+    .nav-item.active .nav-icon { opacity: 1; }
+
+    .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    
+    .topbar {
+      height: 64px; padding: 0 40px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border-light); background-color: var(--bg-body);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .breadcrumbs { color: var(--text-muted); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .breadcrumbs span.current { color: var(--text-main); font-weight: 600; }
+    .breadcrumbs svg { width: 14px; height: 14px; color: var(--text-faint); }
+    
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--bg-sidebar); border: 1px solid var(--border-base);
+      display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .content { padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
+    
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
+    .page-title { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; color: var(--text-main); margin-bottom: 6px; }
+    .page-desc { color: var(--text-muted); font-size: 14px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; height: 36px;
+      font-size: 13px; font-weight: 600; border-radius: var(--radius-md); cursor: pointer; transition: all 0.15s ease;
+      font-family: inherit; border: none; gap: 6px; letter-spacing: -0.01em;
+    }
+    .btn-primary { background-color: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-outline { background-color: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-base); box-shadow: var(--shadow-sm); }
+    .btn-outline:hover { background-color: var(--bg-hover); border-color: var(--border-dark); }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card {
+      background-color: var(--bg-surface); border: 1px solid var(--border-base); border-radius: var(--radius-lg);
+      padding: 20px 24px; box-shadow: var(--shadow-sm);
+    }
+    .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .stat-label { font-size: 13px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 6px; letter-spacing: -0.01em; }
+    .stat-icon { color: var(--text-faint); width: 16px; height: 16px; }
+    .stat-value { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: var(--text-main); margin-bottom: 4px; }
+    
+    /* 변화량 텍스트 */
+    .stat-trend { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .trend-up { color: #16a34a; } /* 초록색 */
+    .trend-down { color: #ef4444; } /* 빨간색 */
+    .trend-neutral { color: var(--text-faint); }
+    .trend-text { color: var(--text-muted); }
+
+    .data-section {
+      background-color: var(--bg-surface); border: 1px solid var(--border-base); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm); margin-bottom: 32px;
+    }
+    .data-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
+    .data-title { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+    
+    table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    th { text-align: left; padding: 14px 24px; font-size: 12px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-base); background-color: var(--bg-sidebar); letter-spacing: -0.01em; }
+    th:not(:first-child) { border-left: 1px solid transparent; }
+    td { padding: 16px 24px; font-size: 13px; border-bottom: 1px solid var(--border-light); color: var(--text-muted); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background-color: var(--bg-card-hover); }
+    .cell-main { font-weight: 500; color: var(--text-main); }
+    .cell-num { font-variant-numeric: tabular-nums; font-family: 'Inter', sans-serif; font-size: 14px; }
+
+    .badge {
+      display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; gap: 6px; border: 1px solid transparent; letter-spacing: -0.01em;
+    }
+    .badge::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; }
+    .badge-gray { background-color: var(--bg-hover); color: var(--text-muted); border-color: var(--border-base); }
+    .badge-gray::before { background-color: var(--text-faint); }
+    .badge-green { background-color: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .badge-green::before { background-color: #22c55e; }
+    .badge-blue { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .badge-blue::before { background-color: #3b82f6; }
+    .badge-red { background-color: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    .badge-red::before { background-color: #ef4444; }
+
+    .pipeline-wrapper { padding: 24px; background: var(--bg-sidebar); border-top: 1px solid var(--border-base); border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); }
+    .pipeline-label { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .pipeline-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pipe-node {
+      display: flex; align-items: center; gap: 8px; padding: 8px 14px; background-color: var(--bg-surface);
+      border: 1px solid var(--border-base); border-radius: var(--radius-md); font-size: 13px; font-weight: 600;
+      box-shadow: var(--shadow-sm); color: var(--text-main); letter-spacing: -0.01em;
+    }
+    .pipe-node svg { width: 14px; height: 14px; color: var(--text-muted); }
+    .pipe-node.disabled { background-color: transparent; color: var(--text-muted); box-shadow: none; border-style: dashed; }
+    .pipe-arr { color: var(--text-faint); display: flex; align-items: center; }
+
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo-container">
+      <div class="logo-icon">T</div>
+      <div class="logo-text">Tallia</div>
+    </div>
+    
+    <div class="nav-group">
+      <div class="nav-label">주요 메뉴</div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        대시보드 총괄
+      </div>
+      <div class="nav-item active">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+        평가 세션 관리
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+        원점수 엑셀 업로드
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        환산 결과 통계
+      </div>
+    </div>
+    
+    <div class="nav-group">
+      <div class="nav-label">설정 사항</div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        대학 공간 권한
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        매핑 테이블 동기화
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumbs">
+        서울대학교 입학처
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <span class="current">평가 세션 리스트</span>
+      </div>
+      <div class="avatar">SNU</div>
+    </header>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">평가 지원 현황</h1>
+          <p class="page-desc">2026학년도 수시 전형의 데이터 처리 및 평가 세션 진행 상황입니다.</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline">
+            <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            엑셀 내보내기
+          </button>
+          <button class="btn btn-primary">+ 신규 평가 생성</button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">전체 세션 누적</div>
+            <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
+          </div>
+          <div class="stat-value">24<span style="font-size:16px; font-weight:500; color:var(--text-faint);">건</span></div>
+          <div class="stat-trend trend-up">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+            +3 <span class="trend-text">지난 달 대비</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">
+              <span style="width:6px;height:6px;border-radius:50%;background:#3b82f6;"></span>
+              검토 진행 중
+            </div>
+          </div>
+          <div class="stat-value" style="color: #1d4ed8;">8<span style="font-size:16px; font-weight:500; color:var(--text-faint);">건</span></div>
+          <div class="stat-trend trend-up">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+            +1 <span class="trend-text">이번 주 신규</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">
+              <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;"></span>
+              환산 완료
+            </div>
+          </div>
+          <div class="stat-value" style="color: #15803d;">14<span style="font-size:16px; font-weight:500; color:var(--text-faint);">건</span></div>
+          <div class="stat-trend trend-neutral">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path></svg>
+            변동 없음
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-label">
+              <span style="width:6px;height:6px;border-radius:50%;background:#ef4444;"></span>
+              예외/오류 발생
+            </div>
+          </div>
+          <div class="stat-value" style="color: #b91c1c;">2<span style="font-size:16px; font-weight:500; color:var(--text-faint);">건</span></div>
+          <div class="stat-trend trend-down">
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+            -1 <span class="trend-text">해결 완료 (어제)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-section">
+        <div class="data-header">
+          <h2 class="data-title">최근 업데이트된 평가 모음</h2>
+          <button class="btn btn-outline" style="height:32px; font-size:13px; font-weight:500;">전체 보기</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>평가 세션명</th>
+              <th>전형 분류</th>
+              <th>상태 파이프라인</th>
+              <th style="text-align:right;">총 원점수 평균</th>
+              <th style="text-align:right;">최종 환산 총점</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-main">2026 수시 면접 다단계 평가</td>
+              <td>A형 (다대일)</td>
+              <td><span class="badge badge-green">환산 및 검증 완료</span></td>
+              <td class="cell-num" style="text-align:right;">85.00</td>
+              <td class="cell-num" style="text-align:right; font-weight:600; color:var(--text-main);">425.00</td>
+            </tr>
+            <tr>
+              <td class="cell-main">정시 특기자 전형 실기평가</td>
+              <td>B형 (절대평가)</td>
+              <td><span class="badge badge-blue">수동 점수 보정 중</span></td>
+              <td class="cell-num" style="text-align:right;">&mdash;</td>
+              <td class="cell-num" style="text-align:right;">&mdash;</td>
+            </tr>
+            <tr>
+              <td class="cell-main">지역균형 서류평가 1단계</td>
+              <td>C형 (서류블라인드)</td>
+              <td><span class="badge badge-gray">파일 업로드 대기</span></td>
+              <td class="cell-num" style="text-align:right;">&mdash;</td>
+              <td class="cell-num" style="text-align:right;">&mdash;</td>
+            </tr>
+            <tr>
+              <td class="cell-main">어학특기자 공인성적 환산대상</td>
+              <td>D형 (매핑테이블)</td>
+              <td><span class="badge badge-red">매핑 누락 오류</span></td>
+              <td class="cell-num" style="text-align:right;">72.50</td>
+              <td class="cell-num" style="text-align:right; color:#ef4444;">오류 상세 보기</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pipeline 설정 등 추가적인 정보 영역 -->
+        <div class="pipeline-wrapper">
+          <div class="pipeline-label">적용된 스코어 파이프라인 명세 (A형 다대일 면접 기준)</div>
+          <div class="pipeline-flow">
+            <div class="pipe-node">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+              점수 단순 합산
+            </div>
+            <div class="pipe-arr"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
+            <div class="pipe-node">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              최고/최저점 제외 (필터)
+            </div>
+            <div class="pipe-arr"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
+            <div class="pipe-node">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+              평균 산출
+            </div>
+            <div class="pipe-arr"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
+            <div class="pipe-node">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+              표준편차 정규화
+            </div>
+            <div class="pipe-arr"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></div>
+            <div class="pipe-node disabled" style="cursor:pointer;">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              새로운 노드 추가
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+</body>
+</html>

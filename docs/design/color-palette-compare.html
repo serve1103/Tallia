@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tallia - Design Direction Compare</title>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', sans-serif; background: #09090b; color: #fafafa; -webkit-font-smoothing: antialiased; }
+
+  .nav { position: sticky; top: 0; z-index: 100; background: rgba(9,9,11,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid #1c1c1f; }
+  .nav-inner { max-width: 1440px; margin: 0 auto; display: flex; align-items: center; padding: 0 32px; height: 52px; gap: 28px; }
+  .nav-title { font-size: 14px; font-weight: 600; color: #52525b; letter-spacing: -0.3px; }
+  .nav-tabs { display: flex; gap: 0; }
+  .nav-tab { padding: 15px 18px; font-size: 13px; font-weight: 500; color: #52525b; cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.12s; }
+  .nav-tab:hover { color: #a1a1aa; }
+  .nav-tab.active { color: #fafafa; border-bottom-color: #fafafa; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+  .preview-wrap { max-width: 1440px; margin: 0 auto; padding: 32px; }
+  .desc { padding: 20px 0 28px; border-bottom: 1px solid #1c1c1f; margin-bottom: 32px; }
+  .desc h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; color: #e4e4e7; letter-spacing: -0.5px; }
+  .desc p { font-size: 13px; color: #52525b; line-height: 1.7; }
+  .desc .tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .desc .tag { font-size: 11px; padding: 3px 10px; border-radius: 4px; background: #18181b; color: #71717a; border: 1px solid #27272a; }
+
+  /* Shared icon helper */
+  .ico { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* ===================== A. ACADEMIC WARM ===================== */
+  .pg-a .frame { display: flex; border-radius: 10px; overflow: hidden; height: 580px; border: 1px solid #292524; }
+
+  .pg-a .side { width: 248px; background: #1c1917; border-right: 1px solid #292524; padding: 20px 14px; display: flex; flex-direction: column; }
+  .pg-a .side-logo { display: flex; align-items: center; gap: 10px; padding: 0 10px; margin-bottom: 32px; }
+  .pg-a .side-logo-icon { width: 22px; height: 22px; background: #b45309; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+  .pg-a .side-logo-text { font-size: 16px; font-weight: 700; color: #d6d3d1; letter-spacing: -0.4px; }
+  .pg-a .side-label { font-size: 10px; font-weight: 600; color: #57534e; padding: 0 10px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.2px; }
+  .pg-a .side-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; font-size: 13px; color: #a8a29e; cursor: pointer; transition: all 0.12s; margin-bottom: 1px; }
+  .pg-a .side-item:hover { background: rgba(255,255,255,0.03); color: #d6d3d1; }
+  .pg-a .side-item.active { background: rgba(180,83,9,0.08); color: #fbbf24; font-weight: 500; }
+  .pg-a .side-item svg { opacity: 0.5; }
+  .pg-a .side-item.active svg { opacity: 0.9; }
+  .pg-a .side-sep { height: 1px; background: #292524; margin: 14px 10px; }
+
+  .pg-a .mn { flex: 1; background: #fafaf9; padding: 28px 32px; overflow-y: auto; color: #1c1917; }
+  .pg-a .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  .pg-a .topbar-left h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; color: #1c1917; }
+  .pg-a .topbar-left p { font-size: 13px; color: #a8a29e; margin-top: 2px; }
+  .pg-a .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; height: 34px; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; font-family: inherit; border: none; transition: all 0.12s; }
+  .pg-a .btn-primary { background: #292524; color: #fafaf9; }
+  .pg-a .btn-primary:hover { background: #1c1917; }
+  .pg-a .btn-ghost { background: #fff; color: #57534e; border: 1px solid #d6d3d1; }
+
+  .pg-a .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: #e7e5e4; border: 1px solid #e7e5e4; border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+  .pg-a .st { background: #fff; padding: 18px 20px; }
+  .pg-a .st-v { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .pg-a .st-l { font-size: 11px; color: #a8a29e; margin-top: 2px; }
+
+  .pg-a .tbl { background: #fff; border: 1px solid #e7e5e4; border-radius: 8px; overflow: hidden; }
+  .pg-a .tbl-head { padding: 16px 20px; border-bottom: 1px solid #f5f5f4; display: flex; justify-content: space-between; align-items: center; }
+  .pg-a .tbl-title { font-size: 15px; font-weight: 600; }
+  .pg-a table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .pg-a th { text-align: left; padding: 10px 20px; font-size: 11px; font-weight: 500; color: #a8a29e; border-bottom: 1px solid #e7e5e4; background: #fafaf9; }
+  .pg-a td { padding: 13px 20px; border-bottom: 1px solid #f5f5f4; color: #57534e; }
+  .pg-a tr:last-child td { border-bottom: none; }
+  .pg-a tr:hover td { background: rgba(0,0,0,0.01); }
+  .pg-a .cell-name { font-weight: 500; color: #1c1917; }
+  .pg-a .cell-num { font-variant-numeric: tabular-nums; text-align: right; }
+  .pg-a th.r { text-align: right; }
+
+  .pg-a .badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .pg-a .badge::before { content:''; width: 5px; height: 5px; border-radius: 50%; }
+  .pg-a .b-done { background: #f5f5f4; color: #57534e; border: 1px solid #e7e5e4; }
+  .pg-a .b-done::before { background: #57534e; }
+  .pg-a .b-active { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+  .pg-a .b-active::before { background: #f59e0b; }
+  .pg-a .b-err { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .pg-a .b-err::before { background: #ef4444; }
+
+  .pg-a .pipe { padding: 20px; background: #fafaf9; border-top: 1px solid #f5f5f4; }
+  .pg-a .pipe-label { font-size: 11px; font-weight: 600; color: #a8a29e; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+  .pg-a .pipe-row { display: flex; align-items: center; gap: 6px; }
+  .pg-a .pn { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fff; border: 1px solid #d6d3d1; border-radius: 6px; font-size: 12px; font-weight: 500; color: #44403c; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .pg-a .pn svg { opacity: 0.5; }
+  .pg-a .pn-add { border-style: dashed; color: #a8a29e; cursor: pointer; }
+  .pg-a .pn-add:hover { border-color: #b45309; color: #b45309; }
+  .pg-a .parr { color: #d6d3d1; display: flex; }
+
+  /* ===================== B. DATA PRO ===================== */
+  .pg-b .frame { display: flex; border-radius: 8px; overflow: hidden; height: 580px; border: 1px solid #1e1e22; }
+
+  .pg-b .side { width: 52px; background: #06060a; border-right: 1px solid #1e1e22; display: flex; flex-direction: column; align-items: center; padding: 14px 0; gap: 2px; }
+  .pg-b .side-logo { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 700; color: #22d3ee; margin-bottom: 20px; }
+  .pg-b .side-btn { width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #3f3f46; cursor: pointer; transition: all 0.1s; }
+  .pg-b .side-btn:hover { background: #18181b; color: #71717a; }
+  .pg-b .side-btn.active { background: #0e3a42; color: #22d3ee; }
+
+  .pg-b .panel { width: 192px; background: #08080c; border-right: 1px solid #141418; padding: 14px 0; }
+  .pg-b .panel-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; color: #3f3f46; padding: 0 14px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1.2px; }
+  .pg-b .panel-item { padding: 6px 14px; font-size: 12px; color: #52525b; cursor: pointer; transition: all 0.1s; font-family: 'IBM Plex Mono', monospace; }
+  .pg-b .panel-item:hover { color: #a1a1aa; background: rgba(255,255,255,0.015); }
+  .pg-b .panel-item.active { color: #22d3ee; background: rgba(34,211,238,0.04); }
+  .pg-b .panel-sep { height: 1px; background: #141418; margin: 10px 14px; }
+
+  .pg-b .mn { flex: 1; background: #09090b; padding: 18px 22px; overflow-y: auto; color: #d4d4d8; }
+  .pg-b .topbar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid #141418; margin-bottom: 18px; }
+  .pg-b .topbar-path { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #3f3f46; }
+  .pg-b .topbar-path span { color: #a1a1aa; }
+  .pg-b .btn { display: inline-flex; align-items: center; gap: 5px; padding: 0 11px; height: 30px; font-size: 11px; font-weight: 500; border-radius: 4px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; border: none; transition: all 0.1s; }
+  .pg-b .btn-primary { background: #164e63; color: #22d3ee; border: 1px solid #1e6e85; }
+  .pg-b .btn-ghost { background: #18181b; color: #71717a; border: 1px solid #27272a; }
+
+  .pg-b .metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+  .pg-b .mt { background: #0c0c10; border: 1px solid #1a1a1e; border-radius: 6px; padding: 14px; }
+  .pg-b .mt-v { font-family: 'IBM Plex Mono', monospace; font-size: 24px; font-weight: 600; color: #fafafa; }
+  .pg-b .mt-l { font-size: 10px; color: #3f3f46; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.6px; }
+
+  .pg-b .alert { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: rgba(250,204,21,0.04); border: 1px solid rgba(250,204,21,0.12); border-radius: 4px; margin-bottom: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #ca8a04; }
+
+  .pg-b table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: 'IBM Plex Mono', monospace; }
+  .pg-b th { text-align: left; padding: 7px 14px; font-size: 10px; color: #3f3f46; text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 1px solid #1a1a1e; }
+  .pg-b td { padding: 8px 14px; border-bottom: 1px solid #0e0e12; color: #71717a; }
+  .pg-b tr:hover td { background: rgba(255,255,255,0.01); }
+  .pg-b .cell-name { color: #d4d4d8; font-weight: 500; }
+  .pg-b .cell-num { text-align: right; color: #d4d4d8; }
+  .pg-b th.r { text-align: right; }
+  .pg-b .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  .pg-b .pipe { padding: 16px 14px; border-top: 1px solid #141418; }
+  .pg-b .pipe-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #3f3f46; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .pg-b .pipe-row { display: flex; align-items: center; gap: 4px; }
+  .pg-b .pn { padding: 6px 12px; background: #0c0c10; border: 1px solid rgba(34,211,238,0.15); border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #67e8f9; }
+  .pg-b .pn-add { border-style: dashed; border-color: #27272a; color: #3f3f46; cursor: pointer; }
+  .pg-b .pn-add:hover { border-color: #22d3ee; color: #22d3ee; }
+  .pg-b .parr { color: #27272a; font-size: 12px; display: flex; align-items: center; }
+
+  /* ===================== C. SOFT MINIMAL ===================== */
+  .pg-c .frame { display: flex; border-radius: 16px; overflow: hidden; height: 580px; box-shadow: 0 4px 32px rgba(0,0,0,0.35); }
+
+  .pg-c .side { width: 240px; background: #fff; border-right: 1px solid #f1f5f9; padding: 20px 14px; display: flex; flex-direction: column; }
+  .pg-c .side-logo { display: flex; align-items: center; gap: 10px; padding: 0 10px; margin-bottom: 32px; }
+  .pg-c .side-logo-icon { width: 24px; height: 24px; background: #2563eb; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .pg-c .side-logo-text { font-size: 17px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
+  .pg-c .side-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; font-size: 13px; color: #94a3b8; cursor: pointer; transition: all 0.12s; margin-bottom: 2px; font-weight: 400; }
+  .pg-c .side-item:hover { background: #f8fafc; color: #64748b; }
+  .pg-c .side-item.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+  .pg-c .side-item svg { opacity: 0.45; }
+  .pg-c .side-item.active svg { opacity: 0.85; }
+  .pg-c .side-sep { height: 1px; background: #f1f5f9; margin: 14px 10px; }
+
+  .pg-c .mn { flex: 1; background: #f8fafc; padding: 28px 32px; overflow-y: auto; color: #0f172a; }
+  .pg-c .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .pg-c .topbar-left h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .pg-c .topbar-left p { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+  .pg-c .btn { display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; height: 36px; font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer; font-family: inherit; border: none; transition: all 0.12s; }
+  .pg-c .btn-primary { background: #2563eb; color: #fff; box-shadow: 0 1px 6px rgba(37,99,235,0.2); }
+  .pg-c .btn-primary:hover { background: #1d4ed8; }
+  .pg-c .btn-ghost { background: #fff; color: #64748b; border: 1px solid #e2e8f0; }
+
+  .pg-c .cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+  .pg-c .cd { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .pg-c .cd-v { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; }
+  .pg-c .cd-l { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+  .pg-c .notice { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fffbeb; border-radius: 12px; margin-bottom: 18px; font-size: 12px; color: #92400e; }
+
+  .pg-c .tbl { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .pg-c .tbl-head { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+  .pg-c .tbl-title { font-size: 15px; font-weight: 600; }
+  .pg-c .search { padding: 7px 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; font-size: 12px; color: #94a3b8; width: 180px; font-family: inherit; outline: none; }
+  .pg-c table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .pg-c th { text-align: left; padding: 10px 20px; font-size: 11px; font-weight: 500; color: #94a3b8; border-bottom: 1px solid #f1f5f9; }
+  .pg-c td { padding: 14px 20px; border-bottom: 1px solid #f8fafc; color: #64748b; }
+  .pg-c tr:hover td { background: #f8fafc; }
+  .pg-c .cell-name { color: #0f172a; font-weight: 600; }
+  .pg-c .cell-num { font-variant-numeric: tabular-nums; text-align: right; font-weight: 500; color: #0f172a; }
+  .pg-c th.r { text-align: right; }
+  .pg-c .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 11px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .pg-c .pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+  .pg-c .p-done { background: #f0fdf4; color: #15803d; }
+  .pg-c .p-done::before { background: #22c55e; }
+  .pg-c .p-active { background: #eff6ff; color: #1d4ed8; }
+  .pg-c .p-active::before { background: #3b82f6; }
+  .pg-c .p-wait { background: #f5f5f4; color: #71717a; }
+  .pg-c .p-wait::before { background: #a1a1aa; }
+  .pg-c .p-err { background: #fef2f2; color: #b91c1c; }
+  .pg-c .p-err::before { background: #ef4444; }
+
+  .pg-c .pipe { padding: 18px 20px; background: #f8fafc; border-top: 1px solid #f1f5f9; }
+  .pg-c .pipe-label { font-size: 11px; font-weight: 600; color: #94a3b8; margin-bottom: 10px; }
+  .pg-c .pipe-row { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 10px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .pg-c .pn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #eff6ff; border-radius: 8px; font-size: 12px; color: #2563eb; font-weight: 500; }
+  .pg-c .pn-add { padding: 7px 14px; border: 2px dashed #e2e8f0; border-radius: 8px; font-size: 12px; color: #94a3b8; cursor: pointer; background: transparent; }
+  .pg-c .pn-add:hover { border-color: #2563eb; color: #2563eb; }
+  .pg-c .parr { color: #cbd5e1; display: flex; }
+
+  /* Shared SVG arrow */
+  .arrow-svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-inner">
+    <div class="nav-title">Tallia Design Direction</div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" onclick="show('a',this)">A. Academic Warm</div>
+      <div class="nav-tab" onclick="show('b',this)">B. Data Pro</div>
+      <div class="nav-tab" onclick="show('c',this)">C. Soft Minimal</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== A. ACADEMIC WARM ===== -->
+<div id="pg-a" class="page active pg-a">
+<div class="preview-wrap">
+  <div class="desc">
+    <h2>A. Academic Warm</h2>
+    <p>대학 행정의 무게감. 따뜻한 스톤 톤 사이드바, 앰버 액센트, 크림 배경. 절제된 색상으로 데이터에 집중.</p>
+    <div class="tags">
+      <span class="tag">Warm Stone</span><span class="tag">Amber Accent</span><span class="tag">Cream Surface</span><span class="tag">Understated</span>
+    </div>
+  </div>
+  <div class="frame">
+    <div class="side">
+      <div class="side-logo"><div class="side-logo-icon">T</div><div class="side-logo-text">Tallia</div></div>
+      <div class="side-label">Main</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>대시보드</div>
+      <div class="side-item active"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>평가 관리</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>엑셀 업로드</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>결과 조회</div>
+      <div class="side-sep"></div>
+      <div class="side-label">Settings</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>대학 관리</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>사용자</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>감사 로그</div>
+    </div>
+    <div class="mn">
+      <div class="topbar">
+        <div class="topbar-left"><h1>평가 관리</h1><p>2026학년도 · 수시 전형 · 24개 평가</p></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost">내보내기</button>
+          <button class="btn btn-primary">+ 새 평가</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="st"><div class="st-v">24</div><div class="st-l">전체</div></div>
+        <div class="st"><div class="st-v" style="color:#b45309">8</div><div class="st-l">진행중</div></div>
+        <div class="st"><div class="st-v" style="color:#15803d">14</div><div class="st-l">완료</div></div>
+        <div class="st"><div class="st-v" style="color:#b91c1c">2</div><div class="st-l">오류</div></div>
+      </div>
+      <div class="tbl">
+        <div class="tbl-head"><div class="tbl-title">최근 평가 목록</div><button class="btn btn-ghost" style="height:30px;font-size:12px;">전체보기</button></div>
+        <table>
+          <tr><th>평가명</th><th>유형</th><th>상태</th><th class="r">원점수</th><th class="r">환산점수</th></tr>
+          <tr><td class="cell-name">2026 면접 평가</td><td>A · 위원 평가</td><td><span class="badge b-done">완료</span></td><td class="cell-num">85.00</td><td class="cell-num" style="color:#1c1917;font-weight:500">425.00</td></tr>
+          <tr><td class="cell-name">필답고사</td><td>B · 자동 채점</td><td><span class="badge b-active">진행중</span></td><td class="cell-num">—</td><td class="cell-num">—</td></tr>
+          <tr><td class="cell-name">논술 평가</td><td>C · 문항별 채점</td><td><span class="badge b-done">완료</span></td><td class="cell-num">78.33</td><td class="cell-num" style="color:#1c1917;font-weight:500">391.65</td></tr>
+          <tr><td class="cell-name">자격증 환산</td><td>D · 점수 변환표</td><td><span class="badge b-err">오류</span></td><td class="cell-num">72.50</td><td class="cell-num">—</td></tr>
+        </table>
+        <div class="pipe">
+          <div class="pipe-label">계산 과정 — 면접 (위원 5명)</div>
+          <div class="pipe-row">
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>위원별 합산</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>최고/최저 제외</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>위원 평균</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>만점 환산</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn pn-add">+ 단계 추가</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== B. DATA PRO ===== -->
+<div id="pg-b" class="page pg-b">
+<div class="preview-wrap">
+  <div class="desc">
+    <h2>B. Data Pro</h2>
+    <p>점수 데이터 전문 도구. 다크 모드, 높은 밀도, 모노스페이스로 숫자 가독성 극대화. 시안 액센트.</p>
+    <div class="tags">
+      <span class="tag">IBM Plex Mono</span><span class="tag">Dark Mode</span><span class="tag">Cyan #22d3ee</span><span class="tag">High Density</span>
+    </div>
+  </div>
+  <div class="frame">
+    <div class="side">
+      <div class="side-logo">T</div>
+      <div class="side-btn active"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg></div>
+      <div class="side-btn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+      <div class="side-btn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></div>
+      <div class="side-btn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+      <div class="side-btn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+    </div>
+    <div class="panel">
+      <div class="panel-label">evaluations</div>
+      <div class="panel-item active">all (24)</div>
+      <div class="panel-item">type_a (8)</div>
+      <div class="panel-item">type_b (6)</div>
+      <div class="panel-item">type_c (5)</div>
+      <div class="panel-item">type_d (5)</div>
+      <div class="panel-sep"></div>
+      <div class="panel-label">filters</div>
+      <div class="panel-item">2026_academic</div>
+      <div class="panel-item">has_errors</div>
+    </div>
+    <div class="mn">
+      <div class="topbar">
+        <div class="topbar-path">evaluations / <span>all</span></div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost">export</button>
+          <button class="btn btn-primary">+ new</button>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="mt"><div class="mt-v">24</div><div class="mt-l">total</div></div>
+        <div class="mt"><div class="mt-v" style="color:#22d3ee">8</div><div class="mt-l">active</div></div>
+        <div class="mt"><div class="mt-v" style="color:#4ade80">14</div><div class="mt-l">done</div></div>
+        <div class="mt"><div class="mt-v" style="color:#f87171">2</div><div class="mt-l">error</div></div>
+      </div>
+      <div class="alert">&#9651; 2건 재계산 필요 (설정 변경됨)</div>
+      <table>
+        <tr><th>평가명</th><th>유형</th><th>상태</th><th class="r">원점수</th><th class="r">환산점수</th></tr>
+        <tr><td class="cell-name">2026_면접평가</td><td>A</td><td><span class="dot" style="background:#4ade80"></span>완료</td><td class="cell-num">85.00</td><td class="cell-num">425.00</td></tr>
+        <tr><td class="cell-name">필답고사</td><td>B</td><td><span class="dot" style="background:#22d3ee"></span>진행중</td><td class="cell-num">—</td><td class="cell-num">—</td></tr>
+        <tr><td class="cell-name">논술평가</td><td>C</td><td><span class="dot" style="background:#facc15"></span>대기</td><td class="cell-num">—</td><td class="cell-num">—</td></tr>
+        <tr><td class="cell-name">자격증환산</td><td>D</td><td><span class="dot" style="background:#f87171"></span>오류</td><td class="cell-num">72.50</td><td class="cell-num">—</td></tr>
+      </table>
+      <div class="pipe">
+        <div class="pipe-label">pipeline: 면접_위원5명</div>
+        <div class="pipe-row">
+          <div class="pn">위원별_합산</div>
+          <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+          <div class="pn">최고최저_제외</div>
+          <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+          <div class="pn">위원_평균</div>
+          <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+          <div class="pn">만점_환산</div>
+          <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+          <div class="pn pn-add">+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== C. SOFT MINIMAL ===== -->
+<div id="pg-c" class="page pg-c">
+<div class="preview-wrap">
+  <div class="desc">
+    <h2>C. Soft Minimal</h2>
+    <p>토스/네이버 B2B 스타일. 라운드 코너, 소프트 쉐도우, 블루 액센트, 넉넉한 여백. Pretendard 폰트.</p>
+    <div class="tags">
+      <span class="tag">Pretendard</span><span class="tag">Blue #2563eb</span><span class="tag">Soft Shadow</span><span class="tag">Round 14px</span>
+    </div>
+  </div>
+  <div class="frame">
+    <div class="side">
+      <div class="side-logo"><div class="side-logo-icon">T</div><div class="side-logo-text">Tallia</div></div>
+      <div class="side-item active"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>대시보드</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>평가 관리</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>엑셀 업로드</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>결과 조회</div>
+      <div class="side-sep"></div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>대학 관리</div>
+      <div class="side-item"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>설정</div>
+    </div>
+    <div class="mn">
+      <div class="topbar">
+        <div class="topbar-left"><h1>평가 관리</h1><p>2026학년도 · 수시 · 24개 평가</p></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost">내보내기</button>
+          <button class="btn btn-primary">+ 새 평가</button>
+        </div>
+      </div>
+      <div class="cards">
+        <div class="cd"><div class="cd-v">24</div><div class="cd-l">전체 평가</div></div>
+        <div class="cd"><div class="cd-v" style="color:#2563eb">8</div><div class="cd-l">진행중</div></div>
+        <div class="cd"><div class="cd-v" style="color:#16a34a">14</div><div class="cd-l">완료</div></div>
+        <div class="cd"><div class="cd-v" style="color:#dc2626">2</div><div class="cd-l">오류</div></div>
+      </div>
+      <div class="notice">&#9888;&#65039; 2건의 평가가 설정 변경 후 재계산이 필요합니다</div>
+      <div class="tbl">
+        <div class="tbl-head"><div class="tbl-title">최근 평가</div><input class="search" placeholder="평가 검색..." /></div>
+        <table>
+          <tr><th>평가명</th><th>유형</th><th>상태</th><th class="r">원점수</th><th class="r">환산점수</th></tr>
+          <tr><td class="cell-name">2026 면접 평가</td><td>A · 위원 평가</td><td><span class="pill p-done">완료</span></td><td class="cell-num">85.00</td><td class="cell-num">425.00</td></tr>
+          <tr><td class="cell-name">필답고사</td><td>B · 자동 채점</td><td><span class="pill p-active">진행중</span></td><td class="cell-num">—</td><td class="cell-num">—</td></tr>
+          <tr><td class="cell-name">논술 평가</td><td>C · 문항별 채점</td><td><span class="pill p-wait">대기</span></td><td class="cell-num">—</td><td class="cell-num">—</td></tr>
+          <tr><td class="cell-name">자격증 환산</td><td>D · 점수 변환표</td><td><span class="pill p-err">오류</span></td><td class="cell-num">72.50</td><td class="cell-num">—</td></tr>
+        </table>
+        <div class="pipe">
+          <div class="pipe-label">계산 과정 — 면접 (위원 5명)</div>
+          <div class="pipe-row">
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>위원별 합산</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>최고/최저 제외</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>위원 평균</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn"><svg class="ico" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>만점 환산</div>
+            <div class="parr"><svg class="arrow-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></div>
+            <div class="pn-add">+ 단계 추가</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pg-' + id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
