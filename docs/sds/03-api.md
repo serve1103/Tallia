@@ -3,11 +3,16 @@
 ### 3.1 공통 규칙
 
 - Base URL: `/api/v1`
+- **HTTP 메서드**: GET과 POST만 사용 (보안 정책)
+  - GET: 조회 (부수 효과 없음)
+  - POST: 생성, 수정, 삭제, 실행 등 모든 변경 작업
 - 인증: `Authorization: Bearer <JWT>` (로그인/회원가입 제외)
 - 테넌트 격리: JWT에서 tenant_id 추출, 모든 쿼리에 자동 주입
 - 응답 형식: `{ "data": ..., "meta": { "total", "page", "limit" } }`
 - 오류: `{ "error": { "code": "VALIDATION_ERROR", "message": "...", "details": [...] } }`
 - 페이지네이션: `?page=1&limit=20` (기본 20, 최대 100)
+
+> 보안 설계 (Helmet, CORS, Rate Limiting, 에러 처리, 감사 로그 등)는 [09-security.md](09-security.md) 참조
 
 ### 3.2 인증
 
@@ -40,10 +45,10 @@
 | POST | /admin/tenants | 대학 공간 생성 |
 | GET | /admin/tenants | 대학 목록 |
 | GET | /admin/tenants/:tenantId | 대학 상세 |
-| PATCH | /admin/tenants/:tenantId | 대학 수정 (도메인, 초대 코드 등) |
-| DELETE | /admin/tenants/:tenantId | 대학 삭제 |
+| POST | /admin/tenants/:tenantId/update | 대학 수정 (도메인, 초대 코드 등) |
+| POST | /admin/tenants/:tenantId/delete | 대학 삭제 |
 | GET | /admin/tenants/:tenantId/users | 대학 사용자 목록 |
-| DELETE | /admin/tenants/:tenantId/users/:userId | 대학 사용자 제거 |
+| POST | /admin/tenants/:tenantId/users/:userId/remove | 대학 사용자 제거 |
 
 ### 3.4 평가 (tenant_admin)
 
@@ -52,8 +57,8 @@
 | POST | /evaluations | 평가 생성 |
 | GET | /evaluations | 평가 목록 (필터: academic_year, admission_type, type) |
 | GET | /evaluations/:id | 평가 상세 (config + pipeline_config 포함) |
-| PATCH | /evaluations/:id | 평가 수정 |
-| DELETE | /evaluations/:id | 평가 삭제 |
+| POST | /evaluations/:id/update | 평가 수정 |
+| POST | /evaluations/:id/delete | 평가 삭제 |
 | POST | /evaluations/:id/copy | 평가 복사 |
 
 **POST /evaluations/:id/copy — 복사 범위:**
@@ -80,7 +85,7 @@
 | Method | Path | 설명 |
 |--------|------|------|
 | GET | /evaluations/:id/config | 유형별 설정 조회 |
-| PUT | /evaluations/:id/config | 유형별 설정 전체 교체 |
+| POST | /evaluations/:id/config/save | 유형별 설정 저장 |
 | GET | /evaluations/:id/config/preview | 샘플 데이터로 결과 미리보기 |
 
 ### 3.6 파이프라인
@@ -88,7 +93,7 @@
 | Method | Path | 설명 |
 |--------|------|------|
 | GET | /evaluations/:id/pipeline | 파이프라인 조회 |
-| PUT | /evaluations/:id/pipeline | 파이프라인 저장 |
+| POST | /evaluations/:id/pipeline/save | 파이프라인 저장 |
 | POST | /evaluations/:id/pipeline/validate | 파이프라인 유효성 검증 |
 | POST | /evaluations/:id/pipeline/preview | 샘플 데이터로 파이프라인 테스트 |
 
@@ -200,7 +205,7 @@ Response: Excel file (Content-Disposition: attachment)
 | Method | Path | 설명 |
 |--------|------|------|
 | GET | /evaluations/:id/mapping-table | 점수 변환표 조회 (entries 포함) |
-| PUT | /evaluations/:id/mapping-table | 점수 변환표 전체 저장 |
+| POST | /evaluations/:id/mapping-table/save | 점수 변환표 저장 |
 | POST | /evaluations/:id/mapping-table/upload | 점수 변환표 엑셀 업로드 |
 | GET | /evaluations/:id/mapping-table/download | 점수 변환표 엑셀 다운로드 |
 
@@ -208,7 +213,7 @@ Response: Excel file (Content-Disposition: attachment)
 
 | Method | Path | 설명 |
 |--------|------|------|
-| PUT | /evaluations/:id/answer-key | 정답지 저장 (config.subjects[].examTypes[].answerKey) |
+| POST | /evaluations/:id/answer-key/save | 정답지 저장 (config.subjects[].examTypes[].answerKey) |
 | POST | /evaluations/:id/question-error | 출제 오류 처리 |
 
 **POST /evaluations/:id/question-error**

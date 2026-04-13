@@ -15,15 +15,7 @@
 
 ### 8.2 보안
 
-| 요구사항 | 반영 |
-|----------|------|
-| bcrypt 해싱 | auth 모듈, salt rounds 12 |
-| JWT 인증 | JwtAuthGuard, 1시간 만료 + 리프레시 |
-| 멀티테넌트 격리 | TenantGuard, 모든 쿼리에 tenant_id 조건 |
-| 사용자 정의 단계 샌드박스 | mathjs 제한 실행, AST 화이트리스트 검증, 100ms 타임아웃 |
-| HTTPS | 배포 환경에서 리버스 프록시(nginx) TLS 종료 |
-| XSS 방지 | React 기본 이스케이프 + Helmet 미들웨어 |
-| SQL Injection | Prisma 파라미터 바인딩 (raw query 사용 금지) |
+> 보안 설계 상세는 [09-security.md](09-security.md) 참조
 
 ### 8.3 개인정보 보호
 
