@@ -1,0 +1,184 @@
+// Tallia — Prisma Schema
+// 참조: docs/sds/02-db-schema.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- tenants ---
+
+model Tenant {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String   @db.VarChar(100)
+  allowedDomains     String[] @map("allowed_domains")
+  inviteCode         String   @unique @map("invite_code") @db.VarChar(20)
+  dataRetentionYears Int      @default(3) @map("data_retention_years")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  users       User[]
+  evaluations Evaluation[]
+  auditLogs   AuditLog[]
+
+  @@map("tenants")
+}
+
+// --- users ---
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  tenantId      String?  @map("tenant_id") @db.Uuid
+  email         String   @unique @db.VarChar(255)
+  passwordHash  String   @map("password_hash") @db.VarChar(255)
+  name          String   @db.VarChar(50)
+  role          String   @db.VarChar(20)
+  emailVerified Boolean  @default(false) @map("email_verified")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  tenant       Tenant?       @relation(fields: [tenantId], references: [id])
+  scoreUploads ScoreUpload[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+// --- evaluations ---
+
+model Evaluation {
+  id                 String   @id @default(uuid()) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  name               String   @db.VarChar(200)
+  type               String   @db.VarChar(1)
+  academicYear       String?  @map("academic_year") @db.VarChar(10)
+  admissionType      String?  @map("admission_type") @db.VarChar(100)
+  config             Json
+  pipelineConfig     Json     @map("pipeline_config")
+  defaultDecimal     Json?    @map("default_decimal")
+  convertedMax       Decimal? @map("converted_max") @db.Decimal(10, 2)
+  status             String   @default("draft") @db.VarChar(20)
+  needsRecalculation Boolean  @default(false) @map("needs_recalculation")
+  copiedFromId       String?  @map("copied_from_id") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  copiedFrom    Evaluation?    @relation("EvaluationCopy", fields: [copiedFromId], references: [id])
+  copies        Evaluation[]   @relation("EvaluationCopy")
+  scoreUploads  ScoreUpload[]
+  scores        Score[]
+  mappingTable  MappingTable?
+
+  @@index([tenantId], map: "idx_evaluations_tenant")
+  @@index([tenantId, academicYear], map: "idx_evaluations_tenant_year")
+  @@map("evaluations")
+}
+
+// --- score_uploads ---
+
+model ScoreUpload {
+  id               String   @id @default(uuid()) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  evaluationId     String   @map("evaluation_id") @db.Uuid
+  fileName         String   @map("file_name") @db.VarChar(255)
+  fileSize         Int      @map("file_size")
+  rowCount         Int      @map("row_count")
+  status           String   @db.VarChar(20)
+  isCurrent        Boolean  @default(false) @map("is_current")
+  rawData          Json     @map("raw_data")
+  validationErrors Json?    @map("validation_errors")
+  uploadedBy       String   @map("uploaded_by") @db.Uuid
+  uploadedAt       DateTime @default(now()) @map("uploaded_at") @db.Timestamptz()
+
+  evaluation Evaluation @relation(fields: [evaluationId], references: [id])
+  uploader   User       @relation(fields: [uploadedBy], references: [id])
+  scores     Score[]
+
+  @@index([evaluationId], map: "idx_uploads_evaluation")
+  @@index([evaluationId], map: "idx_uploads_current")
+  @@map("score_uploads")
+}
+
+// --- scores ---
+
+model Score {
+  id                  String   @id @default(uuid()) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  evaluationId        String   @map("evaluation_id") @db.Uuid
+  uploadId            String   @map("upload_id") @db.Uuid
+  examineeNo          String   @map("examinee_no") @db.VarChar(50)
+  examineeName        String   @map("examinee_name") @db.VarChar(100)
+  rawScore            Decimal? @map("raw_score") @db.Decimal(10, 4)
+  convertedScore      Decimal? @map("converted_score") @db.Decimal(10, 4)
+  failFlag            Boolean  @default(false) @map("fail_flag")
+  failReasons         Json?    @map("fail_reasons")
+  intermediateResults Json?    @map("intermediate_results")
+  errorFlag           Boolean  @default(false) @map("error_flag")
+  errorMessage        String?  @map("error_message") @db.Text
+  calculatedAt        DateTime? @map("calculated_at") @db.Timestamptz()
+
+  evaluation  Evaluation  @relation(fields: [evaluationId], references: [id])
+  scoreUpload ScoreUpload @relation(fields: [uploadId], references: [id])
+
+  @@unique([evaluationId, uploadId, examineeNo], map: "idx_scores_examinee")
+  @@index([evaluationId], map: "idx_scores_evaluation")
+  @@map("scores")
+}
+
+// --- mapping_tables ---
+
+model MappingTable {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  evaluationId String   @unique @map("evaluation_id") @db.Uuid
+  mappingType  String   @map("mapping_type") @db.VarChar(30)
+  columnsDef   Json     @map("columns_def")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+
+  evaluation Evaluation          @relation(fields: [evaluationId], references: [id])
+  entries    MappingTableEntry[]
+
+  @@map("mapping_tables")
+}
+
+// --- mapping_table_entries ---
+
+model MappingTableEntry {
+  id             String  @id @default(uuid()) @db.Uuid
+  mappingTableId String  @map("mapping_table_id") @db.Uuid
+  conditions     Json
+  score          Decimal @db.Decimal(10, 4)
+  sortOrder      Int     @map("sort_order")
+
+  mappingTable MappingTable @relation(fields: [mappingTableId], references: [id])
+
+  @@index([mappingTableId], map: "idx_mapping_entries_table")
+  @@map("mapping_table_entries")
+}
+
+// --- audit_logs ---
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  action       String   @db.VarChar(50)
+  resourceType String   @map("resource_type") @db.VarChar(50)
+  resourceId   String   @map("resource_id") @db.Uuid
+  details      Json?
+  ipAddress    String   @map("ip_address") @db.VarChar(45)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, createdAt(sort: Desc)], map: "idx_audit_tenant_created")
+  @@index([resourceType, resourceId], map: "idx_audit_resource")
+  @@map("audit_logs")
+}
