@@ -139,32 +139,32 @@
 > 참조: [03-api.md](sds/03-api.md) §3.4~3.5, [06-backend.md](sds/06-backend.md) §6.3
 
 ### 3-A. Backend — Evaluations CRUD
-- [ ] `evaluations/controller/evaluations.controller.ts` — 6개 엔드포인트:
-  - [ ] POST /evaluations (생성 — type, config, pipeline_config 포함)
-  - [ ] GET /evaluations (목록 — 필터: academic_year, admission_type, type)
-  - [ ] GET /evaluations/:id (상세 — config + pipeline_config 포함)
-  - [ ] POST /evaluations/:id/update (수정)
-  - [ ] POST /evaluations/:id/delete (삭제)
-  - [ ] POST /evaluations/:id/copy (복사 — Phase 10에서 상세 구현)
-- [ ] `evaluations/application/evaluations.application.ts`
-- [ ] `evaluations/service/evaluations.service.ts`
-- [ ] `evaluations/service/config-handlers/` — 유형별 설정 핸들러:
-  - [ ] type-a.handler.ts
-  - [ ] type-b.handler.ts
-  - [ ] type-c.handler.ts
-  - [ ] type-d.handler.ts
-- [ ] `evaluations/repository/evaluations.repository.ts` — Interface
-- [ ] `evaluations/repository-impl/evaluations.prisma.repository.ts`
+- [x] `evaluations/controller/evaluations.controller.ts` — 6개 엔드포인트:
+  - [x] POST /evaluations (생성 — type, config, pipeline_config 포함)
+  - [x] GET /evaluations (목록 — 필터: academic_year, admission_type, type)
+  - [x] GET /evaluations/:id (상세 — config + pipeline_config 포함)
+  - [x] POST /evaluations/:id/update (수정)
+  - [x] POST /evaluations/:id/delete (삭제)
+  - [x] POST /evaluations/:id/copy (복사 — Phase 10에서 상세 구현)
+- [x] `evaluations/application/evaluations.application.ts`
+- [x] `evaluations/service/evaluations.service.ts`
+- [x] `evaluations/service/config-handlers/` — 유형별 설정 핸들러:
+  - [x] type-a.handler.ts
+  - [x] type-b.handler.ts
+  - [x] type-c.handler.ts
+  - [x] type-d.handler.ts
+- [x] `evaluations/repository/evaluations.repository.ts` — Interface
+- [x] `evaluations/repository-impl/evaluations.prisma.repository.ts`
 
 ### 3-B. Backend — Config 엔드포인트
 > 참조: [03-api.md](sds/03-api.md) §3.5
 
-- [ ] GET /evaluations/:id/config (유형별 설정 조회)
-- [ ] POST /evaluations/:id/config/save (유형별 설정 저장)
-- [ ] GET /evaluations/:id/config/preview (샘플 미리보기 — 엔진 연동은 Phase 5)
+- [x] GET /evaluations/:id/config (유형별 설정 조회)
+- [x] POST /evaluations/:id/config/save (유형별 설정 저장)
+- [x] GET /evaluations/:id/config/preview (샘플 미리보기 — 엔진 연동은 Phase 5)
 
 ### 3-C. app.module.ts 업데이트
-- [ ] EvaluationsModule import 추가
+- [x] EvaluationsModule import 추가
 
 ### 3-D. 검증
 - [ ] 단위 테스트: evaluations.service (CRUD)

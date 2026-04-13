@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { UsersModule } from './users/users.module';
+import { EvaluationsModule } from './evaluations/evaluations.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -19,6 +20,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     AuthModule,
     TenantsModule,
     UsersModule,
+    EvaluationsModule,
   ],
   providers: [
     // Guard 순서: Throttler → JwtAuth → Tenant → Roles
