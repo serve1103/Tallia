@@ -21,6 +21,13 @@ import { customFormulaBlock } from './blocks/custom/custom-formula';
 
 // A유형 블록
 import { gradeToScoreBlock } from './blocks/type-a/grade-to-score';
+// B유형 블록
+import { autoGradeBlock } from './blocks/type-b/auto-grade';
+import { sumBySubjectBlock, subjectFailCheckBlock, subjectSumBlock, subjectWeightedSumBlock } from './blocks/type-b/b-aggregate-blocks';
+// C유형 블록
+import { subQuestionSumBlock, subQuestionWeightedSumBlock, questionWeightBlock, questionSumBlock, questionWeightedSumBlock, subQuestionFailCheckBlock, questionFailCheckBlock } from './blocks/type-c/c-question-blocks';
+// D유형 블록
+import { mappingLookupBlock } from './blocks/type-d/mapping-lookup';
 import {
   sumByCommitteeBlock, weightedSumByCommitteeBlock, addVirtualCommitteeBlock,
   excludeMaxCommitteeBlock, excludeMinCommitteeBlock, committeeAverageBlock, committeeSumBlock,
@@ -76,6 +83,21 @@ export class PipelineModule implements OnModuleInit {
     this.registry.register('item_sum', itemSumBlock);
     this.registry.register('item_average', itemAverageBlock);
 
-    // B/C/D 유형별 블록은 각 Phase에서 등록
+    // B유형
+    this.registry.register('auto_grade', autoGradeBlock);
+    this.registry.register('sum_by_subject', sumBySubjectBlock);
+    this.registry.register('subject_fail_check', subjectFailCheckBlock);
+    this.registry.register('subject_sum', subjectSumBlock);
+    this.registry.register('subject_weighted_sum', subjectWeightedSumBlock);
+    // C유형
+    this.registry.register('sub_question_sum', subQuestionSumBlock);
+    this.registry.register('sub_question_weighted_sum', subQuestionWeightedSumBlock);
+    this.registry.register('question_weight', questionWeightBlock);
+    this.registry.register('question_sum', questionSumBlock);
+    this.registry.register('question_weighted_sum', questionWeightedSumBlock);
+    this.registry.register('sub_question_fail_check', subQuestionFailCheckBlock);
+    this.registry.register('question_fail_check', questionFailCheckBlock);
+    // D유형
+    this.registry.register('mapping_lookup', mappingLookupBlock);
   }
 }
