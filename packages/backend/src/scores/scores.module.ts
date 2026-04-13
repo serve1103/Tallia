@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ScoresController } from './controller/scores.controller';
 
-/** Scores 모듈 골격 — Phase 11에서 계산 실행/결과 조회 구현 */
 @Module({
-  controllers: [],
+  controllers: [ScoresController],
   providers: [],
   exports: [],
 })

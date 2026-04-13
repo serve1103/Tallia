@@ -12,6 +12,7 @@ import { PipelineModule } from './pipeline/pipeline.module';
 import { ExcelModule } from './excel/excel.module';
 import { ScoresModule } from './scores/scores.module';
 import { AuditModule } from './audit/audit.module';
+import { MappingTablesModule } from './mapping-tables/mapping-tables.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -29,6 +30,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     ExcelModule,
     ScoresModule,
     AuditModule,
+    MappingTablesModule,
   ],
   providers: [
     // Guard 순서: Throttler → JwtAuth → Tenant → Roles

@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
+import { AuditController } from './controller/audit.controller';
+import { AuditService } from './service/audit.service';
+import { AUDIT_REPOSITORY } from './repository/audit.repository';
+import { AuditPrismaRepository } from './repository-impl/audit.prisma.repository';
 
-/** Audit 모듈 골격 — Phase 10에서 감사 로그 DB 기록 구현 */
 @Module({
-  controllers: [],
-  providers: [],
-  exports: [],
+  controllers: [AuditController],
+  providers: [
+    AuditService,
+    { provide: AUDIT_REPOSITORY, useClass: AuditPrismaRepository },
+  ],
+  exports: [AuditService],
 })
 export class AuditModule {}
