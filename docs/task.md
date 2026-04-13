@@ -39,90 +39,90 @@
 > 참조: [06-backend.md](sds/06-backend.md), [02-db-schema.md](sds/02-db-schema.md), [09-security.md](sds/09-security.md)
 
 ### 2-A. 패키지 초기화
-- [ ] `packages/backend/package.json` + `tsconfig.json`
-- [ ] NestJS 의존성 설치 (core, common, jwt, passport, throttler, prisma, bcrypt, helmet, cookie-parser, zod)
-- [ ] `@tallia/shared` 의존성 연결
+- [x] `packages/backend/package.json` + `tsconfig.json`
+- [x] NestJS 의존성 설치 (core, common, jwt, passport, throttler, prisma, bcrypt, helmet, cookie-parser, zod)
+- [x] `@tallia/shared` 의존성 연결
 
 ### 2-B. Prisma 스키마
 > 참조: [02-db-schema.md](sds/02-db-schema.md) §2.2, §2.5
 
-- [ ] `prisma/schema.prisma` — provider: postgresql
-- [ ] 모델 정의 (8개):
-  - [ ] Tenant (allowed_domains: String[], invite_code, data_retention_years)
-  - [ ] User (tenant_id nullable, role, password_hash)
-  - [ ] Evaluation (config: Json, pipeline_config: Json, default_decimal: Json, needs_recalculation)
-  - [ ] ScoreUpload (raw_data: Json, is_current)
-  - [ ] Score (intermediate_results: Json, fail_flag, error_flag)
-  - [ ] MappingTable + MappingTableEntry
-  - [ ] AuditLog (append-only)
-- [ ] 인덱스 정의 (§2.5)
-- [ ] `prisma validate` 통과
-- [ ] `prisma generate` 실행
-- [ ] 초기 마이그레이션 (`prisma migrate dev --name init`)
+- [x] `prisma/schema.prisma` — provider: postgresql
+- [x] 모델 정의 (8개):
+  - [x] Tenant (allowed_domains: String[], invite_code, data_retention_years)
+  - [x] User (tenant_id nullable, role, password_hash)
+  - [x] Evaluation (config: Json, pipeline_config: Json, default_decimal: Json, needs_recalculation)
+  - [x] ScoreUpload (raw_data: Json, is_current)
+  - [x] Score (intermediate_results: Json, fail_flag, error_flag)
+  - [x] MappingTable + MappingTableEntry
+  - [x] AuditLog (append-only)
+- [x] 인덱스 정의 (§2.5)
+- [x] `prisma validate` 통과
+- [ ] `prisma generate` 실행 (DB 연결 후)
+- [ ] 초기 마이그레이션 (`prisma migrate dev --name init`) (DB 연결 후)
 
 ### 2-C. 공통 인프라 (common/)
 > 참조: [06-backend.md](sds/06-backend.md) §6.4~6.5, [09-security.md](sds/09-security.md)
 
-- [ ] `guards/jwt-auth.guard.ts` — AuthGuard('jwt') 래핑
-- [ ] `guards/tenant.guard.ts` — §9.3 TenantGuard (platform_admin 통과)
-- [ ] `guards/roles.guard.ts` — §9.3 RolesGuard (Reflector + @Roles)
-- [ ] `decorators/current-user.decorator.ts` — @CurrentUser()
-- [ ] `decorators/current-tenant.decorator.ts` — @CurrentTenant()
-- [ ] `decorators/roles.decorator.ts` — @Roles()
-- [ ] `decorators/public.decorator.ts` — @Public() (JwtAuthGuard 바이패스)
-- [ ] `interceptors/audit-log.interceptor.ts` — before/after 구조 (실제 기록은 Phase 10)
-- [ ] `filters/global-exception.filter.ts` — §9.5 (PII/스택트레이스 노출 차단)
-- [ ] `pipes/zod-validation.pipe.ts` — Zod 스키마 기반 검증
+- [x] `guards/jwt-auth.guard.ts` — AuthGuard('jwt') 래핑
+- [x] `guards/tenant.guard.ts` — §9.3 TenantGuard (platform_admin 통과)
+- [x] `guards/roles.guard.ts` — §9.3 RolesGuard (Reflector + @Roles)
+- [x] `decorators/current-user.decorator.ts` — @CurrentUser()
+- [x] `decorators/current-tenant.decorator.ts` — @CurrentTenant()
+- [x] `decorators/roles.decorator.ts` — @Roles()
+- [x] `decorators/public.decorator.ts` — @Public() (JwtAuthGuard 바이패스)
+- [x] `interceptors/audit-log.interceptor.ts` — before/after 구조 (실제 기록은 Phase 10)
+- [x] `filters/global-exception.filter.ts` — §9.5 (PII/스택트레이스 노출 차단)
+- [x] `pipes/zod-validation.pipe.ts` — Zod 스키마 기반 검증
 
 ### 2-D. Auth 모듈
 > 참조: [03-api.md](sds/03-api.md) §3.2, [09-security.md](sds/09-security.md) §9.2
 
-- [ ] `auth/controller/auth.controller.ts` — 6개 엔드포인트:
-  - [ ] POST /auth/signup (도메인 이메일 → 테넌트 자동 배정 또는 invite_code)
-  - [ ] POST /auth/login (JWT 발급: AT 1h + RT 7d httpOnly 쿠키)
-  - [ ] POST /auth/refresh (RT Rotation: 기존 RT 폐기 → 새 AT/RT)
-  - [ ] POST /auth/verify-email (이메일 인증 확인)
-  - [ ] POST /auth/forgot-password (비밀번호 재설정 요청)
-  - [ ] POST /auth/reset-password (비밀번호 재설정)
-- [ ] `auth/application/auth.application.ts`
-- [ ] `auth/service/auth.service.ts` — bcrypt(12), JWT Payload: { sub, tenantId, role }
-- [ ] `auth/repository/auth.repository.ts` — Interface
-- [ ] `auth/repository-impl/auth.prisma.repository.ts`
-- [ ] Rate Limiting: login 5/min, signup 3/min (IP 기준)
+- [x] `auth/controller/auth.controller.ts` — 6개 엔드포인트:
+  - [x] POST /auth/signup (도메인 이메일 → 테넌트 자동 배정 또는 invite_code)
+  - [x] POST /auth/login (JWT 발급: AT 1h + RT 7d httpOnly 쿠키)
+  - [x] POST /auth/refresh (RT Rotation: 기존 RT 폐기 → 새 AT/RT)
+  - [x] POST /auth/verify-email (이메일 인증 확인)
+  - [x] POST /auth/forgot-password (비밀번호 재설정 요청)
+  - [x] POST /auth/reset-password (비밀번호 재설정)
+- [x] `auth/application/auth.application.ts`
+- [x] `auth/service/auth.service.ts` — bcrypt(12), JWT Payload: { sub, tenantId, role }
+- [x] `auth/repository/auth.repository.ts` — Interface
+- [x] `auth/repository-impl/auth.prisma.repository.ts`
+- [x] Rate Limiting: login 5/min, signup 3/min (IP 기준)
 - [ ] 이메일 발송 서비스 — stub 구현 (실제 발송은 인프라 확정 후, §8 미결사항)
 
 ### 2-E. Tenants 모듈
 > 참조: [03-api.md](sds/03-api.md) §3.3
 
-- [ ] `tenants/controller/` — 7개 엔드포인트 (platform_admin 전용):
-  - [ ] POST /admin/tenants (생성)
-  - [ ] GET /admin/tenants (목록)
-  - [ ] GET /admin/tenants/:tenantId (상세)
-  - [ ] POST /admin/tenants/:tenantId/update (수정)
-  - [ ] POST /admin/tenants/:tenantId/delete (삭제)
-  - [ ] GET /admin/tenants/:tenantId/users (사용자 목록)
-  - [ ] POST /admin/tenants/:tenantId/users/:userId/remove (사용자 제거)
-- [ ] `tenants/application/` + `service/` + `repository/` + `repository-impl/`
-- [ ] `@Roles('platform_admin')` 적용
+- [x] `tenants/controller/` — 7개 엔드포인트 (platform_admin 전용):
+  - [x] POST /admin/tenants (생성)
+  - [x] GET /admin/tenants (목록)
+  - [x] GET /admin/tenants/:tenantId (상세)
+  - [x] POST /admin/tenants/:tenantId/update (수정)
+  - [x] POST /admin/tenants/:tenantId/delete (삭제)
+  - [x] GET /admin/tenants/:tenantId/users (사용자 목록)
+  - [x] POST /admin/tenants/:tenantId/users/:userId/remove (사용자 제거)
+- [x] `tenants/application/` + `service/` + `repository/` + `repository-impl/`
+- [x] `@Roles('platform_admin')` 적용
 
 ### 2-F. Users 모듈
-- [ ] `users/controller/` — GET /users/me, POST /users/me/update
-- [ ] `users/application/` + `service/` + `repository/` + `repository-impl/`
+- [x] `users/controller/` — GET /users/me, POST /users/me/update
+- [x] `users/application/` + `service/` + `repository/` + `repository-impl/`
 
 ### 2-G. App Module + main.ts
 > 참조: [06-backend.md](sds/06-backend.md) §6.4, §6.6
 
-- [ ] `app.module.ts` — AuthModule, TenantsModule, UsersModule import
-- [ ] `main.ts` 부트스트랩:
-  - [ ] Helmet (보안 헤더)
-  - [ ] CORS (origin: env.FRONTEND_ORIGIN, methods: GET/POST, credentials: true)
-  - [ ] Body limit 10mb
-  - [ ] cookie-parser
-  - [ ] trust proxy
-  - [ ] 전역 Guard 순서: ThrottlerGuard → JwtAuthGuard → TenantGuard → RolesGuard
-  - [ ] 전역 Pipe: ZodValidationPipe
-  - [ ] 전역 Filter: GlobalExceptionFilter
-- [ ] 헬스체크 엔드포인트 (GET /health)
+- [x] `app.module.ts` — AuthModule, TenantsModule, UsersModule import
+- [x] `main.ts` 부트스트랩:
+  - [x] Helmet (보안 헤더)
+  - [x] CORS (origin: env.FRONTEND_ORIGIN, methods: GET/POST, credentials: true)
+  - [x] Body limit 10mb
+  - [x] cookie-parser
+  - [x] trust proxy
+  - [x] 전역 Guard 순서: ThrottlerGuard → JwtAuthGuard → TenantGuard → RolesGuard
+  - [ ] 전역 Pipe: ZodValidationPipe (요청별 스키마 적용으로 변경)
+  - [x] 전역 Filter: GlobalExceptionFilter
+- [x] 헬스체크 엔드포인트 (GET /health)
 
 ### 2-H. DB 시딩
 - [ ] `prisma/seed.ts` — 초기 platform_admin 계정 생성
