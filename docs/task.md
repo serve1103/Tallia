@@ -7,14 +7,14 @@
 
 > 참조: [01-monorepo.md](sds/01-monorepo.md) §1.1, §1.3, §1.4
 
-- [ ] 루트 `package.json` (npm workspaces: `packages/*`, devDependencies: concurrently)
-- [ ] `tsconfig.base.json` (strict, ES2022, paths: `@tallia/shared`)
-- [ ] `.eslintrc.cjs` (@typescript-eslint, import/order, import/no-restricted-paths)
-- [ ] `.prettierrc` (2 spaces, single quotes, trailing comma)
-- [ ] `.gitignore` (node_modules, dist, .env, prisma/migrations)
-- [ ] `.env.example` (DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, FRONTEND_ORIGIN, TRUST_PROXY, PORT)
-- [ ] 루트 scripts (dev, build, lint, test, db:migrate, db:seed)
-- [ ] `npm install` 루트에서 실행 확인
+- [x] 루트 `package.json` (npm workspaces: `packages/*`, devDependencies: concurrently)
+- [x] `tsconfig.base.json` (strict, ES2022, paths: `@tallia/shared`)
+- [x] `.eslintrc.cjs` (@typescript-eslint, import/order, import/no-restricted-paths)
+- [x] `.prettierrc` (2 spaces, single quotes, trailing comma)
+- [x] `.gitignore` (node_modules, dist, .env, prisma/migrations)
+- [x] `.env.example` (DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, FRONTEND_ORIGIN, TRUST_PROXY, PORT)
+- [x] 루트 scripts (dev, build, lint, test, db:migrate, db:seed)
+- [x] `npm install` 루트에서 실행 확인
 
 ## Phase 1: Shared 패키지
 

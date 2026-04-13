@@ -1,0 +1,13 @@
+{
+  "name": "@tallia/backend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "echo \"Phase 2에서 NestJS 설정 후 사용\"",
+    "build": "echo \"Phase 2에서 NestJS 설정 후 사용\"",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@tallia/shared": "*"
+  }
+}
