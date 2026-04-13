@@ -345,5 +345,5 @@ export const theme: ThemeConfig = {
 
 | 문서 | 내용 |
 |------|------|
-| [premium-saas.html](premium-saas.html) | 디자인 기준 HTML 목업 |
-| [color-palette-compare.html](color-palette-compare.html) | 디자인 방향 비교 (Academic / Data Pro / Soft Minimal) |
+| [dashboard-final.html](mockups/dashboard-final.html) | 디자인 기준 HTML 목업 |
+| [direction-compare.html](mockups/direction-compare.html) | 디자인 방향 비교 (Academic / Data Pro / Soft Minimal) |
