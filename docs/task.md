@@ -20,17 +20,18 @@
 
 > 참조: [01-monorepo.md](sds/01-monorepo.md) §1.1, [02-db-schema.md](sds/02-db-schema.md) §2.3~2.4, [04-pipeline-engine.md](sds/04-pipeline-engine.md) §4.1~4.2
 
-- [ ] `packages/shared/package.json` + `tsconfig.json` (의존성: zod)
-- [ ] `src/types/user.ts` — User, Role (`platform_admin | tenant_admin`)
-- [ ] `src/types/tenant.ts` — Tenant
-- [ ] `src/types/evaluation.ts` — EvaluationType, EvalConfig 유니온 (A/B/C/D)
-- [ ] `src/types/pipeline.ts` — BlockDef, DataShape, PipelineConfig (A: conditions[], B/C/D: blocks[])
-- [ ] `src/types/score.ts` — Score, IntermediateResult
-- [ ] `src/constants/roles.ts` — PLATFORM_ADMIN, TENANT_ADMIN
-- [ ] `src/constants/block-types.ts` — 블록 타입 열거
-- [ ] `src/constants/data-shapes.ts` — 9개 DataShape 열거
-- [ ] `src/validators/pipeline.ts` — validatePipeline() 기본 구현
-- [ ] `src/index.ts` — 배럴 export
+- [x] `packages/shared/package.json` + `tsconfig.json`
+- [x] `src/types/user.ts` — User, Role
+- [x] `src/types/tenant.ts` — Tenant
+- [x] `src/types/evaluation.ts` — EvaluationType, EvalConfig 유니온 (A/B/C/D 전 필드 반영)
+- [x] `src/types/pipeline.ts` — BlockDef, DataShape, PipelineConfig
+- [x] `src/types/score.ts` — Score, ScoreUpload (rawData 포함), CalculateResult
+- [x] `src/types/mapping-table.ts` — MappingTable, MappingTableEntry
+- [x] `src/types/audit-log.ts` — AuditLog, AuditAction
+- [x] `src/constants/roles.ts` — PLATFORM_ADMIN, TENANT_ADMIN (user.ts ROLES 참조)
+- [x] `src/constants/block-types.ts` — 04-pipeline-engine.md §4.5~4.10 기준 전체 블록 열거
+- [x] `src/validators/pipeline.ts` — validatePipeline() 6개 규칙 구현
+- [x] `src/index.ts` — 배럴 export
 - [ ] `npm run build -w shared` 타입 에러 없이 통과
 
 ## Phase 2: Backend 기반
