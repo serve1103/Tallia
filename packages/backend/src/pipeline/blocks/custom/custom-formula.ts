@@ -23,7 +23,7 @@ function validateExpression(expression: string): void {
 
   node.traverse((n) => {
     if (n.type === 'SymbolNode') {
-      const name = (n as { name: string }).name;
+      const name = (n as unknown as { name: string }).name;
       if (!ALLOWED_VARS.includes(name) && !ALLOWED_FUNCTIONS.includes(name)) {
         throw new Error(`허용되지 않은 변수/함수: ${name}`);
       }

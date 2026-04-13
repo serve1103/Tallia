@@ -24,20 +24,23 @@ export const mappingLookupBlock: BlockHandler = {
 
     const matched = entries.find((entry) => {
       return Object.entries(entry.conditions).every(([key, val]) => {
-        const inputVal = data.conditions[key];
-        if (inputVal === undefined) return false;
-
-        // 구간 매칭: score_min/score_max
+        // 구간 매칭: score_min → 입력의 score와 비교
         if (key.endsWith('_min')) {
           const baseKey = key.replace('_min', '');
-          return Number(data.conditions[baseKey] ?? data.conditions[key]) >= Number(val);
+          const inputVal = data.conditions[baseKey];
+          if (inputVal === undefined) return false;
+          return Number(inputVal) >= Number(val);
         }
         if (key.endsWith('_max')) {
           const baseKey = key.replace('_max', '');
-          return Number(data.conditions[baseKey] ?? data.conditions[key]) <= Number(val);
+          const inputVal = data.conditions[baseKey];
+          if (inputVal === undefined) return false;
+          return Number(inputVal) <= Number(val);
         }
 
         // 정확 매칭
+        const inputVal = data.conditions[key];
+        if (inputVal === undefined) return false;
         return String(inputVal) === String(val);
       });
     });
