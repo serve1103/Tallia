@@ -8,6 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { UsersModule } from './users/users.module';
 import { EvaluationsModule } from './evaluations/evaluations.module';
+import { PipelineModule } from './pipeline/pipeline.module';
+import { ExcelModule } from './excel/excel.module';
+import { ScoresModule } from './scores/scores.module';
+import { AuditModule } from './audit/audit.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -21,6 +25,10 @@ import { RolesGuard } from './common/guards/roles.guard';
     TenantsModule,
     UsersModule,
     EvaluationsModule,
+    PipelineModule,
+    ExcelModule,
+    ScoresModule,
+    AuditModule,
   ],
   providers: [
     // Guard 순서: Throttler → JwtAuth → Tenant → Roles
