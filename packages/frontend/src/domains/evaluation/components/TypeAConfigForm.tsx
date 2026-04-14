@@ -23,11 +23,11 @@ export function TypeAConfigForm({ value, onSave, loading }: Props) {
     const config: TypeAConfig = {
       type: 'A',
       maxCommitteeCount: values.maxCommitteeCount,
-      dataType: values.dataType,
+      dataType: values.dataType as TypeAConfig['dataType'],
       items: values.items.map((item: Record<string, unknown>, idx: number) => ({
         ...item,
         id: item.id || `item-${idx}`,
-      })),
+      })) as ItemDefinition[],
     };
     onSave(config);
   };

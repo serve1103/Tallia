@@ -18,7 +18,7 @@ import {
 const mockGet = vi.mocked(apiClient.get);
 const mockPost = vi.mocked(apiClient.post);
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => { vi.clearAllMocks(); });
 
 describe('Excel API', () => {
   it('downloadTemplate — GET /evaluations/:id/excel/template', async () => {

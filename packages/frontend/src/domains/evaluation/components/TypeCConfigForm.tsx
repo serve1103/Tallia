@@ -27,7 +27,7 @@ export function TypeCConfigForm({ value, onSave, loading }: Props) {
         ...q,
         id: q.id || `q-${idx}`,
         subQuestions: (q.subQuestions as unknown[]) ?? [],
-      })),
+      })) as QuestionDef[],
       totalFailThreshold: values.totalFailThreshold ?? null,
     };
     onSave(config);

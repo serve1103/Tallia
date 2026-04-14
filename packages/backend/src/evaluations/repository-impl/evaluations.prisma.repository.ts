@@ -15,7 +15,7 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
   async findAll(filter: EvaluationFilter): Promise<EvaluationEntity[]> {
     return this.prisma.evaluation.findMany({
       where: {
-        tenantId: filter.tenantId,
+        ...(filter.tenantId && { tenantId: filter.tenantId }),
         ...(filter.academicYear && { academicYear: filter.academicYear }),
         ...(filter.admissionType && { admissionType: filter.admissionType }),
         ...(filter.type && { type: filter.type }),

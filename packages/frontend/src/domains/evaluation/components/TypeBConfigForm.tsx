@@ -27,7 +27,7 @@ export function TypeBConfigForm({ value, onSave, loading }: Props) {
         id: s.id || `subj-${idx}`,
         examTypes: (s.examTypes as unknown[]) ?? [],
         questionErrors: (s.questionErrors as unknown[]) ?? [],
-      })),
+      })) as SubjectDef[],
       totalFailThreshold: values.totalFailThreshold ?? null,
     };
     onSave(config);

@@ -22,7 +22,7 @@ import {
 const mockGet = vi.mocked(apiClient.get);
 const mockPost = vi.mocked(apiClient.post);
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => { vi.clearAllMocks(); });
 
 describe('Evaluations API', () => {
   it('fetchEvaluations — GET /evaluations', async () => {

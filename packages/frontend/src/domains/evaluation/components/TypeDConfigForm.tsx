@@ -24,11 +24,11 @@ export function TypeDConfigForm({ value, onSave, loading }: Props) {
   const handleFinish = (values: { mappingType: string; inputColumns: Record<string, unknown>[]; maxScore: number; totalFailThreshold?: number | null }) => {
     const config: TypeDConfig = {
       type: 'D',
-      mappingType: values.mappingType,
+      mappingType: values.mappingType as TypeDConfig['mappingType'],
       inputColumns: values.inputColumns.map((c: Record<string, unknown>, idx: number) => ({
         ...c,
         key: (c.key as string) || `col-${idx}`,
-      })),
+      })) as ColumnDef[],
       maxScore: values.maxScore,
       totalFailThreshold: values.totalFailThreshold ?? null,
     };

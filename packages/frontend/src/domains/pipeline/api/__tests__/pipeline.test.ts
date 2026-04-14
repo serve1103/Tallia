@@ -18,7 +18,7 @@ import {
 const mockGet = vi.mocked(apiClient.get);
 const mockPost = vi.mocked(apiClient.post);
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => { vi.clearAllMocks(); });
 
 describe('Pipeline API', () => {
   it('fetchPipeline — GET /evaluations/:id/pipeline', async () => {
