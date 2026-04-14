@@ -1,6 +1,6 @@
 import { Card, Typography, Tag, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import type { BlockDefinition, EvaluationType } from '@tallia/shared';
+import type { BlockDefinition, BlockCategory, EvaluationType } from '@tallia/shared';
 import { getCategoryLabel, getCategoryColor } from '../models/pipeline';
 
 interface Props {
@@ -27,12 +27,12 @@ export function BlockPalette({ definitions, evalType, onAdd }: Props) {
       <Typography.Text strong style={{ display: 'block', marginBottom: 12 }}>
         블록 추가
       </Typography.Text>
-      {Object.entries(grouped).map(([category, defs]) => (
+      {(Object.keys(grouped) as BlockCategory[]).map((category) => (
         <div key={category} style={{ marginBottom: 16 }}>
-          <Tag color={getCategoryColor(category as any)} style={{ marginBottom: 8 }}>
-            {getCategoryLabel(category as any)}
+          <Tag color={getCategoryColor(category)} style={{ marginBottom: 8 }}>
+            {getCategoryLabel(category)}
           </Tag>
-          {defs.map((def) => (
+          {grouped[category].map((def) => (
             <Card
               key={def.type}
               size="small"

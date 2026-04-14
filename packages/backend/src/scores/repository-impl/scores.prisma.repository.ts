@@ -18,7 +18,9 @@ export class ScoresPrismaRepository implements ScoresRepository {
         where,
         skip: (filter.page - 1) * filter.limit,
         take: filter.limit,
-        orderBy: { examineeNo: filter.sort === 'examinee_no' ? 'asc' : 'asc' },
+        orderBy: {
+          [filter.sort === 'raw_score' ? 'rawScore' : filter.sort === 'converted_score' ? 'convertedScore' : 'examineeNo']: 'asc',
+        },
       }),
       this.prisma.score.count({ where }),
     ]);

@@ -144,6 +144,7 @@ export class ScoresApplication {
   }
 
   async downloadResults(evaluationId: string, tenantId: string, includeIntermediate: boolean, res: Response, userId?: string) {
+    // TODO: 대용량 데이터(100K+)에 대해 Prisma cursor 기반 스트리밍으로 전환하여 메모리 사용량 최적화 필요
     const { data: scores } = await this.scoresService.findAll({
       tenantId,
       evaluationId,

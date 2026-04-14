@@ -91,8 +91,8 @@ export function validatePipeline(
     });
   }
 
-  // 규칙 4: 필수 블록 누락 (normalize_to_max)
-  if (!hasNormalize) {
+  // 규칙 4: 필수 블록 누락 (normalize_to_max) — D유형(점수변환표)은 정규화 불필요
+  if (!hasNormalize && evalType !== 'D') {
     errors.push({
       blockIndex: -1,
       blockType: BLOCK_NORMALIZE_TO_MAX,

@@ -1,6 +1,6 @@
-import { Button, Space, message, Divider } from 'antd';
+import { Button, Space, message, Divider, theme } from 'antd';
 import { SaveOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -33,10 +33,11 @@ interface Props {
 }
 
 export function PipelineBuilder({ evaluationId, evalType, initialConfig, definitions }: Props) {
+  const { token } = theme.useToken();
   const store = usePipelineStore();
   const saveMutation = useSavePipeline(evaluationId);
   const validateMutation = useValidatePipeline(evaluationId);
-  const defMap = new Map(definitions.map((d) => [d.type, d]));
+  const defMap = useMemo(() => new Map(definitions.map((d) => [d.type, d])), [definitions]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -87,7 +88,7 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Space>
             <ValidationBadge result={store.validationResult} />
-            {store.isDirty && <span style={{ color: '#f59e0b', fontSize: 12 }}>변경사항 있음</span>}
+            {store.isDirty && <span style={{ color: token.colorWarning, fontSize: 12 }}>변경사항 있음</span>}
           </Space>
           <Space>
             <Button icon={<CheckCircleOutlined />} onClick={handleValidate} loading={validateMutation.isPending}>
@@ -116,7 +117,7 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
         </DndContext>
 
         {store.blocks.length === 0 && (
-          <div style={{ padding: 40, textAlign: 'center', color: '#a1a1aa', border: '2px dashed #e4e4e7', borderRadius: 8 }}>
+          <div style={{ padding: 40, textAlign: 'center', color: token.colorTextTertiary, border: `2px dashed ${token.colorBorder}`, borderRadius: 8 }}>
             오른쪽 팔레트에서 블록을 추가하세요
           </div>
         )}

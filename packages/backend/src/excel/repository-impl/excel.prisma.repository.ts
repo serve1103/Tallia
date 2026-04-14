@@ -22,26 +22,27 @@ export class ExcelPrismaRepository implements ExcelRepository {
   }
 
   async createUpload(dto: CreateUploadDto): Promise<ScoreUploadEntity> {
-    // 기존 active 업로드 비활성화
-    await this.prisma.scoreUpload.updateMany({
-      where: { evaluationId: dto.evaluationId, tenantId: dto.tenantId, isCurrent: true },
-      data: { isCurrent: false, status: 'rolled_back' },
-    });
-
-    const upload = await this.prisma.scoreUpload.create({
-      data: {
-        tenantId: dto.tenantId,
-        evaluationId: dto.evaluationId,
-        fileName: dto.fileName,
-        fileSize: dto.fileSize,
-        rowCount: dto.rowCount,
-        rawData: dto.rawData as any,
-        validationErrors: dto.validationErrors as any,
-        uploadedBy: dto.uploadedBy,
-        status: 'active',
-        isCurrent: true,
-      },
-    });
+    // 기존 active 업로드 비활성화 + 신규 생성을 트랜잭션으로 원자적 처리
+    const [, upload] = await this.prisma.$transaction([
+      this.prisma.scoreUpload.updateMany({
+        where: { evaluationId: dto.evaluationId, tenantId: dto.tenantId, isCurrent: true },
+        data: { isCurrent: false, status: 'rolled_back' },
+      }),
+      this.prisma.scoreUpload.create({
+        data: {
+          tenantId: dto.tenantId,
+          evaluationId: dto.evaluationId,
+          fileName: dto.fileName,
+          fileSize: dto.fileSize,
+          rowCount: dto.rowCount,
+          rawData: dto.rawData as any,
+          validationErrors: dto.validationErrors as any,
+          uploadedBy: dto.uploadedBy,
+          status: 'active',
+          isCurrent: true,
+        },
+      }),
+    ]);
 
     return upload as unknown as ScoreUploadEntity;
   }

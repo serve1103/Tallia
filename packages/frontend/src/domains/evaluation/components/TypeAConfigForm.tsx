@@ -19,12 +19,12 @@ const emptyItem: ItemDefinition = {
 export function TypeAConfigForm({ value, onSave, loading }: Props) {
   const [form] = Form.useForm();
 
-  const handleFinish = (values: any) => {
+  const handleFinish = (values: { maxCommitteeCount: number; dataType: string; items: Record<string, unknown>[] }) => {
     const config: TypeAConfig = {
       type: 'A',
       maxCommitteeCount: values.maxCommitteeCount,
       dataType: values.dataType,
-      items: values.items.map((item: any, idx: number) => ({
+      items: values.items.map((item: Record<string, unknown>, idx: number) => ({
         ...item,
         id: item.id || `item-${idx}`,
       })),

@@ -21,13 +21,13 @@ const emptyColumn: ColumnDef = { key: '', label: '', type: 'text' };
 export function TypeDConfigForm({ value, onSave, loading }: Props) {
   const [form] = Form.useForm();
 
-  const handleFinish = (values: any) => {
+  const handleFinish = (values: { mappingType: string; inputColumns: Record<string, unknown>[]; maxScore: number; totalFailThreshold?: number | null }) => {
     const config: TypeDConfig = {
       type: 'D',
       mappingType: values.mappingType,
-      inputColumns: values.inputColumns.map((c: any, idx: number) => ({
+      inputColumns: values.inputColumns.map((c: Record<string, unknown>, idx: number) => ({
         ...c,
-        key: c.key || `col-${idx}`,
+        key: (c.key as string) || `col-${idx}`,
       })),
       maxScore: values.maxScore,
       totalFailThreshold: values.totalFailThreshold ?? null,

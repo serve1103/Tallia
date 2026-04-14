@@ -6,9 +6,11 @@ import { usePipelineConfig } from '../../domains/pipeline/hooks/usePipeline';
 import { PipelineBuilder } from '../../domains/pipeline/components/PipelineBuilder';
 import { getEvalTypeLabel } from '../../domains/evaluation/models/evaluation';
 
+import type { BlockDefinition } from '@tallia/shared';
+
 // Block definitions will come from the backend eventually.
 // For now, use an empty array — the BlockPalette will show nothing until definitions are loaded.
-const BLOCK_DEFINITIONS: any[] = [];
+const BLOCK_DEFINITIONS: BlockDefinition[] = [];
 
 export function PipelinePage() {
   const { id } = useParams<{ id: string }>();
