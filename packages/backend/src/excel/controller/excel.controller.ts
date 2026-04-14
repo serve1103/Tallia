@@ -3,17 +3,20 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ExcelApplication } from '../application/excel.application';
 
 @Controller('evaluations/:id/excel')
 export class ExcelController {
+  constructor(private readonly excelApp: ExcelApplication) {}
+
   @Get('template')
   async downloadTemplate(
     @Param('id') id: string,
     @CurrentTenant() tenantId: string,
     @Res() res: Response,
   ) {
-    // Phase 6 — 유형별 양식 생성 후 스트리밍 다운로드
-    res.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'Phase 6에서 구현', details: [] } });
+    await this.excelApp.downloadTemplate(id, tenantId, res);
   }
 
   @Post('upload')
@@ -21,16 +24,17 @@ export class ExcelController {
   async upload(
     @Param('id') id: string,
     @CurrentTenant() tenantId: string,
+    @CurrentUser() user: { id: string },
     @UploadedFile() file: Express.Multer.File,
   ) {
-    // Phase 6 — 유형별 파싱 + 검증 + JSONB 저장
-    return { data: { fileName: file?.originalname, status: 'not_implemented' } };
+    const result = await this.excelApp.upload(id, tenantId, user.id, file);
+    return { data: result };
   }
 
   @Get('uploads')
   async getUploads(@Param('id') id: string, @CurrentTenant() tenantId: string) {
-    // Phase 6 — 업로드 이력 조회
-    return { data: [] };
+    const uploads = await this.excelApp.getUploads(id, tenantId);
+    return { data: uploads };
   }
 
   @Post('rollback/:uploadId')
@@ -39,7 +43,7 @@ export class ExcelController {
     @Param('uploadId') uploadId: string,
     @CurrentTenant() tenantId: string,
   ) {
-    // Phase 6 — is_current 플래그 교체
-    return { data: { rolledBack: true } };
+    await this.excelApp.rollback(id, uploadId, tenantId);
+    return { data: { success: true } };
   }
 }
