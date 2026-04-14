@@ -1,7 +1,7 @@
 import { Table, Button, Tag, Space, message, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { Tenant } from '@tallia/shared';
 import { useTenants, useDeleteTenant } from '../hooks/useTenants';
 import { formatDate } from '../../../shared/lib/format';
@@ -26,7 +26,7 @@ export function TenantList() {
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: Tenant) => (
-        <a onClick={() => navigate(`/admin/tenants/${record.id}`)}>{name}</a>
+        <Link to={`/admin/tenants/${record.id}`}>{name}</Link>
       ),
     },
     {

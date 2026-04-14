@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { EvaluationsService } from '../service/evaluations.service';
 import type { EvaluationFilter } from '../repository/evaluations.repository';
 
@@ -51,12 +51,12 @@ export class EvaluationsApplication {
     const config = evaluation.config as Record<string, unknown>;
 
     if (config?.type !== 'B') {
-      throw new Error('정답지는 B유형에서만 사용 가능합니다');
+      throw new BadRequestException('정답지는 B유형에서만 사용 가능합니다');
     }
 
     const subjects = (config.subjects as Array<Record<string, unknown>>) ?? [];
     const subject = subjects.find((s) => s.id === subjectId);
-    if (!subject) throw new Error('과목을 찾을 수 없습니다');
+    if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
 
     // 정답지를 과목 내 examTypes에 저장
     subject.answerKey = answerKey;
@@ -72,12 +72,12 @@ export class EvaluationsApplication {
     const config = evaluation.config as Record<string, unknown>;
 
     if (config?.type !== 'B') {
-      throw new Error('출제 오류는 B유형에서만 사용 가능합니다');
+      throw new BadRequestException('출제 오류는 B유형에서만 사용 가능합니다');
     }
 
     const subjects = (config.subjects as Array<Record<string, unknown>>) ?? [];
     const subject = subjects.find((s) => s.id === body.subjectId);
-    if (!subject) throw new Error('과목을 찾을 수 없습니다');
+    if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
 
     const errors = (subject.questionErrors as Array<Record<string, unknown>>) ?? [];
     errors.push({ questionNo: body.questionNo, handling: body.handling });

@@ -1,10 +1,15 @@
-import { Controller, Get, Post, Param, UploadedFile, UseInterceptors, Res } from '@nestjs/common';
+import { Controller, Get, Post, Param, UploadedFile, UseInterceptors, Res, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentUser, JwtPayload } from '../../common/decorators/current-user.decorator';
 import { ExcelApplication } from '../application/excel.application';
+
+const ALLOWED_MIME_TYPES = [
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+  'application/vnd.ms-excel', // xls
+];
 
 @Controller('evaluations/:id/excel')
 export class ExcelController {
@@ -20,14 +25,23 @@ export class ExcelController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('xlsx 또는 xls 파일만 업로드할 수 있습니다'), false);
+      }
+    },
+  }))
   async upload(
     @Param('id') id: string,
     @CurrentTenant() tenantId: string,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: JwtPayload,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const result = await this.excelApp.upload(id, tenantId, user.id, file);
+    const result = await this.excelApp.upload(id, tenantId, user.sub, file);
     return { data: result };
   }
 

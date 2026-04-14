@@ -6,12 +6,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? 'Admin1234!';
+  const tenantPassword = process.env.SEED_TENANT_PASSWORD ?? 'Tenant1234!';
+
   // 1. Platform Admin
   const adminEmail = 'admin@tallia.kr';
   const existingAdmin = await prisma.user.findFirst({ where: { email: adminEmail } });
 
   if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash('Admin1234!', 12);
+    const passwordHash = await bcrypt.hash(adminPassword, 12);
     await prisma.user.create({
       data: {
         email: adminEmail,
@@ -21,7 +24,7 @@ async function main() {
         emailVerified: true,
       },
     });
-    console.log('  ✓ Platform admin created: admin@tallia.kr / Admin1234!');
+    console.log(`  ✓ Platform admin created: ${adminEmail}`);
   } else {
     console.log('  - Platform admin already exists');
   }
@@ -49,7 +52,7 @@ async function main() {
   const existingTenantAdmin = await prisma.user.findFirst({ where: { email: tenantAdminEmail } });
 
   if (!existingTenantAdmin) {
-    const passwordHash = await bcrypt.hash('Tenant1234!', 12);
+    const passwordHash = await bcrypt.hash(tenantPassword, 12);
     await prisma.user.create({
       data: {
         email: tenantAdminEmail,
@@ -60,7 +63,7 @@ async function main() {
         emailVerified: true,
       },
     });
-    console.log('  ✓ Tenant admin created: admin@korea.ac.kr / Tenant1234!');
+    console.log(`  ✓ Tenant admin created: ${tenantAdminEmail}`);
   } else {
     console.log('  - Tenant admin already exists');
   }

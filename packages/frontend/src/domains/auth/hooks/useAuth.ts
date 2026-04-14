@@ -19,9 +19,11 @@ export function useLogin() {
   return useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       loginApi(email, password),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      localStorage.setItem('accessToken', data.accessToken);
+      const user = await getMeApi();
       setAuth(
-        { id: '', email: '', name: '', role: '', tenantId: null },
+        { id: user.id, email: user.email, name: user.name, role: user.role, tenantId: user.tenantId ?? null },
         data.accessToken,
       );
       navigate('/dashboard');

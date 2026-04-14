@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, BadRequestException } from '@nestjs/common';
 
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { EvaluationsApplication } from '../application/evaluations.application';
@@ -87,6 +87,9 @@ export class EvaluationsController {
     @CurrentTenant() tenantId: string,
     @Body() body: { subjectId: string; answerKey: unknown[] },
   ) {
+    if (!body.subjectId || !body.answerKey) {
+      throw new BadRequestException('subjectId와 answerKey는 필수입니다');
+    }
     const result = await this.evaluationsApp.saveAnswerKey(id, tenantId, body.subjectId, body.answerKey);
     return { data: result };
   }
@@ -97,6 +100,9 @@ export class EvaluationsController {
     @CurrentTenant() tenantId: string,
     @Body() body: { subjectId: string; questionNo: number; handling: 'all_correct' | 'exclude' },
   ) {
+    if (!body.subjectId || body.questionNo == null || !body.handling) {
+      throw new BadRequestException('subjectId, questionNo, handling은 필수입니다');
+    }
     const result = await this.evaluationsApp.reportQuestionError(id, tenantId, body);
     return { data: result };
   }

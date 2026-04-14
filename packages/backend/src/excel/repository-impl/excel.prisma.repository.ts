@@ -47,8 +47,8 @@ export class ExcelPrismaRepository implements ExcelRepository {
   }
 
   async rollback(evaluationId: string, uploadId: string, tenantId: string): Promise<void> {
-    await this.prisma.scoreUpload.update({
-      where: { id: uploadId },
+    await this.prisma.scoreUpload.updateMany({
+      where: { id: uploadId, tenantId },
       data: { isCurrent: false, status: 'rolled_back' },
     });
 
@@ -59,8 +59,8 @@ export class ExcelPrismaRepository implements ExcelRepository {
     });
 
     if (previous) {
-      await this.prisma.scoreUpload.update({
-        where: { id: previous.id },
+      await this.prisma.scoreUpload.updateMany({
+        where: { id: previous.id, tenantId },
         data: { isCurrent: true, status: 'active' },
       });
     }

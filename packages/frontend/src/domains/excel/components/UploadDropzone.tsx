@@ -12,6 +12,12 @@ export function UploadDropzone({ evaluationId }: Props) {
   const uploadMutation = useUploadExcel(evaluationId);
 
   const handleUpload = (file: File) => {
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_SIZE) {
+      message.error('파일 크기는 10MB를 초과할 수 없습니다');
+      return false;
+    }
+
     const isExcel =
       file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
       file.type === 'application/vnd.ms-excel' ||

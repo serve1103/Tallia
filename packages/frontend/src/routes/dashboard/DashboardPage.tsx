@@ -1,7 +1,7 @@
 import { Typography, Table, Button, Tag, Space, Select, message, Popconfirm } from 'antd';
 import { PlusOutlined, CopyOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { Evaluation, EvaluationType } from '@tallia/shared';
 import { useEvaluations, useDeleteEvaluation, useCopyEvaluation } from '../../domains/evaluation/hooks/useEvaluations';
 import { getEvalTypeLabel, getStatusLabel, getStatusColor } from '../../domains/evaluation/models/evaluation';
@@ -35,7 +35,7 @@ export function DashboardPage() {
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: Evaluation) => (
-        <a onClick={() => navigate(`/evaluations/${record.id}/config`)}>{name}</a>
+        <Link to={`/evaluations/${record.id}/config`}>{name}</Link>
       ),
     },
     {

@@ -34,9 +34,8 @@ export class ScoresPrismaRepository implements ScoresRepository {
   }
 
   async upsertBatch(scores: CreateScoreDto[]): Promise<number> {
-    let count = 0;
-    for (const score of scores) {
-      await this.prisma.score.upsert({
+    const operations = scores.map((score) =>
+      this.prisma.score.upsert({
         where: {
           evaluationId_uploadId_examineeNo: {
             evaluationId: score.evaluationId,
@@ -69,10 +68,10 @@ export class ScoresPrismaRepository implements ScoresRepository {
           errorMessage: score.errorMessage,
           calculatedAt: new Date(),
         },
-      });
-      count++;
-    }
-    return count;
+      }),
+    );
+    const results = await this.prisma.$transaction(operations);
+    return results.length;
   }
 
   async deleteByEvaluation(evaluationId: string, tenantId: string): Promise<number> {
