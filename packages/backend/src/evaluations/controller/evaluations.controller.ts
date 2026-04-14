@@ -75,8 +75,29 @@ export class EvaluationsController {
 
   @Get(':id/config/preview')
   async previewConfig(@Param('id') id: string, @CurrentTenant() tenantId: string) {
-    // Phase 5 — 파이프라인 엔진 연동 후 구현
     const config = await this.evaluationsApp.getConfig(id, tenantId);
     return { data: { config, preview: null } };
+  }
+
+  // --- B유형 정답지 (§3.11) ---
+
+  @Post(':id/answer-key/save')
+  async saveAnswerKey(
+    @Param('id') id: string,
+    @CurrentTenant() tenantId: string,
+    @Body() body: { subjectId: string; answerKey: unknown[] },
+  ) {
+    const result = await this.evaluationsApp.saveAnswerKey(id, tenantId, body.subjectId, body.answerKey);
+    return { data: result };
+  }
+
+  @Post(':id/question-error')
+  async reportQuestionError(
+    @Param('id') id: string,
+    @CurrentTenant() tenantId: string,
+    @Body() body: { subjectId: string; questionNo: number; handling: 'all_correct' | 'exclude' },
+  ) {
+    const result = await this.evaluationsApp.reportQuestionError(id, tenantId, body);
+    return { data: result };
   }
 }
