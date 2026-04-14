@@ -2,13 +2,16 @@ import { Controller, Get, Post, Param, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
+import { ScoresApplication } from '../application/scores.application';
 
 @Controller('evaluations/:id')
 export class ScoresController {
+  constructor(private readonly scoresApp: ScoresApplication) {}
+
   @Post('calculate')
   async calculate(@Param('id') id: string, @CurrentTenant() tenantId: string) {
-    // Phase 11 — PipelineExecutor 연동 후 구현
-    return { data: { successCount: 0, errorCount: 0, errors: [] } };
+    const result = await this.scoresApp.calculate(id, tenantId);
+    return { data: result };
   }
 
   @Get('calculate/status')
@@ -26,8 +29,15 @@ export class ScoresController {
     @Query('sort') sort = 'examinee_no',
     @Query('failOnly') failOnly?: string,
   ) {
-    // Phase 11 — Scores 조회 구현
-    return { data: [], meta: { total: 0, page: Number(page), limit: Math.min(Number(limit), 100) } };
+    const result = await this.scoresApp.getResults(
+      id,
+      tenantId,
+      Number(page),
+      Math.min(Number(limit), 100),
+      sort,
+      failOnly === 'true',
+    );
+    return { data: result.data, meta: { total: result.total, page: Number(page), limit: Math.min(Number(limit), 100) } };
   }
 
   @Get('results/:examineeNo')
@@ -36,8 +46,8 @@ export class ScoresController {
     @Param('examineeNo') examineeNo: string,
     @CurrentTenant() tenantId: string,
   ) {
-    // Phase 11 — 중간 결과 포함 상세 조회
-    return { data: null };
+    const result = await this.scoresApp.getResultDetail(id, examineeNo, tenantId);
+    return { data: result };
   }
 
   @Get('results/download')
@@ -47,7 +57,7 @@ export class ScoresController {
     @Query('includeIntermediate') includeIntermediate?: string,
     @Res() res?: Response,
   ) {
-    // Phase 11 — ExcelJS 스트리밍 다운로드
-    res?.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'Phase 11에서 구현', details: [] } });
+    // Phase 10 — ExcelJS 스트리밍 다운로드
+    res?.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'ExcelJS 구현 필요', details: [] } });
   }
 }
