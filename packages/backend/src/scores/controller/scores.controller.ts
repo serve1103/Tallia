@@ -2,6 +2,7 @@ import { Controller, Get, Post, Param, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ScoresApplication } from '../application/scores.application';
 
 @Controller('evaluations/:id')
@@ -9,8 +10,8 @@ export class ScoresController {
   constructor(private readonly scoresApp: ScoresApplication) {}
 
   @Post('calculate')
-  async calculate(@Param('id') id: string, @CurrentTenant() tenantId: string) {
-    const result = await this.scoresApp.calculate(id, tenantId);
+  async calculate(@Param('id') id: string, @CurrentTenant() tenantId: string, @CurrentUser() user: { id: string }) {
+    const result = await this.scoresApp.calculate(id, tenantId, user.id);
     return { data: result };
   }
 
@@ -54,10 +55,11 @@ export class ScoresController {
   async downloadResults(
     @Param('id') id: string,
     @CurrentTenant() tenantId: string,
+    @CurrentUser() user: { id: string },
     @Query('includeIntermediate') includeIntermediate?: string,
     @Res() res?: Response,
   ) {
-    // Phase 10 — ExcelJS 스트리밍 다운로드
-    res?.status(501).json({ error: { code: 'NOT_IMPLEMENTED', message: 'ExcelJS 구현 필요', details: [] } });
+    if (!res) return;
+    await this.scoresApp.downloadResults(id, tenantId, includeIntermediate === 'true', res, user.id);
   }
 }

@@ -10,6 +10,11 @@ export class ExcelService {
     return this.repo.findUploads(evaluationId, tenantId);
   }
 
+  async findCurrentUpload(evaluationId: string, tenantId: string) {
+    const uploads = await this.repo.findUploads(evaluationId, tenantId);
+    return uploads.find((u) => u.isCurrent) ?? null;
+  }
+
   async createUpload(dto: CreateUploadDto) {
     return this.repo.createUpload(dto);
   }

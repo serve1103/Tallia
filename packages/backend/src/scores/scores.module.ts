@@ -6,9 +6,16 @@ import { ScoresPrismaRepository } from './repository-impl/scores.prisma.reposito
 import { SCORES_REPOSITORY } from './repository/scores.repository';
 import { EvaluationsModule } from '../evaluations/evaluations.module';
 import { PipelineModule } from '../pipeline/pipeline.module';
+import { ExcelModule } from '../excel/excel.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [forwardRef(() => EvaluationsModule), forwardRef(() => PipelineModule)],
+  imports: [
+    forwardRef(() => EvaluationsModule),
+    forwardRef(() => PipelineModule),
+    forwardRef(() => ExcelModule),
+    forwardRef(() => AuditModule),
+  ],
   controllers: [ScoresController],
   providers: [
     ScoresService,
