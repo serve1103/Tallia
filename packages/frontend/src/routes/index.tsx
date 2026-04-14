@@ -10,6 +10,7 @@ import { DashboardPage } from './dashboard/DashboardPage';
 import { CreatePage } from './evaluation/CreatePage';
 import { ResultListPage } from './results/ResultListPage';
 import { TenantListPage } from './admin/TenantListPage';
+import { TenantDetailPage } from './admin/TenantDetailPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
       { path: '/evaluations/create', element: <CreatePage /> },
       { path: '/results', element: <ResultListPage /> },
       { path: '/admin/tenants', element: <TenantListPage /> },
+      { path: '/admin/tenants/:tenantId', element: <TenantDetailPage /> },
     ],
   },
 ]);
