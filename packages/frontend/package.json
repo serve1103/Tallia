@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^3.3.0",
     "@tallia/shared": "*",
     "@tanstack/react-query": "^5.28.0",

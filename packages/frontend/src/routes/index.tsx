@@ -10,6 +10,7 @@ import { DashboardPage } from './dashboard/DashboardPage';
 import { CreatePage } from './evaluation/CreatePage';
 import { ConfigPage } from './evaluation/ConfigPage';
 import { UploadPage } from './evaluation/UploadPage';
+import { PipelinePage } from './evaluation/PipelinePage';
 import { ResultListPage } from './results/ResultListPage';
 import { ResultDetailPage } from './results/ResultDetailPage';
 import { TenantListPage } from './admin/TenantListPage';
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
       { path: '/evaluations/create', element: <CreatePage /> },
       { path: '/evaluations/:id/config', element: <ConfigPage /> },
       { path: '/evaluations/:id/upload', element: <UploadPage /> },
+      { path: '/evaluations/:id/pipeline', element: <PipelinePage /> },
       { path: '/results', element: <ResultListPage /> },
       { path: '/evaluations/:id/results', element: <ResultListPage /> },
       { path: '/evaluations/:id/results/:examineeNo', element: <ResultDetailPage /> },
