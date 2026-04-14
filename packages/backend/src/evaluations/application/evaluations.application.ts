@@ -21,8 +21,8 @@ export class EvaluationsApplication {
       type: body.type,
       academicYear: body.academicYear,
       admissionType: body.admissionType,
-      config: body.config as Record<string, unknown>,
-      pipelineConfig: body.pipelineConfig as Record<string, unknown> ?? { blocks: [] },
+      config: body.config as any,
+      pipelineConfig: (body.pipelineConfig as any) ?? { blocks: [] },
     });
   }
 

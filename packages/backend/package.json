@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
-    "start": "node dist/main",
-    "start:prod": "node dist/main",
+    "start": "node dist/packages/backend/src/main",
+    "start:prod": "node dist/packages/backend/src/main",
     "lint": "eslint src --ext .ts",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -44,6 +44,7 @@
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.0",
     "@types/jest": "^29.5.0",
+    "@types/multer": "^2.1.0",
     "@types/passport-jwt": "^4.0.0",
     "jest": "^29.7.0",
     "prisma": "^6.19.3",

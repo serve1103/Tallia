@@ -16,7 +16,7 @@ export interface ParseResult {
 export class UploadParser {
   async parse(buffer: Buffer): Promise<ParseResult> {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(buffer as any);
 
     const sheet = workbook.worksheets[0];
     if (!sheet) throw new BadRequestException('시트가 없습니다');

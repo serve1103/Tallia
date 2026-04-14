@@ -24,8 +24,8 @@ export class ScoresApplication {
 
     // TODO: ScoreUpload에서 rawData를 가져와서 행별로 파이프라인 실행
     // 현재는 구조만 잡아둠 — DB 연결 후 실제 데이터 처리
-    const config = evaluation.config as EvalConfig;
-    const defaultDecimal: DecimalConfig = (evaluation.defaultDecimal as DecimalConfig) ?? { method: 'round', places: 2 };
+    const config = evaluation.config as unknown as EvalConfig;
+    const defaultDecimal: DecimalConfig = (evaluation.defaultDecimal as unknown as DecimalConfig) ?? { method: 'round', places: 2 };
 
     const context: ExecutionContext = {
       evaluationType: config.type,

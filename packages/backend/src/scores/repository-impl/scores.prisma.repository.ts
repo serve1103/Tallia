@@ -38,8 +38,9 @@ export class ScoresPrismaRepository implements ScoresRepository {
     for (const score of scores) {
       await this.prisma.score.upsert({
         where: {
-          evaluationId_examineeNo: {
+          evaluationId_uploadId_examineeNo: {
             evaluationId: score.evaluationId,
+            uploadId: score.uploadId,
             examineeNo: score.examineeNo,
           },
         },
@@ -47,8 +48,8 @@ export class ScoresPrismaRepository implements ScoresRepository {
           rawScore: score.rawScore,
           convertedScore: score.convertedScore,
           failFlag: score.failFlag,
-          failReasons: score.failReasons,
-          intermediateResults: score.intermediateResults,
+          failReasons: score.failReasons as any,
+          intermediateResults: score.intermediateResults as any,
           errorFlag: score.errorFlag,
           errorMessage: score.errorMessage,
           calculatedAt: new Date(),
@@ -62,8 +63,8 @@ export class ScoresPrismaRepository implements ScoresRepository {
           rawScore: score.rawScore,
           convertedScore: score.convertedScore,
           failFlag: score.failFlag,
-          failReasons: score.failReasons,
-          intermediateResults: score.intermediateResults,
+          failReasons: score.failReasons as any,
+          intermediateResults: score.intermediateResults as any,
           errorFlag: score.errorFlag,
           errorMessage: score.errorMessage,
           calculatedAt: new Date(),

@@ -19,7 +19,7 @@ export class ExcelApplication {
 
   async downloadTemplate(evaluationId: string, tenantId: string, res: Response) {
     const evaluation = await this.evaluationsService.findById(evaluationId, tenantId);
-    const config = evaluation.config as EvalConfig;
+    const config = evaluation.config as unknown as EvalConfig;
     const workbook = await this.templateGenerator.generate(evaluation.type, config);
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

@@ -52,6 +52,6 @@ export class EvaluationsService {
   }
 
   async saveConfig(id: string, tenantId: string, config: unknown) {
-    return this.update(id, tenantId, { config: config as Record<string, unknown> });
+    return this.update(id, tenantId, { config: config as any });
   }
 }

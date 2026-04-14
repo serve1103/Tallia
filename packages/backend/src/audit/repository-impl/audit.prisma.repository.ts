@@ -7,7 +7,7 @@ export class AuditPrismaRepository implements AuditRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateAuditLogDto): Promise<AuditLogEntity> {
-    return this.prisma.auditLog.create({ data: dto }) as unknown as AuditLogEntity;
+    return this.prisma.auditLog.create({ data: dto as any }) as unknown as AuditLogEntity;
   }
 
   async findByResource(resourceType: string, resourceId: string, tenantId: string): Promise<AuditLogEntity[]> {
