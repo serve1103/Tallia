@@ -183,7 +183,7 @@
 > 참조: [design-system.md](design/design-system.md) §7
 
 - [x] `src/shared/theme/token.ts` — Ant Design ThemeConfig (§7 코드 그대로)
-- [ ] `src/shared/theme/index.ts` — theme export
+- [x] `src/shared/theme/index.ts` — theme export
 - [x] `src/App.tsx` — ConfigProvider 래핑
 - [x] Pretendard + Inter 폰트 로드 (index.html)
 
@@ -192,8 +192,8 @@
   - [x] baseURL: `/api/v1`, withCredentials: true
   - [x] 요청 인터셉터: Bearer 토큰 자동 주입
   - [x] 응답 인터셉터: 401 수신 → POST /auth/refresh → 원래 요청 재시도 (1회)
-- [ ] `src/shared/lib/format.ts` — 숫자/날짜 포맷 유틸
-- [ ] `src/shared/lib/decimal.ts` — 소수점 처리 유틸 (@tallia/shared 래퍼)
+- [x] `src/shared/lib/format.ts` — 숫자/날짜 포맷 유틸
+- [x] `src/shared/lib/decimal.ts` — 소수점 처리 유틸 (@tallia/shared 래퍼)
 
 ### 4-D. 공용 레이아웃
 > 참조: [design-system.md](design/design-system.md) §5.6~5.7
@@ -206,20 +206,20 @@
 
 - [x] `src/domains/auth/stores/authStore.ts` — Zustand + persist
 - [x] `src/domains/auth/api/auth.ts` — login, signup, logout, refresh API 함수
-- [ ] `src/domains/auth/hooks/useAuth.ts`
+- [x] `src/domains/auth/hooks/useAuth.ts`
 - [x] `src/domains/auth/components/LoginForm.tsx` — Ant Design Form
 - [x] `src/domains/auth/components/SignupForm.tsx` — 이메일, 비밀번호, 이름, invite_code
 
 ### 4-F. Admin 도메인
-- [ ] `src/domains/admin/api/tenants.ts`
-- [ ] `src/domains/admin/hooks/useTenants.ts`
-- [ ] `src/domains/admin/components/TenantList.tsx`
-- [ ] `src/domains/admin/components/TenantDetail.tsx`
+- [x] `src/domains/admin/api/tenants.ts`
+- [x] `src/domains/admin/hooks/useTenants.ts`
+- [x] `src/domains/admin/components/TenantList.tsx`
+- [x] `src/domains/admin/components/TenantDetail.tsx`
 
 ### 4-G. Evaluation 도메인 (기본)
-- [ ] `src/domains/evaluation/api/evaluations.ts`
-- [ ] `src/domains/evaluation/hooks/useEvaluations.ts`
-- [ ] `src/domains/evaluation/models/evaluation.ts` — 도메인 모델 변환, 뷰 모델
+- [x] `src/domains/evaluation/api/evaluations.ts`
+- [x] `src/domains/evaluation/hooks/useEvaluations.ts`
+- [x] `src/domains/evaluation/models/evaluation.ts` — 도메인 모델 변환, 뷰 모델
 
 ### 4-H. 라우팅 + 페이지
 - [x] `src/routes/index.tsx` — React Router v7 라우트 정의
@@ -230,16 +230,16 @@
 - [ ] 메인 페이지:
   - [x] `src/routes/dashboard/DashboardPage.tsx` — 껍데기 (목록/필터 미구현)
   - [x] `src/routes/evaluation/CreatePage.tsx` — 껍데기
-  - [ ] `src/routes/evaluation/ConfigPage.tsx` — 유형별 설정
-  - [ ] `src/routes/evaluation/PipelinePage.tsx` — 계산 과정 설정
-  - [ ] `src/routes/evaluation/UploadPage.tsx` — 엑셀 업로드
+  - [x] `src/routes/evaluation/ConfigPage.tsx` — 유형별 설정
+  - [x] `src/routes/evaluation/PipelinePage.tsx` — 계산 과정 설정
+  - [x] `src/routes/evaluation/UploadPage.tsx` — 엑셀 업로드
 - [x] 결과 페이지 (껍데기):
   - [x] `src/routes/results/ResultListPage.tsx`
-  - [ ] `src/routes/results/ResultDetailPage.tsx`
+  - [x] `src/routes/results/ResultDetailPage.tsx`
 - [x] Admin 페이지:
   - [x] `src/routes/admin/TenantListPage.tsx` — 껍데기
-  - [ ] `src/routes/admin/TenantDetailPage.tsx`
-- [ ] 에러 페이지: 404 NotFoundPage
+  - [x] `src/routes/admin/TenantDetailPage.tsx`
+- [x] 에러 페이지: 404 NotFoundPage
 - [ ] ESLint `import/no-restricted-paths` 설정
 
 ### 4-I. 검증
@@ -287,16 +287,16 @@
 > 참조: [06-backend.md](sds/06-backend.md) §6.3, [05-excel.md](sds/05-excel.md)
 
 - [x] `excel/controller/excel.controller.ts` — 4개 엔드포인트 (stub)
-- [ ] `excel/application/excel.application.ts`
-- [ ] `excel/service/template-generator.ts` — 양식 생성 (유형별 분기 구조)
-- [ ] `excel/service/upload-parser.ts` — 업로드 파싱 (유형별 분기 구조)
-- [ ] `excel/service/result-exporter.ts` — 결과 내보내기
-- [ ] `excel/repository/` + `repository-impl/`
+- [x] `excel/application/excel.application.ts`
+- [x] `excel/service/template-generator.ts` — 양식 생성 (유형별 분기 구조)
+- [x] `excel/service/upload-parser.ts` — 업로드 파싱 (유형별 분기 구조)
+- [x] `excel/service/result-exporter.ts` — 결과 내보내기
+- [x] `excel/repository/` + `repository-impl/`
 - [x] app.module.ts에 ExcelModule import
 
 ### 5-F. Backend — Scores 모듈 골격
 - [x] `scores/controller/scores.controller.ts` — 5개 엔드포인트 (stub)
-- [ ] `scores/application/` + `service/` + `repository/` + `repository-impl/`
+- [x] `scores/application/` + `service/` + `repository/` + `repository-impl/`
 - [x] app.module.ts에 ScoresModule import
 
 ### 5-G. Backend — Audit 모듈 골격
@@ -306,19 +306,19 @@
 - [x] app.module.ts에 AuditModule import
 
 ### 5-H. Frontend — Pipeline 도메인
-- [ ] `domains/pipeline/components/PipelineBuilder.tsx` — 메인 빌더
-- [ ] `domains/pipeline/components/BlockPalette.tsx` — 유형별 필터
-- [ ] `domains/pipeline/components/BlockCard.tsx` — 개별 블록 카드
-- [ ] `domains/pipeline/components/BlockParamEditor.tsx` — Drawer 파라미터 편집
-- [ ] `domains/pipeline/components/ConditionalTabs.tsx` — A유형 위원 수별 탭
-- [ ] `domains/pipeline/components/ValidationBadge.tsx` — 실시간 유효성 표시
-- [ ] `domains/pipeline/components/PreviewPanel.tsx` — 샘플 미리보기
-- [ ] `domains/pipeline/stores/pipelineStore.ts` — 편집 상태
-- [ ] `domains/pipeline/hooks/usePipeline.ts`
-- [ ] `domains/pipeline/api/pipeline.ts`
-- [ ] `domains/pipeline/models/pipeline.ts` — 블록 헬퍼, 유효성 해석
-- [ ] @dnd-kit/core 드래그앤드롭 통합
-- [ ] PipelinePage.tsx 연동
+- [x] `domains/pipeline/components/PipelineBuilder.tsx` — 메인 빌더
+- [x] `domains/pipeline/components/BlockPalette.tsx` — 유형별 필터
+- [x] `domains/pipeline/components/BlockCard.tsx` — 개별 블록 카드
+- [x] `domains/pipeline/components/BlockParamEditor.tsx` — Drawer 파라미터 편집
+- [x] `domains/pipeline/components/ConditionalTabs.tsx` — A유형 위원 수별 탭
+- [x] `domains/pipeline/components/ValidationBadge.tsx` — 실시간 유효성 표시
+- [x] `domains/pipeline/components/PreviewPanel.tsx` — 샘플 미리보기
+- [x] `domains/pipeline/stores/pipelineStore.ts` — 편집 상태
+- [x] `domains/pipeline/hooks/usePipeline.ts`
+- [x] `domains/pipeline/api/pipeline.ts`
+- [x] `domains/pipeline/models/pipeline.ts` — 블록 헬퍼, 유효성 해석
+- [x] @dnd-kit/core 드래그앤드롭 통합
+- [x] PipelinePage.tsx 연동
 
 ### 5-I. 검증
 - [x] 단위 테스트: pipeline-executor (블록 순차 실행, 소수점 처리) — 4개
@@ -350,13 +350,13 @@
   - [x] POST /evaluations/:id/excel/rollback/:uploadId
 
 ### 6-C. Frontend
-- [ ] `domains/evaluation/components/TypeAConfigForm.tsx`
-- [ ] `domains/excel/components/UploadDropzone.tsx`
-- [ ] `domains/excel/components/ValidationPreview.tsx`
-- [ ] `domains/excel/components/UploadHistory.tsx`
-- [ ] `domains/excel/hooks/useExcel.ts`
-- [ ] `domains/excel/api/excel.ts`
-- [ ] UploadPage.tsx 연동
+- [x] `domains/evaluation/components/TypeAConfigForm.tsx`
+- [x] `domains/excel/components/UploadDropzone.tsx`
+- [x] `domains/excel/components/ValidationPreview.tsx`
+- [x] `domains/excel/components/UploadHistory.tsx`
+- [x] `domains/excel/hooks/useExcel.ts`
+- [x] `domains/excel/api/excel.ts`
+- [x] UploadPage.tsx 연동
 
 ### 6-D. 검증
 - [x] 단위 테스트: A유형 블록 (각 블록 입출력) — 9개
@@ -379,7 +379,7 @@
 - [x] MappingTablesModule → app.module.ts
 
 ### 7-B. Frontend
-- [ ] `domains/evaluation/components/TypeDConfigForm.tsx`
+- [x] `domains/evaluation/components/TypeDConfigForm.tsx`
 - [ ] 매핑 테이블 화면 직접 편집 UI
 
 ### 7-C. 검증
@@ -395,14 +395,14 @@
   - [x] 전원정답 처리
   - [x] 배점제외 처리
 - [x] B유형 집계 블록: sum_by_subject, subject_fail_check, subject_sum, subject_weighted_sum
-- [ ] 정답지 API (§3.11):
-  - [ ] POST /evaluations/:id/answer-key/save
-  - [ ] POST /evaluations/:id/question-error (출제 오류)
+- [x] 정답지 API (§3.11):
+  - [x] POST /evaluations/:id/answer-key/save
+  - [x] POST /evaluations/:id/question-error (출제 오류)
 - [ ] B유형 채점 감사 로그 자동 기록
 - [ ] B유형 엑셀 양식 생성 (시험유형별 별도 시트) + 업로드 파싱
 
 ### 8-B. Frontend
-- [ ] `domains/evaluation/components/TypeBConfigForm.tsx`
+- [x] `domains/evaluation/components/TypeBConfigForm.tsx`
 
 ### 8-C. 검증
 - [x] 단위 테스트: auto_grade (복수정답) — 1개
@@ -422,7 +422,7 @@
 - [ ] C유형 엑셀 양식 생성 (복수 채점위원 다중행 포맷) + 업로드 파싱
 
 ### 9-B. Frontend
-- [ ] `domains/evaluation/components/TypeCConfigForm.tsx`
+- [x] `domains/evaluation/components/TypeCConfigForm.tsx`
 
 ### 9-C. 검증
 - [x] 단위 테스트: C유형 블록 (sub_question_sum, question_weight, question_sum, question_fail_check) — 4개
@@ -438,7 +438,7 @@
 - [x] 재계산 경고 배지 (needs_recalculation — 설정 변경 시 자동 true)
 
 ### 10-B. 감사 로그 실구현
-- [ ] AuditLogInterceptor에서 AuditService 호출 연결
+- [x] AuditLogInterceptor에서 AuditService 호출 연결
 - [x] 감사 로그 조회 API (§3.12):
   - [x] GET /evaluations/:id/audit-logs (평가별)
   - [x] GET /admin/tenants/:tenantId/audit-logs (테넌트별, platform_admin, 페이지네이션)
@@ -461,13 +461,13 @@
 ### 11-B. 결과 조회
 - [x] GET /evaluations/:id/results (stub — 페이지네이션 구조)
 - [x] GET /evaluations/:id/results/:examineeNo (stub)
-- [ ] `domains/score/components/ScoreTable.tsx`
-- [ ] `domains/score/components/IntermediateDetail.tsx`
-- [ ] `domains/score/components/DownloadButton.tsx`
-- [ ] `domains/score/hooks/useScores.ts`
-- [ ] `domains/score/api/scores.ts`
-- [ ] `domains/score/models/score.ts`
-- [ ] ResultListPage.tsx, ResultDetailPage.tsx 연동
+- [x] `domains/score/components/ScoreTable.tsx`
+- [x] `domains/score/components/IntermediateDetail.tsx`
+- [x] `domains/score/components/DownloadButton.tsx`
+- [x] `domains/score/hooks/useScores.ts`
+- [x] `domains/score/api/scores.ts`
+- [x] `domains/score/models/score.ts`
+- [x] ResultListPage.tsx, ResultDetailPage.tsx 연동
 
 ### 11-C. 엑셀 다운로드
 - [x] GET /evaluations/:id/results/download — 엔드포인트 (stub)
