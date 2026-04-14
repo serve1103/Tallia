@@ -1,15 +1,6 @@
 import { apiClient } from '../../../shared/lib/api-client';
 import type { Tenant, User } from '@tallia/shared';
-
-interface PaginationParams {
-  page: number;
-  limit: number;
-}
-
-interface PaginatedResponse<T> {
-  data: T[];
-  meta: { total: number; page?: number; limit?: number };
-}
+import type { PaginationParams, PaginatedResponse } from '../../../shared/types/api';
 
 interface CreateTenantInput {
   name: string;

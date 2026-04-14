@@ -1,15 +1,6 @@
 import { apiClient } from '../../../shared/lib/api-client';
 import type { Score, CalculateResult } from '@tallia/shared';
-
-interface PaginationParams {
-  page: number;
-  limit: number;
-}
-
-interface PaginatedResponse<T> {
-  data: T[];
-  meta: { total: number };
-}
+import type { PaginationParams, PaginatedResponse } from '../../../shared/types/api';
 
 export async function calculateScores(evaluationId: string): Promise<CalculateResult> {
   const { data } = await apiClient.post(`/evaluations/${evaluationId}/calculate`);

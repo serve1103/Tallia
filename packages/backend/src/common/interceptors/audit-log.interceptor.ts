@@ -10,12 +10,16 @@ const AUDITABLE_METHODS = ['POST'];
 /** PII 노출 방지: 감사 로그에 기록할 때 민감 필드 제외 */
 const SENSITIVE_KEYS = ['password', 'passwordHash', 'token', 'accessToken', 'refreshToken'];
 
-function sanitizeDetails(body: unknown): Record<string, unknown> | undefined {
-  if (!body || typeof body !== 'object') return undefined;
+function sanitizeDetails(body: unknown, depth = 0): Record<string, unknown> | undefined {
+  if (!body || typeof body !== 'object' || depth > 3) return undefined;
   const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
     if (SENSITIVE_KEYS.includes(key)) continue;
-    sanitized[key] = value;
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      sanitized[key] = sanitizeDetails(value, depth + 1);
+    } else {
+      sanitized[key] = value;
+    }
   }
   return Object.keys(sanitized).length > 0 ? sanitized : undefined;
 }

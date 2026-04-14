@@ -1,4 +1,5 @@
-import { Layout, Menu, Typography, Avatar } from 'antd';
+import React from 'react';
+import { Layout, Menu, Typography, Avatar, Result } from 'antd';
 import {
   HomeOutlined,
   FileTextOutlined,
@@ -8,6 +9,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../../domains/auth/stores/authStore';
 
 const { Sider, Header, Content } = Layout;
 
@@ -23,9 +25,29 @@ const adminItems = [
   { key: '/admin/settings', icon: <SettingOutlined />, label: '설정' },
 ];
 
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return <Result status="error" title="오류가 발생했습니다" subTitle="페이지를 새로고침해 주세요." />;
+    }
+    return this.props.children;
+  }
+}
+
 export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useAuthStore((s) => s.user);
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -57,14 +79,18 @@ export function AppLayout() {
           items={menuItems}
           style={{ border: 'none', background: 'transparent' }}
         />
-        <div style={{ margin: '16px 12px', borderTop: '1px solid #e4e4e7' }} />
-        <Menu
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          onClick={({ key }) => navigate(key)}
-          items={adminItems}
-          style={{ border: 'none', background: 'transparent' }}
-        />
+        {user?.role === 'platform_admin' && (
+          <>
+            <div style={{ margin: '16px 12px', borderTop: '1px solid #e4e4e7' }} />
+            <Menu
+              mode="inline"
+              selectedKeys={[location.pathname]}
+              onClick={({ key }) => navigate(key)}
+              items={adminItems}
+              style={{ border: 'none', background: 'transparent' }}
+            />
+          </>
+        )}
       </Sider>
 
       <Layout>
@@ -85,7 +111,9 @@ export function AppLayout() {
 
         <Content style={{ padding: 40, overflow: 'auto', background: '#fff' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </Content>
       </Layout>

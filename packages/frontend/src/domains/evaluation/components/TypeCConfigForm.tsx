@@ -19,14 +19,14 @@ const emptyQuestion: Omit<QuestionDef, 'subQuestions'> = {
 export function TypeCConfigForm({ value, onSave, loading }: Props) {
   const [form] = Form.useForm();
 
-  const handleFinish = (values: any) => {
+  const handleFinish = (values: { committeeCount: number; questions: Record<string, unknown>[]; totalFailThreshold?: number | null }) => {
     const config: TypeCConfig = {
       type: 'C',
       committeeCount: values.committeeCount,
-      questions: values.questions.map((q: any, idx: number) => ({
+      questions: values.questions.map((q: Record<string, unknown>, idx: number) => ({
         ...q,
         id: q.id || `q-${idx}`,
-        subQuestions: q.subQuestions ?? [],
+        subQuestions: (q.subQuestions as unknown[]) ?? [],
       })),
       totalFailThreshold: values.totalFailThreshold ?? null,
     };

@@ -1,4 +1,4 @@
-import { Table, Tag } from 'antd';
+import { Table, Tag, Button } from 'antd';
 import type { Score } from '@tallia/shared';
 import { useResults } from '../hooks/useScores';
 import { getScoreStatusTag } from '../models/score';
@@ -21,7 +21,7 @@ export function ScoreTable({ evaluationId, onSelectExaminee }: Props) {
       dataIndex: 'examineeNo',
       key: 'examineeNo',
       render: (no: string) =>
-        onSelectExaminee ? <a onClick={() => onSelectExaminee(no)}>{no}</a> : no,
+        onSelectExaminee ? <Button type="link" style={{ padding: 0 }} onClick={() => onSelectExaminee(no)}>{no}</Button> : no,
     },
     { title: '수험자명', dataIndex: 'examineeName', key: 'examineeName' },
     {

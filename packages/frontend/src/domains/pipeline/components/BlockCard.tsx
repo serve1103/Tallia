@@ -1,4 +1,4 @@
-import { Card, Tag, Button, Space, Typography } from 'antd';
+import { Card, Tag, Button, Space, Typography, theme } from 'antd';
 import { DeleteOutlined, SettingOutlined, HolderOutlined } from '@ant-design/icons';
 import type { PipelineBlock, BlockDefinition } from '@tallia/shared';
 import { getCategoryColor } from '../models/pipeline';
@@ -15,6 +15,7 @@ interface Props {
 }
 
 export function BlockCard({ block, index, definition, isSelected, onSelect, onRemove }: Props) {
+  const { token } = theme.useToken();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: `block-${index}`,
   });
@@ -38,7 +39,7 @@ export function BlockCard({ block, index, definition, isSelected, onSelect, onRe
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
             <span {...listeners} style={{ cursor: 'grab' }}>
-              <HolderOutlined style={{ color: '#a1a1aa' }} />
+              <HolderOutlined style={{ color: token.colorTextTertiary }} />
             </span>
             <Typography.Text strong style={{ fontSize: 13 }}>
               {definition?.name ?? block.type}

@@ -1,4 +1,4 @@
-import { Card, Button, Typography, Input, Spin, Alert } from 'antd';
+import { Card, Button, Typography, Input, Spin, Alert, message } from 'antd';
 import { PlayCircleOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import type { PipelineBlock } from '@tallia/shared';
@@ -18,7 +18,7 @@ export function PreviewPanel({ evaluationId, blocks }: Props) {
       const sampleData = JSON.parse(sampleInput);
       previewMutation.mutate({ blocks, sampleData });
     } catch {
-      // JSON parse error handled below
+      message.error('JSON 형식이 올바르지 않습니다');
     }
   };
 

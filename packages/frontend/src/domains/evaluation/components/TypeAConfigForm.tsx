@@ -1,4 +1,4 @@
-import { Form, InputNumber, Select, Button, Card, Space, Typography, Divider } from 'antd';
+import { Form, Input, InputNumber, Select, Button, Card, Space, Typography, Divider } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TypeAConfig, ItemDefinition } from '@tallia/shared';
 
@@ -19,12 +19,12 @@ const emptyItem: ItemDefinition = {
 export function TypeAConfigForm({ value, onSave, loading }: Props) {
   const [form] = Form.useForm();
 
-  const handleFinish = (values: any) => {
+  const handleFinish = (values: { maxCommitteeCount: number; dataType: string; items: Record<string, unknown>[] }) => {
     const config: TypeAConfig = {
       type: 'A',
       maxCommitteeCount: values.maxCommitteeCount,
       dataType: values.dataType,
-      items: values.items.map((item: any, idx: number) => ({
+      items: values.items.map((item: Record<string, unknown>, idx: number) => ({
         ...item,
         id: item.id || `item-${idx}`,
       })),
@@ -57,7 +57,7 @@ export function TypeAConfigForm({ value, onSave, loading }: Props) {
               <Card key={key} size="small" style={{ marginBottom: 12 }}>
                 <Space wrap>
                   <Form.Item {...rest} name={[name, 'name']} label="항목명" rules={[{ required: true }]}>
-                    <input placeholder="항목명" style={{ border: '1px solid #d9d9d9', borderRadius: 6, padding: '4px 8px' }} />
+                    <Input placeholder="항목명" />
                   </Form.Item>
                   <Form.Item {...rest} name={[name, 'maxScore']} label="만점">
                     <InputNumber min={0} />

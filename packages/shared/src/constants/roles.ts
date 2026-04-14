@@ -1,4 +1,4 @@
-import { ROLES } from '../types/user.js';
+import type { Role } from '../types/user.js';
 
-export const PLATFORM_ADMIN = ROLES[0];
-export const TENANT_ADMIN = ROLES[1];
+export const PLATFORM_ADMIN: Role = 'platform_admin';
+export const TENANT_ADMIN: Role = 'tenant_admin';

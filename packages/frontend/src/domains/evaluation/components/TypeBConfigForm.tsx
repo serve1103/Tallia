@@ -19,14 +19,14 @@ const emptySubject: Omit<SubjectDef, 'examTypes' | 'questionErrors'> = {
 export function TypeBConfigForm({ value, onSave, loading }: Props) {
   const [form] = Form.useForm();
 
-  const handleFinish = (values: any) => {
+  const handleFinish = (values: { subjects: Record<string, unknown>[]; totalFailThreshold?: number | null }) => {
     const config: TypeBConfig = {
       type: 'B',
-      subjects: values.subjects.map((s: any, idx: number) => ({
+      subjects: values.subjects.map((s: Record<string, unknown>, idx: number) => ({
         ...s,
         id: s.id || `subj-${idx}`,
-        examTypes: s.examTypes ?? [],
-        questionErrors: s.questionErrors ?? [],
+        examTypes: (s.examTypes as unknown[]) ?? [],
+        questionErrors: (s.questionErrors as unknown[]) ?? [],
       })),
       totalFailThreshold: values.totalFailThreshold ?? null,
     };

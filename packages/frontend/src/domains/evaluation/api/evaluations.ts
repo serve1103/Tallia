@@ -1,5 +1,6 @@
 import { apiClient } from '../../../shared/lib/api-client';
 import type { Evaluation, EvalConfig, EvaluationType } from '@tallia/shared';
+import type { PaginatedResponse } from '../../../shared/types/api';
 
 interface FetchParams {
   page: number;
@@ -7,11 +8,6 @@ interface FetchParams {
   type?: EvaluationType;
   academicYear?: string;
   admissionType?: string;
-}
-
-interface PaginatedResponse<T> {
-  data: T[];
-  meta: { total: number; page?: number; limit?: number };
 }
 
 export async function fetchEvaluations(params: FetchParams): Promise<PaginatedResponse<Evaluation>> {

@@ -1,4 +1,4 @@
-import type { EvaluationType } from './evaluation.js';
+import type { EvaluationType, EvalConfig } from './evaluation.js';
 
 // --- DataShape (04-pipeline-engine.md §4.1) ---
 
@@ -20,7 +20,7 @@ export type DataShape = (typeof DATA_SHAPES)[number];
 
 export interface DecimalConfig {
   method: 'round' | 'floor' | 'ceil';
-  places: 0 | 1 | 2 | 3;
+  places: 0 | 1 | 2 | 3 | 4;
 }
 
 // --- 블록 정의 (04-pipeline-engine.md §4.2) ---
@@ -90,7 +90,7 @@ export interface BlockOutput {
 
 export interface ExecutionContext {
   evaluationType: EvaluationType;
-  config: import('./evaluation.js').EvalConfig;
+  config: EvalConfig;
   defaultDecimal: DecimalConfig;
   mappingTable?: unknown;
 }
