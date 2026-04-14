@@ -1,0 +1,42 @@
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+
+import { AppLayout } from '../shared/components/AppLayout';
+import { AuthLayout } from '../shared/components/AuthLayout';
+import { useAuthStore } from '../domains/auth/stores/authStore';
+
+import { LoginPage } from './auth/LoginPage';
+import { SignupPage } from './auth/SignupPage';
+import { DashboardPage } from './dashboard/DashboardPage';
+import { CreatePage } from './evaluation/CreatePage';
+import { ResultListPage } from './results/ResultListPage';
+import { TenantListPage } from './admin/TenantListPage';
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+export const router = createBrowserRouter([
+  {
+    element: <AuthLayout />,
+    children: [
+      { path: '/login', element: <LoginPage /> },
+      { path: '/signup', element: <SignupPage /> },
+    ],
+  },
+  {
+    element: (
+      <PrivateRoute>
+        <AppLayout />
+      </PrivateRoute>
+    ),
+    children: [
+      { path: '/', element: <Navigate to="/dashboard" replace /> },
+      { path: '/dashboard', element: <DashboardPage /> },
+      { path: '/evaluations/create', element: <CreatePage /> },
+      { path: '/results', element: <ResultListPage /> },
+      { path: '/admin/tenants', element: <TenantListPage /> },
+    ],
+  },
+]);

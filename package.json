@@ -1,0 +1,24 @@
+{
+  "name": "tallia",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @tallia/backend\" \"npm run dev -w @tallia/frontend\"",
+    "build": "npm run build -w @tallia/shared && npm run build -w @tallia/backend && npm run build -w @tallia/frontend",
+    "lint": "eslint packages/*/src --ext .ts,.tsx",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "npm run migrate -w @tallia/backend",
+    "db:seed": "npm run seed -w @tallia/backend"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "concurrently": "^9.0.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.4.0"
+  }
+}
