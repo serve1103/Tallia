@@ -9,6 +9,7 @@ import { SignupPage } from './auth/SignupPage';
 import { DashboardPage } from './dashboard/DashboardPage';
 import { CreatePage } from './evaluation/CreatePage';
 import { ConfigPage } from './evaluation/ConfigPage';
+import { UploadPage } from './evaluation/UploadPage';
 import { ResultListPage } from './results/ResultListPage';
 import { TenantListPage } from './admin/TenantListPage';
 import { TenantDetailPage } from './admin/TenantDetailPage';
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/evaluations/create', element: <CreatePage /> },
       { path: '/evaluations/:id/config', element: <ConfigPage /> },
+      { path: '/evaluations/:id/upload', element: <UploadPage /> },
       { path: '/results', element: <ResultListPage /> },
       { path: '/admin/tenants', element: <TenantListPage /> },
       { path: '/admin/tenants/:tenantId', element: <TenantDetailPage /> },
