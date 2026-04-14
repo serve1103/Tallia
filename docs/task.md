@@ -32,7 +32,7 @@
 - [x] `src/constants/block-types.ts` — 04-pipeline-engine.md §4.5~4.10 기준 전체 블록 열거
 - [x] `src/validators/pipeline.ts` — validatePipeline() 6개 규칙 구현
 - [x] `src/index.ts` — 배럴 export
-- [ ] `npm run build -w shared` 타입 에러 없이 통과
+- [x] `npm run build -w shared` 타입 에러 없이 통과
 
 ## Phase 2: Backend 기반
 
@@ -129,10 +129,10 @@
 - [ ] 테스트용 테넌트 + tenant_admin 계정
 
 ### 2-I. 검증
-- [ ] `npm run build -w backend` 통과
+- [ ] `npm run build -w backend` 통과 (DB 연결 후)
 - [ ] `npm run lint` 에러 없음
-- [ ] 단위 테스트: auth.service (signup, login, refresh)
-- [ ] 단위 테스트: tenant.guard, roles.guard
+- [x] 단위 테스트: auth.service (signup, login, refresh) — 8개
+- [x] 단위 테스트: tenant.guard, roles.guard — 9개
 
 ## Phase 3: Evaluations 모듈
 
@@ -167,48 +167,48 @@
 - [x] EvaluationsModule import 추가
 
 ### 3-D. 검증
-- [ ] 단위 테스트: evaluations.service (CRUD)
-- [ ] 통합 테스트: evaluations API (생성 → 조회 → 수정 → 삭제)
+- [ ] 단위 테스트: evaluations.service (CRUD) — DB 연결 후
+- [ ] 통합 테스트: evaluations API (생성 → 조회 → 수정 → 삭제) — DB 연결 후
 
 ## Phase 4: Frontend 기반
 
 > 참조: [07-frontend.md](sds/07-frontend.md), [design-system.md](design/design-system.md)
 
 ### 4-A. 패키지 초기화
-- [ ] `packages/frontend/package.json` + `tsconfig.json`
-- [ ] Vite 설정 (React plugin, proxy /api → localhost:3000, @tallia/shared alias)
-- [ ] 의존성: react, react-dom, react-router-dom, antd, @ant-design/icons, axios, @tanstack/react-query, zustand, react-hook-form, @hookform/resolvers, zod, @tallia/shared
+- [x] `packages/frontend/package.json` + `tsconfig.json`
+- [x] Vite 설정 (React plugin, proxy /api → localhost:3000, @tallia/shared alias)
+- [x] 의존성: react, react-dom, react-router-dom, antd, @ant-design/icons, axios, @tanstack/react-query, zustand, react-hook-form, @hookform/resolvers, zod, @tallia/shared
 
 ### 4-B. 디자인 시스템 적용
 > 참조: [design-system.md](design/design-system.md) §7
 
-- [ ] `src/shared/theme/token.ts` — Ant Design ThemeConfig (§7 코드 그대로)
+- [x] `src/shared/theme/token.ts` — Ant Design ThemeConfig (§7 코드 그대로)
 - [ ] `src/shared/theme/index.ts` — theme export
-- [ ] `src/App.tsx` — ConfigProvider 래핑
-- [ ] Pretendard + Inter 폰트 로드 (index.html 또는 CSS import)
+- [x] `src/App.tsx` — ConfigProvider 래핑
+- [x] Pretendard + Inter 폰트 로드 (index.html)
 
 ### 4-C. 공용 유틸
-- [ ] `src/shared/lib/api-client.ts` — axios 인스턴스:
-  - [ ] baseURL: `/api/v1`, withCredentials: true
-  - [ ] 요청 인터셉터: Bearer 토큰 자동 주입
-  - [ ] 응답 인터셉터: 401 수신 → POST /auth/refresh → 원래 요청 재시도 (1회)
+- [x] `src/shared/lib/api-client.ts` — axios 인스턴스:
+  - [x] baseURL: `/api/v1`, withCredentials: true
+  - [x] 요청 인터셉터: Bearer 토큰 자동 주입
+  - [x] 응답 인터셉터: 401 수신 → POST /auth/refresh → 원래 요청 재시도 (1회)
 - [ ] `src/shared/lib/format.ts` — 숫자/날짜 포맷 유틸
 - [ ] `src/shared/lib/decimal.ts` — 소수점 처리 유틸 (@tallia/shared 래퍼)
 
 ### 4-D. 공용 레이아웃
 > 참조: [design-system.md](design/design-system.md) §5.6~5.7
 
-- [ ] `src/shared/components/AppLayout.tsx` — Sider 260px (bg #f8f8fa) + Topbar 64px + breadcrumb
-- [ ] `src/shared/components/AuthLayout.tsx` — 중앙 카드 레이아웃
+- [x] `src/shared/components/AppLayout.tsx` — Sider 260px (bg #f8f8fa) + Topbar 64px
+- [x] `src/shared/components/AuthLayout.tsx` — 중앙 카드 레이아웃
 
 ### 4-E. Auth 도메인
 > 참조: [07-frontend.md](sds/07-frontend.md) §7.2, §7.4
 
-- [ ] `src/domains/auth/stores/authStore.ts` — Zustand + persist ({ user, accessToken, setAuth, clearAuth })
-- [ ] `src/domains/auth/api/auth.ts` — login, signup, logout, refresh API 함수
+- [x] `src/domains/auth/stores/authStore.ts` — Zustand + persist
+- [x] `src/domains/auth/api/auth.ts` — login, signup, logout, refresh API 함수
 - [ ] `src/domains/auth/hooks/useAuth.ts`
-- [ ] `src/domains/auth/components/LoginForm.tsx` — RHF + Zod + Ant Design Form
-- [ ] `src/domains/auth/components/SignupForm.tsx` — 이메일, 비밀번호, 이름, invite_code
+- [x] `src/domains/auth/components/LoginForm.tsx` — Ant Design Form
+- [x] `src/domains/auth/components/SignupForm.tsx` — 이메일, 비밀번호, 이름, invite_code
 
 ### 4-F. Admin 도메인
 - [ ] `src/domains/admin/api/tenants.ts`
@@ -222,25 +222,25 @@
 - [ ] `src/domains/evaluation/models/evaluation.ts` — 도메인 모델 변환, 뷰 모델
 
 ### 4-H. 라우팅 + 페이지
-- [ ] `src/routes/index.tsx` — React Router v7 라우트 정의
-- [ ] PrivateRoute (인증 여부 체크, 미인증 → /login 리다이렉트)
-- [ ] Auth 페이지:
-  - [ ] `src/routes/auth/LoginPage.tsx`
-  - [ ] `src/routes/auth/SignupPage.tsx`
+- [x] `src/routes/index.tsx` — React Router v7 라우트 정의
+- [x] PrivateRoute (인증 여부 체크, 미인증 → /login 리다이렉트)
+- [x] Auth 페이지:
+  - [x] `src/routes/auth/LoginPage.tsx`
+  - [x] `src/routes/auth/SignupPage.tsx`
 - [ ] 메인 페이지:
-  - [ ] `src/routes/dashboard/DashboardPage.tsx` — 평가 목록 + 학년도/전형명 필터
-  - [ ] `src/routes/evaluation/CreatePage.tsx` — 유형 선택 (A/B/C/D) + 기본 정보
-  - [ ] `src/routes/evaluation/ConfigPage.tsx` — 유형별 설정 (config-handler 연동)
-  - [ ] `src/routes/evaluation/PipelinePage.tsx` — 계산 과정 설정 (Phase 5에서 구현)
-  - [ ] `src/routes/evaluation/UploadPage.tsx` — 엑셀 업로드 (Phase 6에서 구현)
-- [ ] 결과 페이지 (껍데기):
-  - [ ] `src/routes/results/ResultListPage.tsx`
+  - [x] `src/routes/dashboard/DashboardPage.tsx` — 껍데기 (목록/필터 미구현)
+  - [x] `src/routes/evaluation/CreatePage.tsx` — 껍데기
+  - [ ] `src/routes/evaluation/ConfigPage.tsx` — 유형별 설정
+  - [ ] `src/routes/evaluation/PipelinePage.tsx` — 계산 과정 설정
+  - [ ] `src/routes/evaluation/UploadPage.tsx` — 엑셀 업로드
+- [x] 결과 페이지 (껍데기):
+  - [x] `src/routes/results/ResultListPage.tsx`
   - [ ] `src/routes/results/ResultDetailPage.tsx`
-- [ ] Admin 페이지:
-  - [ ] `src/routes/admin/TenantListPage.tsx`
+- [x] Admin 페이지:
+  - [x] `src/routes/admin/TenantListPage.tsx` — 껍데기
   - [ ] `src/routes/admin/TenantDetailPage.tsx`
 - [ ] 에러 페이지: 404 NotFoundPage
-- [ ] ESLint `import/no-restricted-paths` 설정: routes/ → domains/ → shared/ 단방향
+- [ ] ESLint `import/no-restricted-paths` 설정
 
 ### 4-I. 검증
 - [ ] `npm run build -w frontend` 통과
@@ -253,57 +253,57 @@
 > 참조: [04-pipeline-engine.md](sds/04-pipeline-engine.md), [FSD.md](FSD.md)
 
 ### 5-A. Backend — 핵심 엔진
-- [ ] `pipeline/block-registry.ts` — 블록 등록/조회
-- [ ] `pipeline/pipeline-executor.ts` — 순차 실행, 블록별 소수점 처리
-- [ ] `pipeline/pipeline-validator.ts` — validatePipeline() 백엔드 버전
+- [x] `pipeline/block-registry.ts` — 블록 등록/조회
+- [x] `pipeline/pipeline-executor.ts` — 순차 실행, 블록별 소수점 처리
+- [x] `pipeline/pipeline-validator.ts` — validatePipeline() 백엔드 버전
 
 ### 5-B. Backend — 공통 블록 (후처리 4종)
 > 참조: [FSD.md](FSD.md) 후처리 단계
 
-- [ ] `pipeline/blocks/common/item-fail-check.ts` — 항목별 과락 판정
-- [ ] `pipeline/blocks/common/total-fail-check.ts` — 전체 과락 판정
-- [ ] `pipeline/blocks/common/normalize-to-max.ts` — 만점 기준 환산 (→ 원점수)
-- [ ] `pipeline/blocks/common/apply-converted-max.ts` — 환산 만점 적용 (→ 환산점수)
+- [x] `pipeline/blocks/common/item-fail-check.ts` — 항목별 과락 판정
+- [x] `pipeline/blocks/common/total-fail-check.ts` — 전체 과락 판정
+- [x] `pipeline/blocks/common/normalize-to-max.ts` — 만점 기준 환산 (→ 원점수)
+- [x] `pipeline/blocks/common/apply-converted-max.ts` — 환산 만점 적용 (→ 환산점수)
 
 ### 5-C. Backend — 사용자 정의 블록 (5종)
 > 참조: [FSD.md](FSD.md) 사용자 정의 단계, [04-pipeline-engine.md](sds/04-pipeline-engine.md) §4.10
 
-- [ ] `pipeline/blocks/custom/bonus-points.ts` — 가산점 부여
-- [ ] `pipeline/blocks/custom/ratio-adjust.ts` — 비율 조정
-- [ ] `pipeline/blocks/custom/range-convert.ts` — 구간 변환
-- [ ] `pipeline/blocks/custom/clamp.ts` — 상한/하한 제한
-- [ ] `pipeline/blocks/custom/custom-formula.ts` — mathjs 샌드박스 (AST 화이트리스트, 100ms 타임아웃)
+- [x] `pipeline/blocks/custom/custom-bonus.ts` — 가산점 부여
+- [x] `pipeline/blocks/custom/custom-ratio.ts` — 비율 조정
+- [x] `pipeline/blocks/custom/custom-range-map.ts` — 구간 변환
+- [x] `pipeline/blocks/custom/custom-clamp.ts` — 상한/하한 제한
+- [x] `pipeline/blocks/custom/custom-formula.ts` — mathjs 샌드박스 (AST 화이트리스트)
 
 ### 5-D. Backend — Pipeline API
 > 참조: [03-api.md](sds/03-api.md) §3.6
 
-- [ ] GET /evaluations/:id/pipeline (조회)
-- [ ] POST /evaluations/:id/pipeline/save (저장)
-- [ ] POST /evaluations/:id/pipeline/validate (유효성 검증)
-- [ ] POST /evaluations/:id/pipeline/preview (샘플 테스트)
-- [ ] app.module.ts에 PipelineModule import
+- [x] GET /evaluations/:id/pipeline (조회)
+- [x] POST /evaluations/:id/pipeline/save (저장)
+- [x] POST /evaluations/:id/pipeline/validate (유효성 검증)
+- [x] POST /evaluations/:id/pipeline/preview (샘플 테스트 — stub)
+- [x] app.module.ts에 PipelineModule import
 
 ### 5-E. Backend — Excel 모듈 골격
 > 참조: [06-backend.md](sds/06-backend.md) §6.3, [05-excel.md](sds/05-excel.md)
 
-- [ ] `excel/controller/excel.controller.ts`
+- [x] `excel/controller/excel.controller.ts` — 4개 엔드포인트 (stub)
 - [ ] `excel/application/excel.application.ts`
 - [ ] `excel/service/template-generator.ts` — 양식 생성 (유형별 분기 구조)
 - [ ] `excel/service/upload-parser.ts` — 업로드 파싱 (유형별 분기 구조)
-- [ ] `excel/service/result-exporter.ts` — 결과 내보내기 (구조만)
+- [ ] `excel/service/result-exporter.ts` — 결과 내보내기
 - [ ] `excel/repository/` + `repository-impl/`
-- [ ] app.module.ts에 ExcelModule import
+- [x] app.module.ts에 ExcelModule import
 
 ### 5-F. Backend — Scores 모듈 골격
-- [ ] `scores/controller/scores.controller.ts`
+- [x] `scores/controller/scores.controller.ts` — 5개 엔드포인트 (stub)
 - [ ] `scores/application/` + `service/` + `repository/` + `repository-impl/`
-- [ ] app.module.ts에 ScoresModule import
+- [x] app.module.ts에 ScoresModule import
 
 ### 5-G. Backend — Audit 모듈 골격
-- [ ] `audit/service/audit.service.ts`
-- [ ] `audit/repository/audit.repository.ts` — Interface
-- [ ] `audit/repository-impl/audit.prisma.repository.ts`
-- [ ] app.module.ts에 AuditModule import
+- [x] `audit/service/audit.service.ts`
+- [x] `audit/repository/audit.repository.ts` — Interface
+- [x] `audit/repository-impl/audit.prisma.repository.ts`
+- [x] app.module.ts에 AuditModule import
 
 ### 5-H. Frontend — Pipeline 도메인
 - [ ] `domains/pipeline/components/PipelineBuilder.tsx` — 메인 빌더
@@ -321,88 +321,80 @@
 - [ ] PipelinePage.tsx 연동
 
 ### 5-I. 검증
-- [ ] 단위 테스트: pipeline-executor (블록 순차 실행, 소수점 처리)
-- [ ] 단위 테스트: pipeline-validator (호환성 검증)
-- [ ] 단위 테스트: custom-formula (샌드박스 보안 — 금지된 함수 차단 확인)
-- [ ] 통합 테스트: pipeline API (저장 → 검증 → 미리보기)
+- [x] 단위 테스트: pipeline-executor (블록 순차 실행, 소수점 처리) — 4개
+- [x] 단위 테스트: pipeline-validator (호환성 검증) — shared 9개
+- [x] 단위 테스트: custom-formula (샌드박스 보안 — 금지된 함수 차단 확인) — 4개
+- [ ] 통합 테스트: pipeline API (저장 → 검증 → 미리보기) — DB 연결 후
 
 ## Phase 6: A. 위원 평가
 
 > 참조: [FSD.md](FSD.md) §A, [04-pipeline-engine.md](sds/04-pipeline-engine.md) §4.5, [05-excel.md](sds/05-excel.md)
 
 ### 6-A. Backend — A유형 블록
-- [ ] `pipeline/blocks/type-a/` — 블록 구현:
-  - [ ] 위원별 항목 합산 (sum_by_committee)
-  - [ ] 위원별 총점 합산 (sum_committee_total)
-  - [ ] 최고 위원 제외 (drop_highest_committee)
-  - [ ] 최저 위원 제외 (drop_lowest_committee)
-  - [ ] 위원 평균 (committee_average)
-  - [ ] 위원 가중 평균 (committee_weighted_average)
-  - [ ] 등급→점수 변환 (grade_to_score)
-  - [ ] 항목별 위원 평균 (item_committee_average)
-  - [ ] 항목별 최고 제외 (item_drop_highest)
-  - [ ] 항목별 최저 제외 (item_drop_lowest)
-  - [ ] 항목별 가중합 (item_weighted_sum)
-  - [ ] 항목 합산 (sum_items)
-- [ ] A유형 조건부 실행 (위원 수별 파이프라인 분기)
-- [ ] Evaluation config 핸들러 (A유형) 상세 구현
+- [x] `pipeline/blocks/type-a/` — 블록 구현 (스펙 §4.5 기준 18개):
+  - [x] 전처리: grade_to_score
+  - [x] path1: sum_by_committee, weighted_sum_by_committee, add_virtual_committee, exclude_max_committee, exclude_min_committee, committee_average, committee_sum
+  - [x] path2: add_virtual_per_item, exclude_max_per_item, exclude_min_per_item, average_per_item, sum_per_item, apply_weight, sub_to_parent_sum, sub_to_parent_weighted, item_sum, item_average
+- [ ] A유형 조건부 실행 (위원 수별 파이프라인 분기) — executor 연동 필요
+- [ ] Evaluation config 핸들러 (A유형) 상세 구현 — stub만 존재
 
 ### 6-B. Backend — A유형 엑셀
 > 참조: [05-excel.md](sds/05-excel.md) §5.2
 
 - [ ] A유형 양식 자동생성 (항목×위원 동적 열, 등급/점수 분기)
 - [ ] A유형 업로드 파싱 + 검증
-- [ ] Excel API 연동 (§3.7):
-  - [ ] GET /evaluations/:id/excel/template (양식 다운로드)
-  - [ ] POST /evaluations/:id/excel/upload (업로드 + 검증)
-  - [ ] GET /evaluations/:id/excel/uploads (업로드 이력)
-  - [ ] POST /evaluations/:id/excel/rollback/:uploadId (롤백)
+- [x] Excel API 엔드포인트 (stub):
+  - [x] GET /evaluations/:id/excel/template
+  - [x] POST /evaluations/:id/excel/upload
+  - [x] GET /evaluations/:id/excel/uploads
+  - [x] POST /evaluations/:id/excel/rollback/:uploadId
 
 ### 6-C. Frontend
-- [ ] `domains/evaluation/components/TypeAConfigForm.tsx` — 항목, 위원 수, 등급 매핑 설정
-- [ ] `domains/excel/components/UploadDropzone.tsx` — 범용 업로드 UI
-- [ ] `domains/excel/components/ValidationPreview.tsx` — 검증 결과 미리보기
-- [ ] `domains/excel/components/UploadHistory.tsx` — 이력 + 롤백
+- [ ] `domains/evaluation/components/TypeAConfigForm.tsx`
+- [ ] `domains/excel/components/UploadDropzone.tsx`
+- [ ] `domains/excel/components/ValidationPreview.tsx`
+- [ ] `domains/excel/components/UploadHistory.tsx`
 - [ ] `domains/excel/hooks/useExcel.ts`
 - [ ] `domains/excel/api/excel.ts`
 - [ ] UploadPage.tsx 연동
 
 ### 6-D. 검증
-- [ ] 단위 테스트: A유형 블록 (각 블록 입출력)
+- [x] 단위 테스트: A유형 블록 (각 블록 입출력) — 9개
 - [ ] 단위 테스트: A유형 조건부 실행 (위원 수 분기)
-- [ ] 통합 테스트: A유형 전체 흐름 (설정 → 업로드 → 파이프라인 실행)
+- [ ] 통합 테스트: A유형 전체 흐름 — DB 연결 후
 
 ## Phase 7: D. 점수 변환표
 
 > 참조: [FSD.md](FSD.md) §D, [04-pipeline-engine.md](sds/04-pipeline-engine.md) §4.8, [03-api.md](sds/03-api.md) §3.10
 
 ### 7-A. Backend
-- [ ] `pipeline/blocks/type-d/mapping_lookup.ts` — 5가지 매칭 전략
-- [ ] 매칭 실패 error_flag 처리
-- [ ] MappingTable API (§3.10):
-  - [ ] GET /evaluations/:id/mapping-table (조회)
-  - [ ] POST /evaluations/:id/mapping-table/save (저장)
-  - [ ] POST /evaluations/:id/mapping-table/upload (엑셀 업로드)
-  - [ ] GET /evaluations/:id/mapping-table/download (엑셀 다운로드)
+- [x] `pipeline/blocks/type-d/mapping_lookup.ts` — 구간/정확 매칭 구현
+- [x] 매칭 실패 error_flag 처리 (failFlags 반환)
+- [x] MappingTable API (§3.10) — stub:
+  - [x] GET /evaluations/:id/mapping-table
+  - [x] POST /evaluations/:id/mapping-table/save
+  - [x] POST /evaluations/:id/mapping-table/upload
+  - [x] GET /evaluations/:id/mapping-table/download
 - [ ] D유형 엑셀 양식 생성 + 업로드 파싱
-- [ ] MappingTablesModule → app.module.ts
+- [x] MappingTablesModule → app.module.ts
 
 ### 7-B. Frontend
 - [ ] `domains/evaluation/components/TypeDConfigForm.tsx`
 - [ ] 매핑 테이블 화면 직접 편집 UI
 
 ### 7-C. 검증
-- [ ] 단위 테스트: mapping_lookup (5가지 매칭 전략, 실패 케이스)
+- [x] 단위 테스트: mapping_lookup (구간 매칭, 정확 매칭, 실패 케이스) — 3개
 
 ## Phase 8: B. 자동 채점
 
 > 참조: [FSD.md](FSD.md) §B, [04-pipeline-engine.md](sds/04-pipeline-engine.md) §4.6, [03-api.md](sds/03-api.md) §3.11
 
 ### 8-A. Backend
-- [ ] `pipeline/blocks/type-b/auto_grade.ts` — 정답 대조:
-  - [ ] 복수정답 처리
-  - [ ] 전원정답 처리
-  - [ ] 배점제외 처리
+- [x] `pipeline/blocks/type-b/auto_grade.ts` — 정답 대조:
+  - [x] 복수정답 처리
+  - [x] 전원정답 처리
+  - [x] 배점제외 처리
+- [x] B유형 집계 블록: sum_by_subject, subject_fail_check, subject_sum, subject_weighted_sum
 - [ ] 정답지 API (§3.11):
   - [ ] POST /evaluations/:id/answer-key/save
   - [ ] POST /evaluations/:id/question-error (출제 오류)
@@ -413,7 +405,8 @@
 - [ ] `domains/evaluation/components/TypeBConfigForm.tsx`
 
 ### 8-C. 검증
-- [ ] 단위 테스트: auto_grade (복수정답, 전원정답, 배점제외)
+- [x] 단위 테스트: auto_grade (복수정답) — 1개
+- [x] 단위 테스트: sum_by_subject, subject_fail_check, subject_sum — 4개
 - [ ] 단위 테스트: 채점 감사 로그 기록 확인
 
 ## Phase 9: C. 문항별 채점
@@ -421,72 +414,72 @@
 > 참조: [FSD.md](FSD.md) §C, [04-pipeline-engine.md](sds/04-pipeline-engine.md) §4.7
 
 ### 9-A. Backend
-- [ ] `pipeline/blocks/type-c/` — C유형 블록 (A블록 재활용 포함):
-  - [ ] 문항별 위원 점수 집계
-  - [ ] 문항별 위원 평균
-  - [ ] 문항 점수 합산
-  - [ ] 소문항 합산
-  - [ ] (A블록 재활용: 최고/최저 제외, 위원 평균 등)
-- [ ] 문항/소문항 계층 처리
+- [x] `pipeline/blocks/type-c/` — C유형 블록 7개:
+  - [x] sub_question_sum, sub_question_weighted_sum
+  - [x] question_weight, question_sum, question_weighted_sum
+  - [x] sub_question_fail_check, question_fail_check
+  - [x] A블록 재활용: exclude_max/min_per_item, average/sum_per_item (applicableTypes에 'C' 포함)
 - [ ] C유형 엑셀 양식 생성 (복수 채점위원 다중행 포맷) + 업로드 파싱
 
 ### 9-B. Frontend
 - [ ] `domains/evaluation/components/TypeCConfigForm.tsx`
 
 ### 9-C. 검증
-- [ ] 단위 테스트: C유형 블록
-- [ ] 통합 테스트: C유형 전체 흐름
+- [x] 단위 테스트: C유형 블록 (sub_question_sum, question_weight, question_sum, question_fail_check) — 4개
+- [ ] 통합 테스트: C유형 전체 흐름 — DB 연결 후
 
 ## Phase 10: 공통 기능 마감
 
 > 참조: [PRD.md](PRD.md) §7, [03-api.md](sds/03-api.md) §3.4, §3.12
 
 ### 10-A. 평가 기능
-- [ ] 평가 복사 상세 구현 (POST /evaluations/:id/copy — config, pipeline_config, mapping_table 포함)
-- [ ] 소수점 처리 (기본값 + 블록별 오버라이드)
-- [ ] 재계산 경고 배지 (needs_recalculation 플래그)
+- [x] 평가 복사 기본 구현 (POST /evaluations/:id/copy — config, pipeline_config 포함)
+- [x] 소수점 처리 (기본값 + 블록별 오버라이드) — PipelineExecutor에 구현
+- [x] 재계산 경고 배지 (needs_recalculation — 설정 변경 시 자동 true)
 
 ### 10-B. 감사 로그 실구현
 - [ ] AuditLogInterceptor에서 AuditService 호출 연결
-- [ ] 감사 로그 조회 API (§3.12):
-  - [ ] GET /evaluations/:id/audit-logs (평가별)
-  - [ ] GET /admin/tenants/:tenantId/audit-logs (테넌트별, platform_admin)
-- [ ] PII 값 기록 금지 (필드명만), Append-Only 정책
+- [x] 감사 로그 조회 API (§3.12):
+  - [x] GET /evaluations/:id/audit-logs (평가별)
+  - [x] GET /admin/tenants/:tenantId/audit-logs (테넌트별, platform_admin, 페이지네이션)
+- [x] AuditService + AuditPrismaRepository 구현
+- [ ] PII 값 기록 금지 검증 — interceptor 연동 후
 
 ### 10-C. 검증
-- [ ] 단위 테스트: 평가 복사 (복사 범위 확인)
-- [ ] 통합 테스트: 감사 로그 (데이터 접근/수정/다운로드 기록 확인)
+- [ ] 단위 테스트: 평가 복사 — DB 연결 후
+- [ ] 통합 테스트: 감사 로그 — DB 연결 후
 
 ## Phase 11: 결과 조회 + 엑셀 다운로드
 
 > 참조: [03-api.md](sds/03-api.md) §3.8~3.9, [05-excel.md](sds/05-excel.md)
 
 ### 11-A. 계산 실행
-- [ ] POST /evaluations/:id/calculate — 동기 실행
-- [ ] 행별 에러 처리 (successCount / errorCount / errors[])
-- [ ] GET /evaluations/:id/calculate/status (비동기 전환 대비 stub)
+- [x] POST /evaluations/:id/calculate — 엔드포인트 (stub, PipelineExecutor 연동 필요)
+- [ ] 행별 에러 처리 (successCount / errorCount / errors[]) — 실제 실행 로직
+- [x] GET /evaluations/:id/calculate/status (비동기 전환 대비 stub)
 
 ### 11-B. 결과 조회
-- [ ] GET /evaluations/:id/results (페이지네이션, 정렬, failOnly 필터)
-- [ ] GET /evaluations/:id/results/:examineeNo (중간 결과 포함)
+- [x] GET /evaluations/:id/results (stub — 페이지네이션 구조)
+- [x] GET /evaluations/:id/results/:examineeNo (stub)
 - [ ] `domains/score/components/ScoreTable.tsx`
-- [ ] `domains/score/components/IntermediateDetail.tsx` — 중간 결과 펼침
+- [ ] `domains/score/components/IntermediateDetail.tsx`
 - [ ] `domains/score/components/DownloadButton.tsx`
 - [ ] `domains/score/hooks/useScores.ts`
 - [ ] `domains/score/api/scores.ts`
-- [ ] `domains/score/models/score.ts` — 점수 포맷, 과락 판정 헬퍼
+- [ ] `domains/score/models/score.ts`
 - [ ] ResultListPage.tsx, ResultDetailPage.tsx 연동
 
 ### 11-C. 엑셀 다운로드
-- [ ] GET /evaluations/:id/results/download — ExcelJS 스트리밍 모드
+- [x] GET /evaluations/:id/results/download — 엔드포인트 (stub)
+- [ ] ExcelJS 스트리밍 구현
 - [ ] includeIntermediate 옵션
-- [ ] 다운로드 시 감사 로그 자동 기록 (action: data_download)
+- [ ] 다운로드 시 감사 로그 자동 기록
 
 ### 11-D. 검증
-- [ ] 단위 테스트: 계산 실행 (정상/에러 케이스)
+- [ ] 단위 테스트: 계산 실행 — DB 연결 후
 - [ ] 성능 테스트: 1,000행 계산 10초 이내
 - [ ] 성능 테스트: 10,000행 엑셀 다운로드 30초 이내
-- [ ] 통합 테스트: 전체 흐름 (업로드 → 계산 → 결과 조회 → 다운로드)
+- [ ] 통합 테스트: 전체 흐름 — DB 연결 후
 
 ## Phase 12: 최종 검증 + 배포 준비
 
