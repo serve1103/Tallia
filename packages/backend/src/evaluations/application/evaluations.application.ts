@@ -21,8 +21,8 @@ export class EvaluationsApplication {
       type: body.type,
       academicYear: body.academicYear,
       admissionType: body.admissionType,
-      config: body.config as Record<string, unknown>,
-      pipelineConfig: body.pipelineConfig as Record<string, unknown> ?? { blocks: [] },
+      config: body.config as any,
+      pipelineConfig: (body.pipelineConfig as any) ?? { blocks: [] },
     });
   }
 
@@ -43,6 +43,46 @@ export class EvaluationsApplication {
   }
 
   async saveConfig(id: string, tenantId: string, config: unknown) {
+    return this.evaluationsService.saveConfig(id, tenantId, config);
+  }
+
+  async saveAnswerKey(id: string, tenantId: string, subjectId: string, answerKey: unknown[]) {
+    const evaluation = await this.evaluationsService.findById(id, tenantId);
+    const config = evaluation.config as Record<string, unknown>;
+
+    if (config?.type !== 'B') {
+      throw new Error('정답지는 B유형에서만 사용 가능합니다');
+    }
+
+    const subjects = (config.subjects as Array<Record<string, unknown>>) ?? [];
+    const subject = subjects.find((s) => s.id === subjectId);
+    if (!subject) throw new Error('과목을 찾을 수 없습니다');
+
+    // 정답지를 과목 내 examTypes에 저장
+    subject.answerKey = answerKey;
+    return this.evaluationsService.saveConfig(id, tenantId, config);
+  }
+
+  async reportQuestionError(
+    id: string,
+    tenantId: string,
+    body: { subjectId: string; questionNo: number; handling: 'all_correct' | 'exclude' },
+  ) {
+    const evaluation = await this.evaluationsService.findById(id, tenantId);
+    const config = evaluation.config as Record<string, unknown>;
+
+    if (config?.type !== 'B') {
+      throw new Error('출제 오류는 B유형에서만 사용 가능합니다');
+    }
+
+    const subjects = (config.subjects as Array<Record<string, unknown>>) ?? [];
+    const subject = subjects.find((s) => s.id === body.subjectId);
+    if (!subject) throw new Error('과목을 찾을 수 없습니다');
+
+    const errors = (subject.questionErrors as Array<Record<string, unknown>>) ?? [];
+    errors.push({ questionNo: body.questionNo, handling: body.handling });
+    subject.questionErrors = errors;
+
     return this.evaluationsService.saveConfig(id, tenantId, config);
   }
 }

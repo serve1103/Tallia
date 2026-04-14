@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type {
   PipelineBlock,
+  PipelineConfig,
+  TypeAPipelineConfig,
+  StandardPipelineConfig,
   ExecutionContext,
   IntermediateResult,
   FailFlag,
@@ -18,6 +21,39 @@ export interface PipelineResult {
 @Injectable()
 export class PipelineExecutor {
   constructor(private readonly registry: BlockRegistry) {}
+
+  /**
+   * A유형 조건부 실행: 위원 수에 맞는 블록 세트를 선택하여 실행.
+   * committeeCount가 conditions에 정확히 매칭되면 해당 블록 사용.
+   * 매칭 안 되면 가장 가까운 하위 조건 사용.
+   */
+  executeConditional(
+    config: TypeAPipelineConfig,
+    committeeCount: number,
+    initialData: unknown,
+    context: ExecutionContext,
+  ): PipelineResult {
+    const sorted = [...config.conditions].sort((a, b) => b.committeeCount - a.committeeCount);
+    const matched = sorted.find((c) => committeeCount >= c.committeeCount);
+    const blocks = matched?.blocks ?? sorted[sorted.length - 1]?.blocks ?? [];
+    return this.execute(blocks, initialData, context);
+  }
+
+  /**
+   * PipelineConfig를 자동 분기: A유형이면 조건부, 나머지는 표준 실행.
+   */
+  executeConfig(
+    pipelineConfig: PipelineConfig,
+    initialData: unknown,
+    context: ExecutionContext,
+    committeeCount?: number,
+  ): PipelineResult {
+    if ('conditions' in pipelineConfig && committeeCount != null) {
+      return this.executeConditional(pipelineConfig as TypeAPipelineConfig, committeeCount, initialData, context);
+    }
+    const blocks = 'blocks' in pipelineConfig ? (pipelineConfig as StandardPipelineConfig).blocks : [];
+    return this.execute(blocks, initialData, context);
+  }
 
   execute(
     pipeline: PipelineBlock[],

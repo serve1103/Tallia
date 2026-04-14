@@ -27,7 +27,7 @@ export class PipelineController {
     @Body() body: { pipelineConfig: unknown },
   ) {
     await this.evaluationsService.update(id, tenantId, {
-      pipelineConfig: body.pipelineConfig as Record<string, unknown>,
+      pipelineConfig: body.pipelineConfig as any,
     });
     return { data: { saved: true } };
   }
