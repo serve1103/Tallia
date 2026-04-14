@@ -8,6 +8,7 @@ import { LoginPage } from './auth/LoginPage';
 import { SignupPage } from './auth/SignupPage';
 import { DashboardPage } from './dashboard/DashboardPage';
 import { CreatePage } from './evaluation/CreatePage';
+import { ConfigPage } from './evaluation/ConfigPage';
 import { ResultListPage } from './results/ResultListPage';
 import { TenantListPage } from './admin/TenantListPage';
 import { TenantDetailPage } from './admin/TenantDetailPage';
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <Navigate to="/dashboard" replace /> },
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/evaluations/create', element: <CreatePage /> },
+      { path: '/evaluations/:id/config', element: <ConfigPage /> },
       { path: '/results', element: <ResultListPage /> },
       { path: '/admin/tenants', element: <TenantListPage /> },
       { path: '/admin/tenants/:tenantId', element: <TenantDetailPage /> },
