@@ -81,7 +81,7 @@ export function TenantList() {
         pagination={{
           current: page,
           pageSize,
-          total: data?.meta.total,
+          total: data?.meta?.total,
           onChange: setPage,
           showSizeChanger: false,
         }}

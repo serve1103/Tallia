@@ -96,7 +96,7 @@ export function TenantDetail({ tenantId }: TenantDetailProps) {
         pagination={{
           current: page,
           pageSize,
-          total: usersData?.meta.total,
+          total: usersData?.meta?.total,
           onChange: setPage,
           showSizeChanger: false,
         }}
