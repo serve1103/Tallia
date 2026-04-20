@@ -132,14 +132,18 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
         )}
 
         <Divider />
-        <PreviewPanel evaluationId={evaluationId} blocks={store.blocks} />
+        <PreviewPanel evaluationId={evaluationId} />
       </div>
 
       <div style={{ width: 260, flexShrink: 0 }}>
         <BlockPalette
           definitions={definitions}
           evalType={evalType}
-          onAdd={(type) => store.addBlock(createEmptyBlock(type))}
+          onAdd={(type, initialParams) => {
+            const block = createEmptyBlock(type);
+            if (initialParams) block.params = initialParams;
+            store.addBlock(block);
+          }}
         />
       </div>
 

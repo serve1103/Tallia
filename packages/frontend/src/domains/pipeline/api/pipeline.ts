@@ -23,14 +23,25 @@ export async function validatePipelineApi(
   return data.data;
 }
 
-export async function previewPipeline(
-  evaluationId: string,
-  blocks: PipelineBlock[],
-  sampleData: unknown,
-): Promise<{ result: unknown }> {
-  const { data } = await apiClient.post(`/evaluations/${evaluationId}/pipeline/preview`, {
-    blocks,
-    sampleData,
-  });
+export interface PreviewResult {
+  sampleInput: unknown;
+  intermediateResults: Array<{
+    blockIndex: number;
+    blockType: string;
+    label: string;
+    output: unknown;
+  }>;
+  finalData: unknown;
+  failFlags: Array<{
+    type: 'item' | 'total';
+    name: string;
+    value: number;
+    threshold: number;
+  }>;
+  errorMessage?: string;
+}
+
+export async function previewPipeline(evaluationId: string): Promise<PreviewResult> {
+  const { data } = await apiClient.post(`/evaluations/${evaluationId}/pipeline/preview`, {});
   return data.data;
 }

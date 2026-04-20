@@ -4,6 +4,8 @@ import { useResults } from '../hooks/useScores';
 import { getScoreStatusTag } from '../models/score';
 import { formatNumber } from '../../../shared/lib/format';
 import { useState } from 'react';
+import { useBreakpoints } from '../../../shared/hooks/useBreakpoint';
+import { ScoreCardList } from './ScoreCardList';
 
 interface Props {
   evaluationId: string;
@@ -53,9 +55,21 @@ function InlineIntermediate({ record }: { record: Score }) {
 }
 
 export function ScoreTable({ evaluationId, onSelectExaminee, failOnly, searchText }: Props) {
+  const { isMobile } = useBreakpoints();
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const { data, isLoading } = useResults(evaluationId, page, pageSize, failOnly);
+
+  if (isMobile) {
+    return (
+      <ScoreCardList
+        evaluationId={evaluationId}
+        onSelectExaminee={onSelectExaminee}
+        failOnly={failOnly}
+        searchText={searchText}
+      />
+    );
+  }
 
   const filteredData = (() => {
     const rows = data?.data ?? [];
