@@ -60,10 +60,12 @@ export async function saveEvalConfig(id: string, config: unknown): Promise<void>
 export async function saveAnswerKey(
   evaluationId: string,
   subjectId: string,
+  examType: string,
   answerKey: AnswerKeyEntry[],
 ): Promise<void> {
   await apiClient.post(`/evaluations/${evaluationId}/answer-key/save`, {
     subjectId,
+    examType,
     answerKey,
   });
 }

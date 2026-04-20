@@ -14,7 +14,7 @@ interface Props {
   examType: string;
   questionCount: number;
   existingAnswerKey?: AnswerKeyEntry[];
-  onSave: (subjectId: string, answerKey: AnswerKeyEntry[]) => Promise<void>;
+  onSave: (subjectId: string, examType: string, answerKey: AnswerKeyEntry[]) => Promise<void>;
   saving?: boolean;
 }
 
@@ -61,7 +61,7 @@ export function AnswerKeyEditor({
         score: 0,
       }));
     try {
-      await onSave(subjectId, answerKey);
+      await onSave(subjectId, examType, answerKey);
       message.success(`${examType}형 정답지 저장 완료`);
     } catch {
       message.error('정답지 저장에 실패했습니다');

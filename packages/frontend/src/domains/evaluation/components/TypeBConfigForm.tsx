@@ -70,11 +70,15 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
     onSave(config, settings);
   };
 
-  const handleSaveAnswerKey = async (subjectId: string, answerKey: AnswerKeyEntry[]) => {
+  const handleSaveAnswerKey = async (
+    subjectId: string,
+    examType: string,
+    answerKey: AnswerKeyEntry[],
+  ) => {
     if (!evaluationId) return;
     setAnswerKeySaving(true);
     try {
-      await saveAnswerKey(evaluationId, subjectId, answerKey);
+      await saveAnswerKey(evaluationId, subjectId, examType, answerKey);
     } finally {
       setAnswerKeySaving(false);
     }

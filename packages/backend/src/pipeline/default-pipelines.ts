@@ -21,6 +21,7 @@ export function getDefaultPipeline(type: EvalType): StandardPipelineConfig {
     case 'B':
       return {
         blocks: [
+          block('auto_grade'),
           block('sum_by_subject'),
           block('subject_sum'),
           block('total_fail_check', { threshold: 0 }),
