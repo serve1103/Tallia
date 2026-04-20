@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, UploadedFile, UseInterceptors, Res, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, UploadedFile, UseInterceptors, Res, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 
@@ -40,8 +40,9 @@ export class ExcelController {
     @CurrentTenant() tenantId: string,
     @CurrentUser() user: JwtPayload,
     @UploadedFile() file: Express.Multer.File,
+    @Query('skipErrors') skipErrors?: string,
   ) {
-    const result = await this.excelApp.upload(id, tenantId, user.sub, file);
+    const result = await this.excelApp.upload(id, tenantId, user.sub, file, skipErrors === 'true');
     return { data: result };
   }
 

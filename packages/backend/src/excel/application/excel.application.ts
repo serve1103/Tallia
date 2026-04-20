@@ -28,16 +28,24 @@ export class ExcelApplication {
     res.end();
   }
 
-  async upload(evaluationId: string, tenantId: string, userId: string, file: Express.Multer.File) {
+  async upload(evaluationId: string, tenantId: string, userId: string, file: Express.Multer.File, skipErrors = false) {
     const parseResult = await this.uploadParser.parse(file.buffer);
+
+    const rows = skipErrors
+      ? parseResult.rows.filter((_, idx) => {
+          const errorRows = new Set(parseResult.errors.map((e) => e.row));
+          // rows start from rowNumber 2 (1-indexed with header), idx is 0-indexed
+          return !errorRows.has(idx + 2);
+        })
+      : parseResult.rows;
 
     const upload = await this.excelService.createUpload({
       tenantId,
       evaluationId,
       fileName: file.originalname,
       fileSize: file.size,
-      rowCount: parseResult.rows.length,
-      rawData: parseResult.rows,
+      rowCount: rows.length,
+      rawData: rows,
       validationErrors: parseResult.errors,
       uploadedBy: userId,
     });

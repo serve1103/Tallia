@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, InputNumber, Button, Card, Space, Divider, Input } from 'antd';
+import { Form, InputNumber, Button, Card, Space, Divider, Input, Select } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TypeCConfig, QuestionDef } from '@tallia/shared';
 import { CommonSettingsCard, DEFAULT_COMMON_SETTINGS } from './CommonSettingsCard';
@@ -20,11 +20,27 @@ const emptyQuestion: Omit<QuestionDef, 'subQuestions'> = {
   failThreshold: null,
 };
 
+const calcMethodOptions = [
+  { label: '소문항 합산', value: 'sum' },
+  { label: '소문항 가중합산', value: 'weighted_sum' },
+];
+
+const totalCalcOptions = [
+  { label: '합산', value: 'sum' },
+  { label: '가중합산', value: 'weighted_sum' },
+];
+
 export function TypeCConfigForm({ value, commonSettings, onSave, loading }: Props) {
   const [form] = Form.useForm();
   const [settings, setSettings] = useState<CommonSettings>(commonSettings ?? DEFAULT_COMMON_SETTINGS);
 
-  const handleFinish = (values: { committeeCount: number; questions: Record<string, unknown>[]; totalFailThreshold?: number | null }) => {
+  const handleFinish = (values: {
+    committeeCount: number;
+    questions: Record<string, unknown>[];
+    totalFailThreshold?: number | null;
+    parentScoreMethod?: 'sum' | 'weighted_sum';
+    totalCalcMethod?: 'sum' | 'weighted_sum';
+  }) => {
     const config: TypeCConfig = {
       type: 'C',
       committeeCount: values.committeeCount,
@@ -34,6 +50,8 @@ export function TypeCConfigForm({ value, commonSettings, onSave, loading }: Prop
         subQuestions: (q.subQuestions as unknown[]) ?? [],
       })) as QuestionDef[],
       totalFailThreshold: values.totalFailThreshold ?? null,
+      parentScoreMethod: values.parentScoreMethod ?? 'sum',
+      totalCalcMethod: values.totalCalcMethod ?? 'sum',
     };
     onSave(config, settings);
   };
@@ -42,7 +60,14 @@ export function TypeCConfigForm({ value, commonSettings, onSave, loading }: Prop
     <Form
       form={form}
       layout="vertical"
-      initialValues={value ?? { committeeCount: 2, questions: [emptyQuestion], totalFailThreshold: null }}
+      initialValues={{
+        committeeCount: 2,
+        questions: [emptyQuestion],
+        totalFailThreshold: null,
+        parentScoreMethod: 'sum',
+        totalCalcMethod: 'sum',
+        ...value,
+      }}
       onFinish={handleFinish}
     >
       <Space size="large">
@@ -53,6 +78,17 @@ export function TypeCConfigForm({ value, commonSettings, onSave, loading }: Prop
           <InputNumber min={0} placeholder="없음" />
         </Form.Item>
       </Space>
+
+      <Card size="small" style={{ marginBottom: 16 }} title="계산 방식">
+        <Space wrap>
+          <Form.Item name="parentScoreMethod" label="대문항 점수 산출" style={{ marginBottom: 0 }}>
+            <Select options={calcMethodOptions} style={{ width: 180 }} />
+          </Form.Item>
+          <Form.Item name="totalCalcMethod" label="전체 계산 기준" style={{ marginBottom: 0 }}>
+            <Select options={totalCalcOptions} style={{ width: 160 }} />
+          </Form.Item>
+        </Space>
+      </Card>
 
       <Divider orientation="left">문항</Divider>
 

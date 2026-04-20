@@ -85,6 +85,7 @@ export function ConfigPage() {
       case 'D':
         return (
           <TypeDConfigForm
+            evaluationId={id}
             value={config?.type === 'D' ? config : undefined}
             commonSettings={initialSettings}
             onSave={handleSave}

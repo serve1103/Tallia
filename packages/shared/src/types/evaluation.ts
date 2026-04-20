@@ -24,6 +24,7 @@ export interface ItemDefinition {
   weight: number;
   failThreshold: number | null;
   subItems?: SubItemDefinition[];
+  gradeMapping?: Record<string, number>;
 }
 
 export interface TypeAConfig {
@@ -93,6 +94,8 @@ export interface TypeCConfig {
   committeeCount: number;
   questions: QuestionDef[];
   totalFailThreshold: number | null;
+  parentScoreMethod?: 'sum' | 'weighted_sum';
+  totalCalcMethod?: 'sum' | 'weighted_sum';
 }
 
 // --- D유형: 점수 변환표 (02-db-schema.md §2.3) ---

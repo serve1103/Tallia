@@ -4,8 +4,20 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TypeDConfig, ColumnDef } from '@tallia/shared';
 import { CommonSettingsCard, DEFAULT_COMMON_SETTINGS } from './CommonSettingsCard';
 import type { CommonSettings } from './CommonSettingsCard';
+import { MappingTableEditor } from './MappingTableEditor';
+
+interface MappingEntry {
+  key: string;
+  conditions: Record<string, unknown>;
+  score: number;
+}
+
+const GROUPED_MAPPING_TYPES = ['language_test', 'certificate'];
+
+const LANGUAGE_TEST_GROUPS = ['TOEIC', 'TOEFL', 'TEPS'];
 
 interface Props {
+  evaluationId?: string;
   value?: TypeDConfig;
   commonSettings?: CommonSettings;
   onSave: (config: TypeDConfig, commonSettings: CommonSettings) => void;
@@ -22,9 +34,15 @@ const MAPPING_TYPE_OPTIONS = [
 
 const emptyColumn: ColumnDef = { key: '', label: '', type: 'text' };
 
-export function TypeDConfigForm({ value, commonSettings, onSave, loading }: Props) {
+export function TypeDConfigForm({ evaluationId, value, commonSettings, onSave, loading }: Props) {
   const [form] = Form.useForm();
   const [settings, setSettings] = useState<CommonSettings>(commonSettings ?? DEFAULT_COMMON_SETTINGS);
+  const [mappingType, setMappingType] = useState<string>(value?.mappingType ?? 'certificate');
+  const [entriesByGroup, setEntriesByGroup] = useState<Record<string, MappingEntry[]>>({});
+  const [singleEntries, setSingleEntries] = useState<MappingEntry[]>([]);
+
+  const isGrouped = GROUPED_MAPPING_TYPES.includes(mappingType);
+  const groups = mappingType === 'language_test' ? LANGUAGE_TEST_GROUPS : [];
 
   const handleFinish = (values: { mappingType: string; inputColumns: Record<string, unknown>[]; maxScore: number; totalFailThreshold?: number | null }) => {
     const config: TypeDConfig = {
@@ -49,7 +67,7 @@ export function TypeDConfigForm({ value, commonSettings, onSave, loading }: Prop
     >
       <Space size="large">
         <Form.Item name="mappingType" label="변환표 유형" rules={[{ required: true }]}>
-          <Select options={MAPPING_TYPE_OPTIONS} style={{ width: 200 }} />
+          <Select options={MAPPING_TYPE_OPTIONS} style={{ width: 200 }} onChange={(v) => setMappingType(v)} />
         </Form.Item>
         <Form.Item name="maxScore" label="원점수 만점" rules={[{ required: true }]}>
           <InputNumber min={0} />
@@ -86,6 +104,29 @@ export function TypeDConfigForm({ value, commonSettings, onSave, loading }: Prop
           </>
         )}
       </Form.List>
+
+      <Divider orientation="left">변환표 데이터</Divider>
+
+      <Form.Item noStyle shouldUpdate={(prev, cur) => prev.inputColumns !== cur.inputColumns || prev.maxScore !== cur.maxScore}>
+        {({ getFieldValue }) => {
+          const cols: ColumnDef[] = (getFieldValue('inputColumns') as ColumnDef[] | undefined) ?? [];
+          const max: number = (getFieldValue('maxScore') as number | undefined) ?? 100;
+          return (
+            <MappingTableEditor
+              evaluationId={evaluationId}
+              inputColumns={cols}
+              entries={singleEntries}
+              maxScore={max}
+              onSave={setSingleEntries}
+              loading={loading}
+              groups={isGrouped ? groups : undefined}
+              entriesByGroup={isGrouped ? entriesByGroup : undefined}
+              onSaveGroup={isGrouped ? (group, updated) => setEntriesByGroup((prev) => ({ ...prev, [group]: updated })) : undefined}
+              showExcelButtons={!!evaluationId}
+            />
+          );
+        }}
+      </Form.Item>
 
       <CommonSettingsCard value={settings} onChange={setSettings} />
 
