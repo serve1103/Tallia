@@ -111,6 +111,31 @@ export const subQuestionFailCheckBlock: BlockHandler = {
   },
 };
 
+// committee_average_per_question: 복수위원 원시 데이터에서 문항별 평균 산출
+const committeeAveragePerQuestionDef: BlockDefinition = {
+  type: 'committee_average_per_question', name: '위원별 문항 평균', category: 'aggregate',
+  applicableTypes: ['C'], inputShape: 'QUESTION_ITEM_SCORES', outputShape: 'QUESTION_ITEM_SCORES', params: [],
+};
+
+export const committeeAveragePerQuestionBlock: BlockHandler = {
+  definition: committeeAveragePerQuestionDef,
+  execute(input: BlockInput): BlockOutput {
+    // 입력: { questions: Record<string, number[]> } (문항키 → 위원점수 배열)
+    // 출력: { items: string[], data: number[] } (QUESTION_ITEM_SCORES 형식)
+    const raw = input.data as { questions: Record<string, number[]> };
+    const items: string[] = [];
+    const data: number[] = [];
+    for (const [key, scores] of Object.entries(raw.questions)) {
+      items.push(key);
+      const avg = Array.isArray(scores)
+        ? scores.reduce((s, v) => s + v, 0) / scores.length
+        : (scores as number);
+      data.push(avg);
+    }
+    return { data: { items, data } };
+  },
+};
+
 // question_fail_check
 const questionFailCheckDef: BlockDefinition = {
   type: 'question_fail_check', name: '대문항별 과락 판정', category: 'aggregate',

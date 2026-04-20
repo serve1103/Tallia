@@ -1,6 +1,6 @@
 import type { BlockInput, ExecutionContext } from '@tallia/shared';
 
-import { subQuestionSumBlock, questionSumBlock, questionWeightBlock, questionFailCheckBlock } from '../blocks/type-c/c-question-blocks';
+import { subQuestionSumBlock, questionSumBlock, questionWeightBlock, questionFailCheckBlock, committeeAveragePerQuestionBlock } from '../blocks/type-c/c-question-blocks';
 import { mappingLookupBlock } from '../blocks/type-d/mapping-lookup';
 
 const cContext: ExecutionContext = {
@@ -60,6 +60,38 @@ describe('C유형 블록', () => {
     const result = questionFailCheckBlock.execute({ data, context: cContext }, {});
     expect(result.failFlags).toHaveLength(1);
     expect(result.failFlags![0].name).toBe('1번');
+  });
+});
+
+describe('C유형 복수위원 블록', () => {
+  it('committee_average_per_question: 위원 배열 → 문항별 평균', () => {
+    // 위원 2명, 문항 3개 (1-1, 2-1, 2-2)
+    const data = {
+      questions: {
+        '1-1': [15, 14],   // 평균 14.5
+        '2-1': [28, 30],   // 평균 29
+        '2-2': [20, 22],   // 평균 21
+      },
+    };
+    const result = committeeAveragePerQuestionBlock.execute({ data, context: cContext }, {});
+    const out = result.data as { items: string[]; data: number[] };
+    expect(out.items).toEqual(['1-1', '2-1', '2-2']);
+    expect(out.data[0]).toBeCloseTo(14.5);
+    expect(out.data[1]).toBeCloseTo(29);
+    expect(out.data[2]).toBeCloseTo(21);
+  });
+
+  it('committee_average_per_question: 단일 위원도 정상 처리', () => {
+    const data = {
+      questions: {
+        'Q1': [30],
+        'Q2': [25],
+      },
+    };
+    const result = committeeAveragePerQuestionBlock.execute({ data, context: cContext }, {});
+    const out = result.data as { items: string[]; data: number[] };
+    expect(out.data[0]).toBe(30);
+    expect(out.data[1]).toBe(25);
   });
 });
 

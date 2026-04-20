@@ -1,6 +1,6 @@
-import { Button, Space, message, Divider, theme } from 'antd';
+import { Button, Space, message, Divider, theme, Switch, Typography } from 'antd';
 import { SaveOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import type { BlockDefinition, EvaluationType, PipelineConfig } from '@tallia/shared';
+import type { BlockDefinition, EvaluationType, PipelineConfig, PipelineCondition } from '@tallia/shared';
 import { usePipelineStore } from '../stores/pipelineStore';
 import { useSavePipeline, useValidatePipeline } from '../hooks/usePipeline';
 import { createEmptyBlock } from '../models/pipeline';
@@ -24,6 +24,7 @@ import { BlockPalette } from './BlockPalette';
 import { BlockParamEditor } from './BlockParamEditor';
 import { ValidationBadge } from './ValidationBadge';
 import { PreviewPanel } from './PreviewPanel';
+import { ConditionalTabs } from './ConditionalTabs';
 
 interface Props {
   evaluationId: string;
@@ -39,6 +40,15 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
   const validateMutation = useValidatePipeline(evaluationId);
   const defMap = useMemo(() => new Map(definitions.map((d) => [d.type, d])), [definitions]);
 
+  // A유형 조건부 모드 상태
+  const isAType = evalType === 'A';
+  const [conditionalMode, setConditionalMode] = useState(false);
+  const [conditions, setConditions] = useState<PipelineCondition[]>([
+    { committeeCount: 3, blocks: [] },
+    { committeeCount: 5, blocks: [] },
+  ]);
+  const [activeConditionKey, setActiveConditionKey] = useState('0');
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -46,10 +56,59 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
 
   useEffect(() => {
     if (initialConfig) {
-      const blocks = 'blocks' in initialConfig ? initialConfig.blocks : [];
-      store.setBlocks(blocks);
+      if ('conditions' in initialConfig) {
+        // TypeAPipelineConfig: 조건부 모드로 복원
+        setConditionalMode(true);
+        setConditions(initialConfig.conditions);
+        // 현재 탭의 blocks를 store에 로드
+        const firstBlocks = initialConfig.conditions[0]?.blocks ?? [];
+        store.setBlocks(firstBlocks);
+      } else {
+        const blocks = 'blocks' in initialConfig ? initialConfig.blocks : [];
+        store.setBlocks(blocks);
+      }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialConfig]);
+
+  // 조건부 모드에서 탭 전환 시 현재 탭 blocks 저장 후 새 탭 blocks 로드
+  const handleConditionTabChange = (key: string) => {
+    if (conditionalMode) {
+      const prevIdx = Number(activeConditionKey);
+      setConditions((prev) => {
+        const updated = [...prev];
+        updated[prevIdx] = { ...updated[prevIdx], blocks: store.blocks };
+        return updated;
+      });
+      const nextIdx = Number(key);
+      store.setBlocks(conditions[nextIdx]?.blocks ?? []);
+    }
+    setActiveConditionKey(key);
+  };
+
+  const handleConditionCountChange = (index: number, count: number) => {
+    setConditions((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], committeeCount: count };
+      return updated;
+    });
+  };
+
+  const handleConditionalModeToggle = (checked: boolean) => {
+    setConditionalMode(checked);
+    if (checked) {
+      // 현재 표준 blocks를 첫 번째 조건에 복사
+      setConditions([
+        { committeeCount: 3, blocks: store.blocks },
+        { committeeCount: 5, blocks: [] },
+      ]);
+      setActiveConditionKey('0');
+    } else {
+      // 조건부 모드 해제 시 현재 탭 blocks를 표준으로
+      const currentIdx = Number(activeConditionKey);
+      store.setBlocks(conditions[currentIdx]?.blocks ?? store.blocks);
+    }
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -60,7 +119,17 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
   };
 
   const handleSave = () => {
-    const config: PipelineConfig = { blocks: store.blocks };
+    let config: PipelineConfig;
+    if (isAType && conditionalMode) {
+      // 현재 편집 중인 탭 blocks를 조건에 반영
+      const currentIdx = Number(activeConditionKey);
+      const updatedConditions = conditions.map((c, i) =>
+        i === currentIdx ? { ...c, blocks: store.blocks } : c,
+      );
+      config = { conditions: updatedConditions };
+    } else {
+      config = { blocks: store.blocks };
+    }
     saveMutation.mutate(config, {
       onSuccess: () => {
         message.success('파이프라인이 저장되었습니다');
@@ -98,6 +167,18 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
           <Space>
             <ValidationBadge result={store.validationResult} />
             {store.isDirty && <span style={{ color: token.colorWarning, fontSize: 12 }}>변경사항 있음</span>}
+            {isAType && (
+              <Space size={8}>
+                <Switch
+                  size="small"
+                  checked={conditionalMode}
+                  onChange={handleConditionalModeToggle}
+                />
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  조건부 모드 (위원수별)
+                </Typography.Text>
+              </Space>
+            )}
           </Space>
           <Space>
             <Button icon={<CheckCircleOutlined />} onClick={handleValidate} loading={validateMutation.isPending}>
@@ -108,6 +189,15 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
             </Button>
           </Space>
         </div>
+
+        {isAType && conditionalMode && (
+          <ConditionalTabs
+            conditions={conditions}
+            activeKey={activeConditionKey}
+            onChange={handleConditionTabChange}
+            onConditionCountChange={handleConditionCountChange}
+          />
+        )}
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={store.blocks.map((_, i) => `block-${i}`)} strategy={verticalListSortingStrategy}>

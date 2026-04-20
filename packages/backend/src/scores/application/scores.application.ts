@@ -226,7 +226,34 @@ export class ScoresApplication {
       return rawData;
     }
 
-    // C/D 유형은 flat 그대로
+    if (config.type === 'C') {
+      const cConfig = config as any;
+      // 복수위원(committeeCount > 1)이고 committees 배열 구조인 경우 위원별 평균 집계
+      if (cConfig.committeeCount > 1 && rawData && 'committees' in rawData) {
+        const typeCData = rawData as { committees: Array<{ committeeNo: number; questions: Record<string, number> }> };
+        const committees = typeCData.committees;
+        if (committees.length === 0) return { questions: {} };
+
+        // 모든 문항 키 수집
+        const allKeys = new Set<string>();
+        for (const c of committees) {
+          Object.keys(c.questions).forEach((k) => allKeys.add(k));
+        }
+
+        // 위원별 평균 계산
+        const averaged: Record<string, number> = {};
+        for (const key of allKeys) {
+          const values = committees.map((c) => c.questions[key] ?? 0);
+          const avg = values.reduce((s, v) => s + v, 0) / values.length;
+          averaged[key] = avg;
+        }
+        return { questions: averaged };
+      }
+      // 단일위원 또는 이미 flat 구조
+      return rawData;
+    }
+
+    // D 유형은 flat 그대로
     return rawData;
   }
 }

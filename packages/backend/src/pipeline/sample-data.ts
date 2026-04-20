@@ -71,15 +71,35 @@ function buildTypeBSample(config: Extract<EvalConfig, { type: 'B' }>): unknown {
 }
 
 function buildTypeCSample(config: Extract<EvalConfig, { type: 'C' }>): unknown {
+  // 복수위원(committeeCount > 1): committees 배열 구조로 샘플 생성
+  if (config.committeeCount > 1) {
+    const committees = Array.from({ length: config.committeeCount }, (_, ci) => {
+      const questions: Record<string, number> = {};
+      for (const q of config.questions) {
+        if (q.subQuestions && q.subQuestions.length > 0) {
+          for (const sq of q.subQuestions) {
+            const max = sq.maxScore;
+            questions[`${q.name}_${sq.name}`] = randScore(Math.floor(max * 0.5), max);
+          }
+        } else {
+          questions[q.name] = randScore(Math.floor(q.maxScore * 0.5), q.maxScore);
+        }
+      }
+      return { committeeNo: ci + 1, questions };
+    });
+    return { committees };
+  }
+
+  // 단일위원: flat questions 구조
   const questions: Record<string, number> = {};
   for (const q of config.questions) {
     if (q.subQuestions && q.subQuestions.length > 0) {
       for (const sq of q.subQuestions) {
         const max = sq.maxScore;
-        questions[`${q.id}-${sq.id}`] = randScore(Math.floor(max * 0.5), max);
+        questions[`${q.name}_${sq.name}`] = randScore(Math.floor(max * 0.5), max);
       }
     } else {
-      questions[q.id] = randScore(Math.floor(q.maxScore * 0.5), q.maxScore);
+      questions[q.name] = randScore(Math.floor(q.maxScore * 0.5), q.maxScore);
     }
   }
   return { questions };
