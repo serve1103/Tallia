@@ -38,7 +38,7 @@ export function IntermediateDetail({ score }: Props) {
         </Descriptions.Item>
       </Descriptions>
 
-      {score.failReasons.length > 0 && (
+      {Array.isArray(score.failReasons) && score.failReasons.length > 0 && (
         <>
           <Typography.Title level={5}>과락 사유</Typography.Title>
           {score.failReasons.map((f, i) => (
@@ -52,7 +52,7 @@ export function IntermediateDetail({ score }: Props) {
       <Typography.Title level={5} style={{ marginTop: 16 }}>중간 계산 결과</Typography.Title>
       <Table
         columns={intermediateColumns}
-        dataSource={score.intermediateResults.map((r, i) => ({ ...r, key: i }))}
+        dataSource={(Array.isArray(score.intermediateResults) ? score.intermediateResults : []).map((r, i) => ({ ...r, key: i }))}
         size="small"
         pagination={false}
       />
