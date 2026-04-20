@@ -153,25 +153,36 @@ export class ScoresApplication {
     return { successCount, errorCount: errors.length, errors };
   }
 
+  /** 현재(최신) 업로드 ID 조회. 없으면 undefined. */
+  private async resolveCurrentUploadId(evaluationId: string, tenantId: string): Promise<string | undefined> {
+    const upload = await this.excelService.findCurrentUpload(evaluationId, tenantId);
+    return upload?.id;
+  }
+
   async getResults(evaluationId: string, tenantId: string, page: number, limit: number, sort?: string, failOnly?: boolean) {
-    return this.scoresService.findAll({ tenantId, evaluationId, page, limit, sort, failOnly });
+    const uploadId = await this.resolveCurrentUploadId(evaluationId, tenantId);
+    return this.scoresService.findAll({ tenantId, evaluationId, page, limit, sort, failOnly, uploadId });
   }
 
   async getResultDetail(evaluationId: string, examineeNo: string, tenantId: string) {
-    return this.scoresService.findByExamineeNo(evaluationId, examineeNo, tenantId);
+    const uploadId = await this.resolveCurrentUploadId(evaluationId, tenantId);
+    return this.scoresService.findByExamineeNo(evaluationId, examineeNo, tenantId, uploadId);
   }
 
   async getStats(evaluationId: string, tenantId: string) {
-    return this.scoresService.getStats(evaluationId, tenantId);
+    const uploadId = await this.resolveCurrentUploadId(evaluationId, tenantId);
+    return this.scoresService.getStats(evaluationId, tenantId, uploadId);
   }
 
   async downloadResults(evaluationId: string, tenantId: string, includeIntermediate: boolean, res: Response, userId?: string) {
     // TODO: 대용량 데이터(100K+)에 대해 Prisma cursor 기반 스트리밍으로 전환하여 메모리 사용량 최적화 필요
+    const uploadId = await this.resolveCurrentUploadId(evaluationId, tenantId);
     const { data: scores } = await this.scoresService.findAll({
       tenantId,
       evaluationId,
       page: 1,
       limit: 100000,
+      uploadId,
     });
 
     const workbook = await this.resultExporter.export(scores, includeIntermediate);

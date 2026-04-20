@@ -155,6 +155,73 @@ describe('auto_grade — 다과목 × 다시험유형', () => {
   });
 });
 
+describe('auto_grade — 시험유형별 문항수 다른 경우', () => {
+  const diffQCountCtx: ExecutionContext = {
+    evaluationType: 'B',
+    config: {
+      type: 'B',
+      subjects: [{
+        id: 'eng', name: '영어', questionCount: 50, maxScore: 100, failThreshold: 40,
+        examTypes: [
+          {
+            id: 'eA', name: 'A', questionCount: 50, answerKey: [
+              { questionNo: 1, answers: ['1'], score: 2 },
+              { questionNo: 50, answers: ['3'], score: 2 },
+            ],
+          },
+          {
+            id: 'eB', name: 'B', questionCount: 45, answerKey: [
+              { questionNo: 1, answers: ['2'], score: 2 },
+              { questionNo: 45, answers: ['5'], score: 2 },
+            ],
+          },
+          {
+            id: 'eC', name: 'C', questionCount: 60, answerKey: [
+              { questionNo: 1, answers: ['4'], score: 2 },
+              { questionNo: 60, answers: ['1'], score: 2 },
+            ],
+          },
+        ],
+        questionErrors: [],
+      }],
+      totalFailThreshold: null,
+    } as never,
+    defaultDecimal: { method: 'round', places: 2 },
+  };
+
+  it('A형(50문항) — answerKey 기준 채점', () => {
+    const data = {
+      subjects: [{ subjectId: 'eng', examType: 'eA', answers: { 1: '1', 50: '3' } }],
+    };
+    const result = autoGradeBlock.execute({ data, context: diffQCountCtx }, {});
+    const scores = (result.data as { scores: { qNo: number; correct: boolean; score: number }[] }).scores;
+    expect(scores.find((s) => s.qNo === 1)).toMatchObject({ correct: true, score: 2 });
+    expect(scores.find((s) => s.qNo === 50)).toMatchObject({ correct: true, score: 2 });
+  });
+
+  it('B형(45문항) — A형 answerKey와 다른 정답 사용', () => {
+    const data = {
+      subjects: [{ subjectId: 'eng', examType: 'eB', answers: { 1: '2', 45: '5' } }],
+    };
+    const result = autoGradeBlock.execute({ data, context: diffQCountCtx }, {});
+    const scores = (result.data as { scores: { qNo: number; correct: boolean; score: number }[] }).scores;
+    expect(scores.find((s) => s.qNo === 1)).toMatchObject({ correct: true, score: 2 });
+    expect(scores.find((s) => s.qNo === 45)).toMatchObject({ correct: true, score: 2 });
+    // B형에는 50번 문항이 없음 — A형 정답으로 채점되지 않아야 함
+    expect(scores.find((s) => s.qNo === 50)).toBeUndefined();
+  });
+
+  it('C형(60문항) — 60번 문항까지 채점', () => {
+    const data = {
+      subjects: [{ subjectId: 'eng', examType: 'eC', answers: { 1: '4', 60: '1' } }],
+    };
+    const result = autoGradeBlock.execute({ data, context: diffQCountCtx }, {});
+    const scores = (result.data as { scores: { qNo: number; correct: boolean; score: number }[] }).scores;
+    expect(scores.find((s) => s.qNo === 1)).toMatchObject({ correct: true, score: 2 });
+    expect(scores.find((s) => s.qNo === 60)).toMatchObject({ correct: true, score: 2 });
+  });
+});
+
 describe('auto_grade — resolveScore 배점 우선순위', () => {
   const scoreCtx: ExecutionContext = {
     evaluationType: 'B',

@@ -41,15 +41,29 @@ export class TemplateGenerator {
 
   private generateTypeB(workbook: ExcelJS.Workbook, config: TypeBConfig) {
     for (const subject of config.subjects) {
-      const sheet = workbook.addWorksheet(subject.name);
-      const headers = ['수험번호', '수험자명', '시험유형'];
-
-      for (let q = 1; q <= subject.questionCount; q++) {
-        headers.push(`Q${q}`);
+      if (subject.examTypes && subject.examTypes.length > 0) {
+        // 시험유형별 별도 시트: 시트명 = {과목명}_{유형명}
+        for (const et of subject.examTypes) {
+          const sheetName = `${subject.name}_${et.name}`;
+          const sheet = workbook.addWorksheet(sheetName);
+          const headers = ['수험번호', '수험자명'];
+          const qCount = et.questionCount > 0 ? et.questionCount : subject.questionCount;
+          for (let q = 1; q <= qCount; q++) {
+            headers.push(`Q${q}`);
+          }
+          sheet.addRow(headers);
+          this.styleHeader(sheet);
+        }
+      } else {
+        // fallback: 과목명 시트 + 시험유형 컬럼 (하위 호환)
+        const sheet = workbook.addWorksheet(subject.name);
+        const headers = ['수험번호', '수험자명', '시험유형'];
+        for (let q = 1; q <= subject.questionCount; q++) {
+          headers.push(`Q${q}`);
+        }
+        sheet.addRow(headers);
+        this.styleHeader(sheet);
       }
-
-      sheet.addRow(headers);
-      this.styleHeader(sheet);
     }
   }
 

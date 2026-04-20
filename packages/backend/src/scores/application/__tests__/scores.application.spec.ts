@@ -89,12 +89,14 @@ describe('ScoresApplication', () => {
       limit: 20,
       sort: undefined,
       failOnly: undefined,
+      uploadId: undefined,
     });
   });
 
   it('getResultDetail — scoresService.findByExamineeNo 호출', async () => {
     await app.getResultDetail('e1', '001', 't1');
-    expect(mockScoresService.findByExamineeNo).toHaveBeenCalledWith('e1', '001', 't1');
+    // 현재 업로드 없을 때 uploadId는 undefined로 전달
+    expect(mockScoresService.findByExamineeNo).toHaveBeenCalledWith('e1', '001', 't1', undefined);
   });
 
   it('calculate — 파이프라인 미설정 시 BadRequestException', async () => {

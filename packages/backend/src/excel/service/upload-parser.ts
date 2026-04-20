@@ -89,8 +89,9 @@ export class UploadParser {
 
   /**
    * B유형 전용 파서: 과목별 시트를 모두 순회하여 수험번호 기준으로 병합.
-   * 시트명 ↔ config.subjects[i].name 매칭 (공백 trim).
-   * 각 행: 수험번호(1열), 수험자명(2열), 시험유형(3열), Q1..Qn(4열~).
+   * 시트명 패턴:
+   *   1) {과목명}_{유형명} → 시트명에서 subject/examType 결정, 시험유형 컬럼 없음
+   *   2) {과목명}          → 3열의 시험유형 컬럼 사용 (하위 호환)
    */
   async parseTypeB(buffer: Buffer, config: TypeBConfig): Promise<ParseResult> {
     const workbook = new ExcelJS.Workbook();
@@ -107,68 +108,134 @@ export class UploadParser {
     for (const sheet of workbook.worksheets) {
       const sheetName = sheet.name.trim();
 
-      // 시트명으로 config에서 과목 찾기
-      const subject = config.subjects.find((s) => s.name.trim() === sheetName);
-      if (!subject) {
-        // 등록되지 않은 시트는 건너뜀
-        continue;
+      // 1) {과목명}_{유형명} 패턴 먼저 시도
+      let matchedSubject: TypeBConfig['subjects'][number] | null = null;
+      let matchedExamTypeName: string | null = null;
+
+      outer: for (const s of config.subjects) {
+        for (const et of s.examTypes ?? []) {
+          if (sheetName === `${s.name.trim()}_${et.name.trim()}`) {
+            matchedSubject = s;
+            matchedExamTypeName = et.name;
+            break outer;
+          }
+        }
       }
 
-      // 헤더 파싱 (Q1, Q2, ... 위치 확인)
+      // 헤더 파싱 (Q숫자 패턴 컬럼 위치 확인)
       const headerRow = sheet.getRow(1);
       const headers: string[] = [];
       headerRow.eachCell((cell, colNumber) => {
         headers[colNumber] = String(cell.value ?? '').trim();
       });
 
-      sheet.eachRow((row, rowNumber) => {
-        if (rowNumber === 1) return; // 헤더 건너뜀
+      if (matchedSubject && matchedExamTypeName) {
+        // {과목명}_{유형명} 시트: 시트명으로 subject/examType 확정, 시험유형 컬럼 없음
+        const subject = matchedSubject;
+        const examTypeName = matchedExamTypeName;
 
-        const examineeNo = String(row.getCell(1).value ?? '').trim();
-        const examineeName = String(row.getCell(2).value ?? '').trim();
-        const examType = String(row.getCell(3).value ?? '').trim();
+        sheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return;
 
-        if (!examineeNo) {
-          errors.push({
-            row: rowNumber,
-            examineeNo: '',
-            examineeName: '',
-            column: '수험번호',
-            message: `[${sheetName}] 수험번호가 비어있습니다`,
+          const examineeNo = String(row.getCell(1).value ?? '').trim();
+          const examineeName = String(row.getCell(2).value ?? '').trim();
+
+          if (!examineeNo) {
+            errors.push({
+              row: rowNumber,
+              examineeNo: '',
+              examineeName: '',
+              column: '수험번호',
+              message: `[${sheetName}] 수험번호가 비어있습니다`,
+            });
+            return;
+          }
+
+          // Q1..Qn 파싱 (헤더가 'Q숫자' 패턴인 열)
+          const answers: Record<number, string> = {};
+          row.eachCell((cell, colNumber) => {
+            const header = headers[colNumber] ?? '';
+            const qMatch = /^Q(\d+)$/i.exec(header);
+            if (qMatch) {
+              const qNo = parseInt(qMatch[1], 10);
+              answers[qNo] = String(cell.value ?? '').trim();
+            }
           });
-          return;
-        }
 
-        // Q1..Qn 파싱 (4열~, 헤더가 'Q숫자' 패턴인 열)
-        const answers: Record<number, string> = {};
-        row.eachCell((cell, colNumber) => {
-          const header = headers[colNumber] ?? '';
-          const qMatch = /^Q(\d+)$/i.exec(header);
-          if (qMatch) {
-            const qNo = parseInt(qMatch[1], 10);
-            answers[qNo] = String(cell.value ?? '').trim();
+          const subjectData: SubjectAnswerData = {
+            subjectId: subject.id,
+            examType: examTypeName,
+            answers,
+          };
+
+          if (mergedMap.has(examineeNo)) {
+            const existing = mergedMap.get(examineeNo)!;
+            (existing.data as unknown as TypeBRowData).subjects.push(subjectData);
+          } else {
+            const typeBData: TypeBRowData = { subjects: [subjectData] };
+            mergedMap.set(examineeNo, {
+              examineeNo,
+              examineeName,
+              data: typeBData as unknown as Record<string, unknown>,
+            });
           }
         });
-
-        const subjectData: SubjectAnswerData = {
-          subjectId: subject.id,
-          examType,
-          answers,
-        };
-
-        // 수험번호 기준 병합
-        if (mergedMap.has(examineeNo)) {
-          const existing = mergedMap.get(examineeNo)!;
-          (existing.data as unknown as TypeBRowData).subjects.push(subjectData);
-        } else {
-          const typeBData: TypeBRowData = { subjects: [subjectData] };
-          mergedMap.set(examineeNo, {
-            examineeNo,
-            examineeName,
-            data: typeBData as unknown as Record<string, unknown>,  // B유형 data는 TypeBRowData 구조
-          });
+      } else {
+        // 2) 과목명 시트: 기존 로직 (3열 시험유형 컬럼)
+        const subject = config.subjects.find((s) => s.name.trim() === sheetName);
+        if (!subject) {
+          // 등록되지 않은 시트는 건너뜀
+          continue;
         }
-      });
+
+        sheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return;
+
+          const examineeNo = String(row.getCell(1).value ?? '').trim();
+          const examineeName = String(row.getCell(2).value ?? '').trim();
+          const examType = String(row.getCell(3).value ?? '').trim();
+
+          if (!examineeNo) {
+            errors.push({
+              row: rowNumber,
+              examineeNo: '',
+              examineeName: '',
+              column: '수험번호',
+              message: `[${sheetName}] 수험번호가 비어있습니다`,
+            });
+            return;
+          }
+
+          // Q1..Qn 파싱 (4열~, 헤더가 'Q숫자' 패턴인 열)
+          const answers: Record<number, string> = {};
+          row.eachCell((cell, colNumber) => {
+            const header = headers[colNumber] ?? '';
+            const qMatch = /^Q(\d+)$/i.exec(header);
+            if (qMatch) {
+              const qNo = parseInt(qMatch[1], 10);
+              answers[qNo] = String(cell.value ?? '').trim();
+            }
+          });
+
+          const subjectData: SubjectAnswerData = {
+            subjectId: subject.id,
+            examType,
+            answers,
+          };
+
+          if (mergedMap.has(examineeNo)) {
+            const existing = mergedMap.get(examineeNo)!;
+            (existing.data as unknown as TypeBRowData).subjects.push(subjectData);
+          } else {
+            const typeBData: TypeBRowData = { subjects: [subjectData] };
+            mergedMap.set(examineeNo, {
+              examineeNo,
+              examineeName,
+              data: typeBData as unknown as Record<string, unknown>,
+            });
+          }
+        });
+      }
     }
 
     return { rows: Array.from(mergedMap.values()), errors };
