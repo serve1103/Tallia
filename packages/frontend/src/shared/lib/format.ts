@@ -1,7 +1,9 @@
 /** 숫자를 소수점 places 자리까지 표시. null/undefined → '-' */
-export function formatNumber(value: number | null | undefined, places = 2): string {
+export function formatNumber(value: number | string | null | undefined, places = 2): string {
   if (value == null) return '-';
-  return value.toFixed(places);
+  const num = Number(value);
+  if (isNaN(num)) return '-';
+  return num.toFixed(places);
 }
 
 /** 점수 표시: rawScore / maxScore 형태 */
