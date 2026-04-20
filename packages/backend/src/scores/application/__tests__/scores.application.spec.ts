@@ -7,6 +7,7 @@ import { ExcelService } from '../../../excel/service/excel.service';
 import { ResultExporter } from '../../../excel/service/result-exporter';
 import { PipelineExecutor } from '../../../pipeline/pipeline-executor';
 import { AuditService } from '../../../audit/service/audit.service';
+import { MappingTablesService } from '../../../mapping-tables/service/mapping-tables.service';
 
 const mockScoresService = {
   findAll: jest.fn().mockResolvedValue({ data: [], total: 0 }),
@@ -56,6 +57,8 @@ const mockAuditService = {
   log: jest.fn().mockResolvedValue(undefined),
 };
 
+const mockMappingTablesService = {};
+
 describe('ScoresApplication', () => {
   let app: ScoresApplication;
 
@@ -69,6 +72,7 @@ describe('ScoresApplication', () => {
         { provide: ResultExporter, useValue: mockResultExporter },
         { provide: PipelineExecutor, useValue: mockPipelineExecutor },
         { provide: AuditService, useValue: mockAuditService },
+        { provide: MappingTablesService, useValue: mockMappingTablesService },
       ],
     }).compile();
 

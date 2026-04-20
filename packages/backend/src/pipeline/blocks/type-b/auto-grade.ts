@@ -13,35 +13,86 @@ const definition: BlockDefinition = {
 
 interface AnswerKeyEntry { questionNo: number; answers: string[]; score: number }
 interface QuestionError { questionNo: number; handling: 'all_correct' | 'exclude' }
+interface ExamTypeDef { id: string; answerKey?: AnswerKeyEntry[] }
+interface SubjectDef { id: string; examTypes: ExamTypeDef[]; questionErrors: QuestionError[] }
+
+/** B유형 블록 입력: 과목별 답안 배열 */
+interface SubjectAnswerInput {
+  subjectId: string;
+  examType: string;
+  /** qNo → 응답 문자열 */
+  answers: Record<number, string>;
+}
+
+/**
+ * 채점 결과 항목. subject별로 순서대로 flatten.
+ * sum_by_subject 가 subject 순서로 슬라이스할 수 있도록 __subjectId 를 함께 저장.
+ */
+interface ScoreItem {
+  qNo: number;
+  correct: boolean;
+  score: number;
+  __subjectId: string;
+}
 
 export const autoGradeBlock: BlockHandler = {
   definition,
   execute(input: BlockInput): BlockOutput {
-    const data = input.data as { answers: { qNo: number; answer: string }[] };
-    const config = input.context.config as {
-      subjects: { examTypes: { answerKey?: AnswerKeyEntry[] }[]; questionErrors: QuestionError[] }[];
-    };
+    const config = input.context.config as { subjects: SubjectDef[] };
 
-    const answerKey = config.subjects[0]?.examTypes[0]?.answerKey ?? [];
-    const errors = config.subjects[0]?.questionErrors ?? [];
+    // 다과목 형식 { subjects: SubjectAnswerInput[] } 지원
+    const raw = input.data as { subjects?: SubjectAnswerInput[] };
 
-    const scores = data.answers.map((qa) => {
-      const key = answerKey.find((k) => k.questionNo === qa.qNo);
-      if (!key) return { qNo: qa.qNo, correct: false, score: 0 };
+    if (!raw.subjects || raw.subjects.length === 0) {
+      // 비어 있으면 빈 결과 반환
+      return { data: { scores: [] } };
+    }
 
-      const error = errors.find((e) => e.questionNo === qa.qNo);
-      if (error?.handling === 'all_correct') {
-        return { qNo: qa.qNo, correct: true, score: key.score };
+    const allScores: ScoreItem[] = [];
+
+    for (const subjectInput of raw.subjects) {
+      // config에서 해당 과목 찾기
+      const subjectConfig = config.subjects.find((s) => s.id === subjectInput.subjectId);
+      if (!subjectConfig) {
+        // 설정에 없는 과목은 건너뜀
+        continue;
       }
-      if (error?.handling === 'exclude') {
-        return { qNo: qa.qNo, correct: false, score: 0 };
+
+      // 수험자가 선택한 시험유형의 정답키 조회
+      const examTypeDef = subjectConfig.examTypes.find((et) => et.id === subjectInput.examType);
+      const answerKey: AnswerKeyEntry[] = examTypeDef?.answerKey ?? [];
+      const questionErrors = subjectConfig.questionErrors ?? [];
+
+      // answers는 { [qNo]: answer } 형태 — answerKey 길이 기준으로 채점
+      const qNos = answerKey.map((k) => k.questionNo);
+
+      for (const key of answerKey) {
+        const studentAnswer = String(subjectInput.answers[key.questionNo] ?? '').trim();
+
+        const error = questionErrors.find((e) => e.questionNo === key.questionNo);
+        if (error?.handling === 'all_correct') {
+          allScores.push({ qNo: key.questionNo, correct: true, score: key.score, __subjectId: subjectInput.subjectId });
+          continue;
+        }
+        if (error?.handling === 'exclude') {
+          allScores.push({ qNo: key.questionNo, correct: false, score: 0, __subjectId: subjectInput.subjectId });
+          continue;
+        }
+
+        // 복수정답: answers 배열 중 하나라도 일치하면 정답
+        const correct = key.answers.includes(studentAnswer);
+        allScores.push({ qNo: key.questionNo, correct, score: correct ? key.score : 0, __subjectId: subjectInput.subjectId });
       }
 
-      // 복수정답: answers 배열 중 하나라도 일치하면 정답
-      const correct = key.answers.includes(qa.answer);
-      return { qNo: qa.qNo, correct, score: correct ? key.score : 0 };
-    });
+      // answerKey에 없는 문항(수험자가 응답했지만 키 없음)은 0점 처리
+      for (const [qNoStr] of Object.entries(subjectInput.answers)) {
+        const qNo = Number(qNoStr);
+        if (!qNos.includes(qNo)) {
+          allScores.push({ qNo, correct: false, score: 0, __subjectId: subjectInput.subjectId });
+        }
+      }
+    }
 
-    return { data: { scores } };
+    return { data: { scores: allScores } };
   },
 };
