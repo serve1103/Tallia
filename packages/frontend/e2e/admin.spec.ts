@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from './auth.spec';
+import { login } from './helpers';
 
 // platform_admin 전용 테스트
 // rate limit 주의: 두 시나리오를 하나의 테스트로 묶어 로그인 1회만 수행
