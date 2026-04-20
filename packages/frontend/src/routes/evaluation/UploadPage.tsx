@@ -6,6 +6,7 @@ import { getEvalTypeLabel } from '../../domains/evaluation/models/evaluation';
 import { UploadDropzone } from '../../domains/excel/components/UploadDropzone';
 import { UploadHistory } from '../../domains/excel/components/UploadHistory';
 import { useDownloadTemplate } from '../../domains/excel/hooks/useExcel';
+import { EvaluationTabs } from '../../shared/components/EvaluationTabs';
 
 export function UploadPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,17 +19,17 @@ export function UploadPage() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 24 }}>
+      <Space style={{ marginBottom: 16 }}>
         <Button icon={<ArrowLeftOutlined />} type="text" onClick={() => navigate('/dashboard')}>
           목록으로
         </Button>
       </Space>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <Typography.Title level={4} style={{ margin: 0 }}>
             {evaluation.name}
           </Typography.Title>
-          <Typography.Text type="secondary">{getEvalTypeLabel(evaluation.type)} — 엑셀 업로드</Typography.Text>
+          <Typography.Text type="secondary">{getEvalTypeLabel(evaluation.type)}</Typography.Text>
         </div>
         <Button
           icon={<DownloadOutlined />}
@@ -38,6 +39,8 @@ export function UploadPage() {
           양식 다운로드
         </Button>
       </div>
+
+      <EvaluationTabs evaluationId={id} activeKey="upload" />
 
       <UploadDropzone evaluationId={id} />
 

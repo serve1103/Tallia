@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Spin, message, Button, Space } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import { EvaluationTabs } from '../../shared/components/EvaluationTabs';
 import { useEvaluation, useEvalConfig, useSaveEvalConfig } from '../../domains/evaluation/hooks/useEvaluations';
 import { TypeAConfigForm } from '../../domains/evaluation/components/TypeAConfigForm';
 import { TypeBConfigForm } from '../../domains/evaluation/components/TypeBConfigForm';
@@ -43,7 +44,7 @@ export function ConfigPage() {
 
   return (
     <div>
-      <Space style={{ marginBottom: 24 }}>
+      <Space style={{ marginBottom: 16 }}>
         <Button icon={<ArrowLeftOutlined />} type="text" onClick={() => navigate('/dashboard')}>
           목록으로
         </Button>
@@ -51,9 +52,10 @@ export function ConfigPage() {
       <Typography.Title level={4} style={{ marginBottom: 4 }}>
         {evaluation.name}
       </Typography.Title>
-      <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
-        {getEvalTypeLabel(evaluation.type)} 설정
+      <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+        {getEvalTypeLabel(evaluation.type)}
       </Typography.Text>
+      <EvaluationTabs evaluationId={id} activeKey="config" />
       {renderForm()}
     </div>
   );
