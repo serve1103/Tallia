@@ -16,6 +16,7 @@ interface EvalFilters {
   limit: number;
   type?: EvaluationType;
   academicYear?: string;
+  admissionType?: string;
 }
 
 export function useEvaluations(filters: EvalFilters) {

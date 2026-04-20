@@ -62,7 +62,20 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
   }
 
   async delete(id: string, tenantId: string): Promise<void> {
-    await this.prisma.evaluation.deleteMany({ where: { id, tenantId } });
+    // 자식 레코드(FK) 먼저 삭제 후 본인 삭제. 하나의 트랜잭션으로 원자 실행.
+    await this.prisma.$transaction(async (tx) => {
+      await tx.score.deleteMany({ where: { evaluationId: id, tenantId } });
+      await tx.scoreUpload.deleteMany({ where: { evaluationId: id, tenantId } });
+      // mapping_tables → entries (cascade 가정하지 않고 명시 삭제)
+      const mapping = await tx.mappingTable.findFirst({
+        where: { evaluationId: id, tenantId },
+      });
+      if (mapping) {
+        await tx.mappingTableEntry.deleteMany({ where: { mappingTableId: mapping.id } });
+        await tx.mappingTable.delete({ where: { id: mapping.id } });
+      }
+      await tx.evaluation.deleteMany({ where: { id, tenantId } });
+    });
   }
 
   async copy(id: string, tenantId: string): Promise<EvaluationEntity> {
