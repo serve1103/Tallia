@@ -67,4 +67,12 @@ export class AuthController {
     await this.authApp.resetPassword(body.userId, body.newPassword);
     return { data: { reset: true } };
   }
+
+  @Public()
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refreshToken');
+    return { data: { success: true } };
+  }
 }

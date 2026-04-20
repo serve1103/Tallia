@@ -33,7 +33,7 @@ describe('Pipeline API', () => {
     const config = { blocks: [{ type: 'normalize_to_max', params: {}, decimal: null }] };
     mockPost.mockResolvedValue({ data: { data: { success: true } } });
     await savePipeline('e1', config);
-    expect(mockPost).toHaveBeenCalledWith('/evaluations/e1/pipeline/save', config);
+    expect(mockPost).toHaveBeenCalledWith('/evaluations/e1/pipeline/save', { pipelineConfig: config });
   });
 
   it('validatePipelineApi — POST /evaluations/:id/pipeline/validate', async () => {

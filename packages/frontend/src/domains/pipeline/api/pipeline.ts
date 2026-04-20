@@ -7,7 +7,7 @@ export async function fetchPipeline(evaluationId: string): Promise<PipelineConfi
 }
 
 export async function savePipeline(evaluationId: string, config: PipelineConfig): Promise<void> {
-  await apiClient.post(`/evaluations/${evaluationId}/pipeline/save`, config);
+  await apiClient.post(`/evaluations/${evaluationId}/pipeline/save`, { pipelineConfig: config });
 }
 
 export async function validatePipelineApi(

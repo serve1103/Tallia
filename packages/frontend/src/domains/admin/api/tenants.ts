@@ -11,7 +11,8 @@ interface CreateTenantInput {
 
 export async function fetchTenants(params: PaginationParams): Promise<PaginatedResponse<Tenant>> {
   const { data } = await apiClient.get('/admin/tenants', { params });
-  return data;
+  const items = data.data;
+  return { data: items, meta: { total: items.length } };
 }
 
 export async function fetchTenant(tenantId: string): Promise<Tenant> {
@@ -38,7 +39,8 @@ export async function fetchTenantUsers(
   params: PaginationParams,
 ): Promise<PaginatedResponse<User>> {
   const { data } = await apiClient.get(`/admin/tenants/${tenantId}/users`, { params });
-  return data;
+  const items = data.data;
+  return { data: items, meta: { total: items.length } };
 }
 
 export async function removeTenantUser(tenantId: string, userId: string): Promise<void> {
