@@ -14,13 +14,12 @@ test.describe('평가 CRUD', () => {
     await page.goto('/evaluations/create');
     await expect(page.getByText('평가명')).toBeVisible();
 
-    // 폼 작성
+    // 폼 작성 (유형은 카드 클릭 방식)
     await page.getByPlaceholder('예: 2026학년도 수시 면접평가').fill('E2E 테스트 평가');
-    await page.locator('.ant-select-selector').click();
-    await page.locator('.ant-select-item-option').filter({ hasText: 'A. 위원 평가' }).click();
+    await page.getByText('A. 위원 점수 집계', { exact: true }).click();
 
-    // 생성 버튼
-    await page.getByRole('button', { name: '생성' }).click();
+    // 제출 버튼 (텍스트: '다음: 세부 설정')
+    await page.getByRole('button', { name: '다음: 세부 설정' }).click();
 
     // 설정 페이지로 이동
     await expect(page).toHaveURL(/\/evaluations\/.*\/config/, { timeout: 10000 });
@@ -29,9 +28,8 @@ test.describe('평가 CRUD', () => {
   test('평가 설정 저장 후 성공 메시지', async ({ page }) => {
     await page.goto('/evaluations/create');
     await page.getByPlaceholder('예: 2026학년도 수시 면접평가').fill('설정 저장 테스트');
-    await page.locator('.ant-select-selector').click();
-    await page.locator('.ant-select-item-option').filter({ hasText: 'A. 위원 평가' }).click();
-    await page.getByRole('button', { name: '생성' }).click();
+    await page.getByText('A. 위원 점수 집계', { exact: true }).click();
+    await page.getByRole('button', { name: '다음: 세부 설정' }).click();
     await expect(page).toHaveURL(/\/evaluations\/.*\/config/, { timeout: 10000 });
 
     // 설정 저장
