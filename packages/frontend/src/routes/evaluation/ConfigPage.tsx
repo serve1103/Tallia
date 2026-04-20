@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Spin, message, Button, Space } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Typography, Spin, message, Button, Space, Input } from 'antd';
+import { ArrowLeftOutlined, EditOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { EvaluationTabs } from '../../shared/components/EvaluationTabs';
 import {
   useEvaluation,
@@ -26,6 +27,9 @@ export function ConfigPage() {
   const saveMutation = useSaveEvalConfig();
   const updateMutation = useUpdateEvaluation();
 
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+
   if (isLoading || configLoading) return <Spin />;
   if (!evaluation || !id) return <Typography.Text>평가를 찾을 수 없습니다</Typography.Text>;
 
@@ -48,6 +52,35 @@ export function ConfigPage() {
       message.success('설정이 저장되었습니다');
     } catch {
       message.error('저장에 실패했습니다');
+    }
+  };
+
+  const startEditName = () => {
+    setNameDraft(evaluation.name);
+    setEditingName(true);
+  };
+
+  const cancelEditName = () => {
+    setEditingName(false);
+    setNameDraft('');
+  };
+
+  const submitEditName = async () => {
+    const next = nameDraft.trim();
+    if (!next) {
+      message.error('평가명을 입력하세요');
+      return;
+    }
+    if (next === evaluation.name) {
+      setEditingName(false);
+      return;
+    }
+    try {
+      await updateMutation.mutateAsync({ id, name: next });
+      message.success('평가명이 변경되었습니다');
+      setEditingName(false);
+    } catch {
+      message.error('평가명 변경에 실패했습니다');
     }
   };
 
@@ -102,9 +135,39 @@ export function ConfigPage() {
           목록으로
         </Button>
       </Space>
-      <Typography.Title level={4} style={{ marginBottom: 4 }}>
-        {evaluation.name}
-      </Typography.Title>
+
+      {editingName ? (
+        <Space.Compact style={{ marginBottom: 4, width: '100%', maxWidth: 520 }}>
+          <Input
+            autoFocus
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            onPressEnter={submitEditName}
+            placeholder="평가명"
+            maxLength={100}
+          />
+          <Button
+            type="primary"
+            icon={<CheckOutlined />}
+            loading={updateMutation.isPending}
+            onClick={submitEditName}
+          >
+            저장
+          </Button>
+          <Button icon={<CloseOutlined />} onClick={cancelEditName}>
+            취소
+          </Button>
+        </Space.Compact>
+      ) : (
+        <Space align="center" style={{ marginBottom: 4 }}>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            {evaluation.name}
+          </Typography.Title>
+          <Button type="text" icon={<EditOutlined />} onClick={startEditName}>
+            이름 수정
+          </Button>
+        </Space>
+      )}
       <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
         {getEvalTypeLabel(evaluation.type)}
       </Typography.Text>

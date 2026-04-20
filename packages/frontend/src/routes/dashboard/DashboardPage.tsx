@@ -1,5 +1,5 @@
-import { Typography, Table, Button, Tag, Space, Select, message, Popconfirm } from 'antd';
-import { PlusOutlined, CopyOutlined } from '@ant-design/icons';
+import { Typography, Table, Button, Tag, Space, Select, Input, message, Popconfirm } from 'antd';
+import { PlusOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { Evaluation, EvaluationType } from '@tallia/shared';
@@ -11,15 +11,24 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<EvaluationType | undefined>();
+  const [academicYearFilter, setAcademicYearFilter] = useState<string | undefined>();
+  const [admissionTypeFilter, setAdmissionTypeFilter] = useState<string | undefined>();
   const pageSize = 20;
 
-  const { data, isLoading } = useEvaluations({ page, limit: pageSize, type: typeFilter });
+  const { data, isLoading } = useEvaluations({
+    page,
+    limit: pageSize,
+    type: typeFilter,
+    academicYear: academicYearFilter,
+    admissionType: admissionTypeFilter,
+  });
   const deleteMutation = useDeleteEvaluation();
   const copyMutation = useCopyEvaluation();
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(id, {
       onSuccess: () => message.success('삭제되었습니다'),
+      onError: () => message.error('삭제에 실패했습니다'),
     });
   };
 
@@ -92,29 +101,69 @@ export function DashboardPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Typography.Title level={3} style={{ letterSpacing: '-0.03em', margin: 0 }}>
           평가 관리
         </Typography.Title>
-        <Space>
-          <Select
-            placeholder="전체 유형"
-            allowClear
-            style={{ width: 160 }}
-            value={typeFilter}
-            onChange={(val) => setTypeFilter(val ?? undefined)}
-            options={[
-              { label: 'A. 위원 평가', value: 'A' },
-              { label: 'B. 자동 채점', value: 'B' },
-              { label: 'C. 문항별 채점', value: 'C' },
-              { label: 'D. 점수 변환표', value: 'D' },
-            ]}
-          />
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/evaluations/create')}>
-            평가 생성
-          </Button>
-        </Space>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/evaluations/create')}>
+          평가 생성
+        </Button>
       </div>
+
+      <Space wrap style={{ marginBottom: 16 }}>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="학년도 (예: 2026)"
+          allowClear
+          style={{ width: 180 }}
+          value={academicYearFilter ?? ''}
+          onChange={(e) => {
+            setPage(1);
+            setAcademicYearFilter(e.target.value || undefined);
+          }}
+        />
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="전형 (예: 수시)"
+          allowClear
+          style={{ width: 180 }}
+          value={admissionTypeFilter ?? ''}
+          onChange={(e) => {
+            setPage(1);
+            setAdmissionTypeFilter(e.target.value || undefined);
+          }}
+        />
+        <Select
+          placeholder="전체 유형"
+          allowClear
+          style={{ width: 180 }}
+          value={typeFilter}
+          onChange={(val) => {
+            setPage(1);
+            setTypeFilter(val ?? undefined);
+          }}
+          options={[
+            { label: 'A. 위원 평가', value: 'A' },
+            { label: 'B. 자동 채점', value: 'B' },
+            { label: 'C. 문항별 채점', value: 'C' },
+            { label: 'D. 점수 변환표', value: 'D' },
+          ]}
+        />
+        {(academicYearFilter || admissionTypeFilter || typeFilter) && (
+          <Button
+            type="text"
+            onClick={() => {
+              setAcademicYearFilter(undefined);
+              setAdmissionTypeFilter(undefined);
+              setTypeFilter(undefined);
+              setPage(1);
+            }}
+          >
+            필터 초기화
+          </Button>
+        )}
+      </Space>
+
       <Table
         columns={columns}
         dataSource={data?.data}
