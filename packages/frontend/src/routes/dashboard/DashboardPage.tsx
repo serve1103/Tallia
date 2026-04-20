@@ -92,16 +92,16 @@ export function DashboardPage() {
         </Typography.Title>
         <Space>
           <Select
-            placeholder="유형 필터"
+            placeholder="전체 유형"
             allowClear
-            style={{ width: 140 }}
+            style={{ width: 160 }}
             value={typeFilter}
-            onChange={setTypeFilter}
+            onChange={(val) => setTypeFilter(val ?? undefined)}
             options={[
-              { label: '위원 평가', value: 'A' },
-              { label: '자동 채점', value: 'B' },
-              { label: '문항별 채점', value: 'C' },
-              { label: '점수 변환표', value: 'D' },
+              { label: 'A. 위원 평가', value: 'A' },
+              { label: 'B. 자동 채점', value: 'B' },
+              { label: 'C. 문항별 채점', value: 'C' },
+              { label: 'D. 점수 변환표', value: 'D' },
             ]}
           />
           <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/evaluations/create')}>

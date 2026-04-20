@@ -2,10 +2,10 @@
   "cookies": [
     {
       "name": "refreshToken",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNzdmZGI4NC1kMTljLTQwMmYtYjU2NS1kNjkwNWIxY2ZkM2IiLCJ0ZW5hbnRJZCI6IjMzNzczODFhLTk5ZDAtNDg4YS1hYjQ0LTBhY2FlZjE3MWI1MiIsInJvbGUiOiJ0ZW5hbnRfYWRtaW4iLCJpYXQiOjE3NzY2NDkzMjIsImV4cCI6MTc3NzI1NDEyMn0._aWpbkOVD8zQx7hDs2Mvf0y-IhBtJZPAzrK_QUM-8PY",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNzdmZGI4NC1kMTljLTQwMmYtYjU2NS1kNjkwNWIxY2ZkM2IiLCJ0ZW5hbnRJZCI6IjMzNzczODFhLTk5ZDAtNDg4YS1hYjQ0LTBhY2FlZjE3MWI1MiIsInJvbGUiOiJ0ZW5hbnRfYWRtaW4iLCJpYXQiOjE3NzY2NTIwMTQsImV4cCI6MTc3NzI1NjgxNH0.5OaKtNzna88RE_ymq_Dv4FF1iW2cXVQiBrcRRpb0Uz0",
       "domain": "localhost",
       "path": "/api/v1/auth/refresh",
-      "expires": 1777254122.289677,
+      "expires": 1777256814.969349,
       "httpOnly": true,
       "secure": false,
       "sameSite": "Strict"
@@ -17,11 +17,11 @@
       "localStorage": [
         {
           "name": "accessToken",
-          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNzdmZGI4NC1kMTljLTQwMmYtYjU2NS1kNjkwNWIxY2ZkM2IiLCJ0ZW5hbnRJZCI6IjMzNzczODFhLTk5ZDAtNDg4YS1hYjQ0LTBhY2FlZjE3MWI1MiIsInJvbGUiOiJ0ZW5hbnRfYWRtaW4iLCJpYXQiOjE3NzY2NDkzMjIsImV4cCI6MTc3NjY1MjkyMn0.oNX4ZKwmspxyCz9vjUC36NRVdBxk4rj3p14X6USwrhE"
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNzdmZGI4NC1kMTljLTQwMmYtYjU2NS1kNjkwNWIxY2ZkM2IiLCJ0ZW5hbnRJZCI6IjMzNzczODFhLTk5ZDAtNDg4YS1hYjQ0LTBhY2FlZjE3MWI1MiIsInJvbGUiOiJ0ZW5hbnRfYWRtaW4iLCJpYXQiOjE3NzY2NTIwMTQsImV4cCI6MTc3NjY1NTYxNH0.reLrlrDAbtWZXPrl7SiR9mN7SC_Qfv2g3feq5vWoEuo"
         },
         {
           "name": "tallia-auth",
-          "value": "{\"state\":{\"user\":{\"id\":\"377fdb84-d19c-402f-b565-d6905b1cfd3b\",\"email\":\"admin@korea.ac.kr\",\"name\":\"입학처 관리자\",\"role\":\"tenant_admin\",\"tenantId\":\"3377381a-99d0-488a-ab44-0acaef171b52\",\"emailVerified\":true},\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNzdmZGI4NC1kMTljLTQwMmYtYjU2NS1kNjkwNWIxY2ZkM2IiLCJ0ZW5hbnRJZCI6IjMzNzczODFhLTk5ZDAtNDg4YS1hYjQ0LTBhY2FlZjE3MWI1MiIsInJvbGUiOiJ0ZW5hbnRfYWRtaW4iLCJpYXQiOjE3NzY2NDkzMjIsImV4cCI6MTc3NjY1MjkyMn0.oNX4ZKwmspxyCz9vjUC36NRVdBxk4rj3p14X6USwrhE\"},\"version\":0}"
+          "value": "{\"state\":{\"user\":{\"id\":\"377fdb84-d19c-402f-b565-d6905b1cfd3b\",\"email\":\"admin@korea.ac.kr\",\"name\":\"입학처 관리자\",\"role\":\"tenant_admin\",\"tenantId\":\"3377381a-99d0-488a-ab44-0acaef171b52\",\"emailVerified\":true},\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNzdmZGI4NC1kMTljLTQwMmYtYjU2NS1kNjkwNWIxY2ZkM2IiLCJ0ZW5hbnRJZCI6IjMzNzczODFhLTk5ZDAtNDg4YS1hYjQ0LTBhY2FlZjE3MWI1MiIsInJvbGUiOiJ0ZW5hbnRfYWRtaW4iLCJpYXQiOjE3NzY2NTIwMTQsImV4cCI6MTc3NjY1NTYxNH0.reLrlrDAbtWZXPrl7SiR9mN7SC_Qfv2g3feq5vWoEuo\"},\"version\":0}"
         }
       ]
     }

@@ -54,7 +54,6 @@ export const router = createBrowserRouter([
       { path: '/evaluations/:id/config', element: <ConfigPage /> },
       { path: '/evaluations/:id/upload', element: <UploadPage /> },
       { path: '/evaluations/:id/pipeline', element: <PipelinePage /> },
-      { path: '/results', element: <ResultListPage /> },
       { path: '/evaluations/:id/results', element: <ResultListPage /> },
       { path: '/evaluations/:id/results/:examineeNo', element: <ResultDetailPage /> },
       { path: '/admin/tenants', element: <TenantListPage /> },

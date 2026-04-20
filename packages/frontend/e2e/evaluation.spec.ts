@@ -65,18 +65,28 @@ test.describe('평가 CRUD', () => {
 });
 
 test.describe('네비게이션', () => {
-  test('사이드바 — 결과 조회 이동', async ({ page }) => {
+  test('평가 탭 — 설정 → 계산과정 → 업로드 → 결과', async ({ page }) => {
     await page.goto('/dashboard');
-    await expect(page.getByRole('heading', { name: '평가 관리' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.ant-table')).toBeVisible({ timeout: 10000 });
 
-    await page.locator('.ant-menu-item').filter({ hasText: '결과 조회' }).click();
-    await expect(page).toHaveURL(/\/results/, { timeout: 5000 });
-  });
+    // 첫 번째 평가 클릭 → 설정 페이지
+    const evalLink = page.locator('.ant-table a, .ant-table .ant-btn-link').first();
+    if (await evalLink.isVisible()) {
+      await evalLink.click();
+      await expect(page).toHaveURL(/\/evaluations\/.*\/config/, { timeout: 5000 });
 
-  test('사이드바 — 대시보드 이동', async ({ page }) => {
-    await page.goto('/results');
-    await page.locator('.ant-menu-item').filter({ hasText: '대시보드' }).click();
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 5000 });
+      // 탭 이동: 계산 과정
+      await page.getByRole('tab', { name: '계산 과정' }).click();
+      await expect(page).toHaveURL(/\/pipeline/, { timeout: 5000 });
+
+      // 탭 이동: 엑셀 업로드
+      await page.getByRole('tab', { name: '엑셀 업로드' }).click();
+      await expect(page).toHaveURL(/\/upload/, { timeout: 5000 });
+
+      // 탭 이동: 결과 조회
+      await page.getByRole('tab', { name: '결과 조회' }).click();
+      await expect(page).toHaveURL(/\/results/, { timeout: 5000 });
+    }
   });
 
   test('평가 생성 후 뒤로가기 → 대시보드', async ({ page }) => {
