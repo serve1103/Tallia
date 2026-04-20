@@ -3,6 +3,15 @@ import { test, expect } from '@playwright/test';
 // storageState로 이미 인증됨 (setup.ts에서 세션 저장)
 // 매번 로그인하지 않음
 
+test.describe('사이드바', () => {
+  test('tenant_admin — 대학 관리 메뉴 비노출', async ({ page }) => {
+    // storageState로 tenant_admin 세션 이미 로드됨
+    await page.goto('/dashboard');
+    await expect(page.getByRole('heading', { name: '평가 관리' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('대학 관리')).not.toBeVisible();
+  });
+});
+
 test.describe('평가 CRUD', () => {
   test('대시보드에 평가 목록이 표시된다', async ({ page }) => {
     await page.goto('/dashboard');
