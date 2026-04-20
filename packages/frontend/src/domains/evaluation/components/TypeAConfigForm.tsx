@@ -4,6 +4,9 @@ import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TypeAConfig, ItemDefinition } from '@tallia/shared';
 import { CommonSettingsCard, DEFAULT_COMMON_SETTINGS } from './CommonSettingsCard';
 import type { CommonSettings } from './CommonSettingsCard';
+import { GradeMappingEditor } from './GradeMappingEditor';
+
+const { Text } = Typography;
 
 interface Props {
   value?: TypeAConfig;
@@ -23,6 +26,16 @@ const emptyItem: ItemDefinition = {
 export function TypeAConfigForm({ value, commonSettings, onSave, loading }: Props) {
   const [form] = Form.useForm();
   const [settings, setSettings] = useState<CommonSettings>(commonSettings ?? DEFAULT_COMMON_SETTINGS);
+  const [gradeMappings, setGradeMappings] = useState<Record<number, Record<string, number>>>(() => {
+    if (value?.dataType === 'grade' && value.items) {
+      return Object.fromEntries(
+        value.items.map((item, idx) => [idx, item.gradeMapping ?? { A: 50, B: 40, C: 30 }])
+      );
+    }
+    return {};
+  });
+
+  const dataType = Form.useWatch('dataType', form);
 
   const handleFinish = (values: { maxCommitteeCount: number; dataType: string; items: Record<string, unknown>[] }) => {
     const config: TypeAConfig = {
@@ -32,6 +45,7 @@ export function TypeAConfigForm({ value, commonSettings, onSave, loading }: Prop
       items: values.items.map((item: Record<string, unknown>, idx: number) => ({
         ...item,
         id: item.id || `item-${idx}`,
+        ...(values.dataType === 'grade' ? { gradeMapping: gradeMappings[idx] ?? {} } : {}),
       })) as ItemDefinition[],
     };
     onSave(config, settings);
@@ -75,14 +89,35 @@ export function TypeAConfigForm({ value, commonSettings, onSave, loading }: Prop
                   </Form.Item>
                   <Button type="text" danger icon={<DeleteOutlined />} onClick={() => remove(name)} />
                 </Space>
+                {dataType === 'grade' && (
+                  <GradeMappingEditor
+                    value={gradeMappings[name] ?? { A: 50, B: 40, C: 30 }}
+                    onChange={(next) =>
+                      setGradeMappings((prev) => ({ ...prev, [name]: next }))
+                    }
+                  />
+                )}
               </Card>
             ))}
-            <Button type="dashed" block icon={<PlusOutlined />} onClick={() => add(emptyItem)}>
+            <Button
+              type="dashed"
+              block
+              icon={<PlusOutlined />}
+              onClick={() => {
+                add(emptyItem);
+              }}
+            >
               항목 추가
             </Button>
           </>
         )}
       </Form.List>
+
+      {dataType === 'grade' && (
+        <Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 12 }}>
+          등급 입력 방식: 항목별로 등급-점수 매핑을 설정하세요.
+        </Text>
+      )}
 
       <CommonSettingsCard value={settings} onChange={setSettings} />
 

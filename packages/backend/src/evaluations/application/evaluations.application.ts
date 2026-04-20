@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { EvaluationsService } from '../service/evaluations.service';
 import type { EvaluationFilter } from '../repository/evaluations.repository';
+import { getDefaultPipeline } from '../../pipeline/default-pipelines';
 
 @Injectable()
 export class EvaluationsApplication {
@@ -28,7 +29,7 @@ export class EvaluationsApplication {
       academicYear: body.academicYear,
       admissionType: body.admissionType,
       config: (body.config ?? defaultConfigs[body.type] ?? {}) as any,
-      pipelineConfig: (body.pipelineConfig as any) ?? { blocks: [] },
+      pipelineConfig: (body.pipelineConfig as any) ?? getDefaultPipeline(body.type as 'A' | 'B' | 'C' | 'D'),
     });
   }
 

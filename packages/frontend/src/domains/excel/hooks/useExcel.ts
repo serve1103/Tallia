@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { downloadTemplate, uploadExcel, fetchUploads, rollbackUpload } from '../api/excel';
+import { downloadTemplate, uploadExcel, uploadExcelSkipErrors, fetchUploads, rollbackUpload } from '../api/excel';
 
 export function useUploads(evaluationId: string | undefined) {
   return useQuery({
@@ -13,6 +13,16 @@ export function useUploadExcel(evaluationId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (file: File) => uploadExcel(evaluationId, file),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId, 'uploads'] });
+    },
+  });
+}
+
+export function useUploadExcelSkipErrors(evaluationId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => uploadExcelSkipErrors(evaluationId, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId, 'uploads'] });
     },

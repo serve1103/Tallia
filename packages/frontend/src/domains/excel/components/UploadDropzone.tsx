@@ -1,14 +1,16 @@
 import { Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { useUploadExcel } from '../hooks/useExcel';
+import type { ScoreUpload } from '@tallia/shared';
 
 const { Dragger } = Upload;
 
 interface Props {
   evaluationId: string;
+  onUploadSuccess?: (upload: ScoreUpload, file: File) => void;
 }
 
-export function UploadDropzone({ evaluationId }: Props) {
+export function UploadDropzone({ evaluationId, onUploadSuccess }: Props) {
   const uploadMutation = useUploadExcel(evaluationId);
 
   const handleUpload = (file: File) => {
@@ -31,7 +33,7 @@ export function UploadDropzone({ evaluationId }: Props) {
 
     uploadMutation.mutate(file, {
       onSuccess: (data) => {
-        message.success(`${data.rowCount}건 업로드 완료`);
+        onUploadSuccess ? onUploadSuccess(data, file) : message.success(`${data.rowCount}건 업로드 완료`);
       },
       onError: () => {
         message.error('업로드에 실패했습니다');

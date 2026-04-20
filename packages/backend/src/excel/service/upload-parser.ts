@@ -7,9 +7,17 @@ export interface ParsedRow {
   data: Record<string, unknown>;
 }
 
+export interface ParseError {
+  row: number;
+  examineeNo: string;
+  examineeName: string;
+  column: string;
+  message: string;
+}
+
 export interface ParseResult {
   rows: ParsedRow[];
-  errors: { row: number; column: string; message: string }[];
+  errors: ParseError[];
 }
 
 @Injectable()
@@ -28,7 +36,7 @@ export class UploadParser {
     });
 
     const rows: ParsedRow[] = [];
-    const errors: { row: number; column: string; message: string }[] = [];
+    const errors: ParseError[] = [];
 
     sheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return; // skip header
@@ -37,7 +45,7 @@ export class UploadParser {
       const examineeName = String(row.getCell(2).value ?? '').trim();
 
       if (!examineeNo) {
-        errors.push({ row: rowNumber, column: headers[1] ?? 'A', message: '수험번호가 비어있습니다' });
+        errors.push({ row: rowNumber, examineeNo: '', examineeName: '', column: headers[1] ?? 'A', message: '수험번호가 비어있습니다' });
         return;
       }
 

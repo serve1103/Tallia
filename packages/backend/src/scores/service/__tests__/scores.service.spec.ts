@@ -26,6 +26,7 @@ const mockRepo: ScoresRepository = {
   findByExamineeNo: jest.fn().mockResolvedValue(mockScore),
   upsertBatch: jest.fn().mockResolvedValue(1),
   deleteByEvaluation: jest.fn().mockResolvedValue(0),
+  getStats: jest.fn().mockResolvedValue({ total: 1, average: 87.5, failCount: 0, max: 90 }),
 };
 
 describe('ScoresService', () => {

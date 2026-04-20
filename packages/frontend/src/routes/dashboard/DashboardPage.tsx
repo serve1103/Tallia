@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import type { Evaluation, EvaluationType } from '@tallia/shared';
 import { useEvaluations, useDeleteEvaluation, useCopyEvaluation } from '../../domains/evaluation/hooks/useEvaluations';
 import { getEvalTypeLabel, getStatusLabel, getStatusColor } from '../../domains/evaluation/models/evaluation';
-import { formatDate } from '../../shared/lib/format';
+import { formatDate, formatDateTime } from '../../shared/lib/format';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -67,6 +67,12 @@ export function DashboardPage() {
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: formatDate,
+    },
+    {
+      title: '최종 계산',
+      key: 'lastCalculated',
+      render: (_: unknown, record: Evaluation) =>
+        record.status === 'calculated' ? formatDateTime(record.updatedAt) : '-',
     },
     {
       title: '',

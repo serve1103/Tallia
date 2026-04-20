@@ -17,6 +17,17 @@ export async function uploadExcel(evaluationId: string, file: File): Promise<Sco
   return data.data;
 }
 
+export async function uploadExcelSkipErrors(evaluationId: string, file: File): Promise<ScoreUpload> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const { data } = await apiClient.post(
+    `/evaluations/${evaluationId}/excel/upload?skipErrors=true`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  return data.data;
+}
+
 export async function fetchUploads(evaluationId: string): Promise<ScoreUpload[]> {
   const { data } = await apiClient.get(`/evaluations/${evaluationId}/excel/uploads`);
   return data.data;
