@@ -39,7 +39,7 @@ describe('Scores API', () => {
   it('fetchResults — GET /evaluations/:id/results', async () => {
     mockGet.mockResolvedValue({ data: { data: [], meta: { total: 0 } } });
     const result = await fetchResults('e1', { page: 1, limit: 20 });
-    expect(mockGet).toHaveBeenCalledWith('/evaluations/e1/results', { params: { page: 1, limit: 20 } });
+    expect(mockGet).toHaveBeenCalledWith('/evaluations/e1/results', { params: { page: 1, limit: 20, failOnly: undefined } });
     expect(result.data).toEqual([]);
   });
 
@@ -54,6 +54,9 @@ describe('Scores API', () => {
   it('downloadResults — GET /evaluations/:id/results/download', async () => {
     mockGet.mockResolvedValue({ data: new Blob() });
     await downloadResults('e1');
-    expect(mockGet).toHaveBeenCalledWith('/evaluations/e1/results/download', { responseType: 'blob' });
+    expect(mockGet).toHaveBeenCalledWith('/evaluations/e1/results/download', {
+      params: { includeIntermediate: undefined },
+      responseType: 'blob',
+    });
   });
 });

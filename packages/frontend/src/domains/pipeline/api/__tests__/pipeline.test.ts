@@ -45,11 +45,15 @@ describe('Pipeline API', () => {
   });
 
   it('previewPipeline — POST /evaluations/:id/pipeline/preview', async () => {
-    const blocks = [{ type: 'normalize_to_max', params: {}, decimal: null }];
-    const sampleData = { score: 80 };
-    mockPost.mockResolvedValue({ data: { data: { result: 80 } } });
-    const result = await previewPipeline('e1', blocks, sampleData);
-    expect(mockPost).toHaveBeenCalledWith('/evaluations/e1/pipeline/preview', { blocks, sampleData });
-    expect(result.result).toBe(80);
+    const previewResult = {
+      sampleInput: { items: ['인성'], data: [[80]] },
+      intermediateResults: [{ blockIndex: 0, blockType: 'normalize_to_max', label: '정규화', output: { value: 80 } }],
+      finalData: { value: 80 },
+      failFlags: [],
+    };
+    mockPost.mockResolvedValue({ data: { data: previewResult } });
+    const result = await previewPipeline('e1');
+    expect(mockPost).toHaveBeenCalledWith('/evaluations/e1/pipeline/preview', {});
+    expect(result.finalData).toEqual({ value: 80 });
   });
 });

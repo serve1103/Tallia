@@ -36,7 +36,6 @@ export function useValidatePipeline(evaluationId: string) {
 
 export function usePreviewPipeline(evaluationId: string) {
   return useMutation({
-    mutationFn: ({ blocks, sampleData }: { blocks: PipelineBlock[]; sampleData: unknown }) =>
-      previewPipeline(evaluationId, blocks, sampleData),
+    mutationFn: () => previewPipeline(evaluationId),
   });
 }
