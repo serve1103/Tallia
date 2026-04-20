@@ -103,7 +103,7 @@ export interface TypeCConfig {
 export interface ColumnDef {
   key: string;
   label: string;
-  type: 'text' | 'number';
+  type: 'text' | 'number' | 'range';
 }
 
 export interface TypeDConfig {

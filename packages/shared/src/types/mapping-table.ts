@@ -3,7 +3,7 @@ export type MappingType = 'certificate' | 'language_test' | 'transfer_gpa' | 'ac
 export interface MappingTableColumnDef {
   key: string;
   label: string;
-  type: 'text' | 'number';
+  type: 'text' | 'number' | 'range';
 }
 
 export interface MappingTable {

@@ -10,8 +10,22 @@ const sumBySubjectDef: BlockDefinition = {
 export const sumBySubjectBlock: BlockHandler = {
   definition: sumBySubjectDef,
   execute(input: BlockInput): BlockOutput {
-    const data = input.data as { scores: { qNo: number; correct: boolean; score: number }[] };
+    const data = input.data as { scores: { qNo: number; correct: boolean; score: number; __subjectId?: string }[] };
     const config = input.context.config as { subjects: { id: string; name: string; questionCount: number }[] };
+
+    // __subjectId 가 있으면 과목 ID 기준으로 그룹핑, 없으면 questionCount 슬라이스(하위 호환)
+    const hasSubjectId = data.scores.length > 0 && data.scores[0].__subjectId !== undefined;
+
+    if (hasSubjectId) {
+      const subjects = config.subjects.map((subj) => {
+        const slice = data.scores.filter((q) => q.__subjectId === subj.id);
+        const score = slice.reduce((s, q) => s + q.score, 0);
+        return { id: subj.id, name: subj.name, score };
+      });
+      return { data: { subjects } };
+    }
+
+    // 하위 호환: questionCount 기준 슬라이스
     let idx = 0;
     const subjects = config.subjects.map((subj) => {
       const slice = data.scores.slice(idx, idx + subj.questionCount);

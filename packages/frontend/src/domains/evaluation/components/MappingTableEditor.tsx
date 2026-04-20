@@ -1,4 +1,4 @@
-import { Table, Button, Input, InputNumber, Space, Typography, Tabs, Upload, message } from 'antd';
+import { Table, Button, InputNumber, Input, Space, Typography, Tabs, Upload, message } from 'antd';
 import { PlusOutlined, DeleteOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import type { ColumnDef } from '@tallia/shared';
@@ -42,23 +42,32 @@ function SingleTable({
     setEntries(initialEntries);
   }, [initialEntries]);
 
-  const handleCellChange = (index: number, field: string, value: unknown) => {
+  const handleCellChange = (index: number, condKey: string, value: unknown) => {
     const updated = [...entries];
-    if (field === 'score') {
-      updated[index] = { ...updated[index], score: value as number };
-    } else {
-      updated[index] = {
-        ...updated[index],
-        conditions: { ...updated[index].conditions, [field]: value },
-      };
-    }
+    updated[index] = {
+      ...updated[index],
+      conditions: { ...updated[index].conditions, [condKey]: value },
+    };
+    setEntries(updated);
+  };
+
+  const handleScoreChange = (index: number, value: number | null) => {
+    const updated = [...entries];
+    updated[index] = { ...updated[index], score: value ?? 0 };
     setEntries(updated);
   };
 
   const handleAddRow = () => {
     const conditions: Record<string, unknown> = {};
     inputColumns.forEach((col) => {
-      conditions[col.key] = col.type === 'number' ? 0 : '';
+      if (col.type === 'range') {
+        conditions[`${col.key}_min`] = 0;
+        conditions[`${col.key}_max`] = 0;
+      } else if (col.type === 'number') {
+        conditions[col.key] = 0;
+      } else {
+        conditions[col.key] = '';
+      }
     });
     setEntries([...entries, { key: `row-${Date.now()}`, conditions, score: 0 }]);
   };
@@ -68,24 +77,55 @@ function SingleTable({
   };
 
   const columns = [
-    ...inputColumns.map((col) => ({
-      title: col.label,
-      key: col.key,
-      render: (_: unknown, record: MappingEntry, index: number) =>
-        col.type === 'number' ? (
-          <InputNumber
-            size="small"
-            value={record.conditions[col.key] as number}
-            onChange={(v) => handleCellChange(index, col.key, v)}
-          />
-        ) : (
-          <Input
-            size="small"
-            value={record.conditions[col.key] as string}
-            onChange={(e) => handleCellChange(index, col.key, e.target.value)}
-          />
-        ),
-    })),
+    ...inputColumns.flatMap((col) => {
+      if (col.type === 'range') {
+        return [
+          {
+            title: `${col.label} 이상`,
+            key: `${col.key}_min`,
+            render: (_: unknown, record: MappingEntry, index: number) => (
+              <InputNumber
+                size="small"
+                value={record.conditions[`${col.key}_min`] as number}
+                onChange={(v) => handleCellChange(index, `${col.key}_min`, v ?? 0)}
+              />
+            ),
+          },
+          {
+            title: `${col.label} 미만`,
+            key: `${col.key}_max`,
+            render: (_: unknown, record: MappingEntry, index: number) => (
+              <InputNumber
+                size="small"
+                value={record.conditions[`${col.key}_max`] as number}
+                onChange={(v) => handleCellChange(index, `${col.key}_max`, v ?? 0)}
+              />
+            ),
+          },
+        ];
+      }
+
+      return [
+        {
+          title: col.label,
+          key: col.key,
+          render: (_: unknown, record: MappingEntry, index: number) =>
+            col.type === 'number' ? (
+              <InputNumber
+                size="small"
+                value={record.conditions[col.key] as number}
+                onChange={(v) => handleCellChange(index, col.key, v ?? 0)}
+              />
+            ) : (
+              <Input
+                size="small"
+                value={record.conditions[col.key] as string}
+                onChange={(e) => handleCellChange(index, col.key, e.target.value)}
+              />
+            ),
+        },
+      ];
+    }),
     {
       title: `환산점수 (만점: ${maxScore})`,
       key: 'score',
@@ -95,7 +135,7 @@ function SingleTable({
           min={0}
           max={maxScore}
           value={record.score}
-          onChange={(v) => handleCellChange(index, 'score', v)}
+          onChange={(v) => handleScoreChange(index, v)}
         />
       ),
     },
@@ -104,7 +144,13 @@ function SingleTable({
       key: 'actions',
       width: 50,
       render: (_: unknown, __: MappingEntry, index: number) => (
-        <Button type="text" danger size="small" icon={<DeleteOutlined />} onClick={() => handleRemoveRow(index)} />
+        <Button
+          type="text"
+          danger
+          size="small"
+          icon={<DeleteOutlined />}
+          onClick={() => handleRemoveRow(index)}
+        />
       ),
     },
   ];
@@ -184,25 +230,22 @@ export function MappingTableEditor({
     return false;
   };
 
-  const excelBar = showExcelButtons && evaluationId ? (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        엑셀 양식 다운로드 후 작성하여 업로드하세요
-      </Typography.Text>
-      <Button size="small" icon={<DownloadOutlined />} onClick={handleDownload}>
-        양식 다운로드
-      </Button>
-      <Upload
-        accept=".xlsx,.xls"
-        showUploadList={false}
-        beforeUpload={handleUpload}
-      >
-        <Button size="small" icon={<UploadOutlined />} loading={uploading}>
-          엑셀 업로드
+  const excelBar =
+    showExcelButtons && evaluationId ? (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          엑셀 양식 다운로드 후 작성하여 업로드하세요
+        </Typography.Text>
+        <Button size="small" icon={<DownloadOutlined />} onClick={handleDownload}>
+          양식 다운로드
         </Button>
-      </Upload>
-    </div>
-  ) : null;
+        <Upload accept=".xlsx,.xls" showUploadList={false} beforeUpload={handleUpload}>
+          <Button size="small" icon={<UploadOutlined />} loading={uploading}>
+            엑셀 업로드
+          </Button>
+        </Upload>
+      </div>
+    ) : null;
 
   if (groups && groups.length > 0 && entriesByGroup && onSaveGroup) {
     const tabItems = groups.map((group) => ({
@@ -227,10 +270,14 @@ export function MappingTableEditor({
           onChange={setActiveGroup}
           items={tabItems}
           tabBarExtraContent={
-            <Button size="small" icon={<PlusOutlined />} onClick={() => {
-              const name = `그룹${groups.length + 1}`;
-              onSaveGroup(name, []);
-            }}>
+            <Button
+              size="small"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                const name = `그룹${groups.length + 1}`;
+                onSaveGroup(name, []);
+              }}
+            >
               그룹 추가
             </Button>
           }

@@ -8,6 +8,7 @@ import { EvaluationsModule } from '../evaluations/evaluations.module';
 import { PipelineModule } from '../pipeline/pipeline.module';
 import { ExcelModule } from '../excel/excel.module';
 import { AuditModule } from '../audit/audit.module';
+import { MappingTablesModule } from '../mapping-tables/mapping-tables.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuditModule } from '../audit/audit.module';
     forwardRef(() => PipelineModule),
     forwardRef(() => ExcelModule),
     forwardRef(() => AuditModule),
+    forwardRef(() => MappingTablesModule),
   ],
   controllers: [ScoresController],
   providers: [

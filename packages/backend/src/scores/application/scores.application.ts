@@ -6,6 +6,7 @@ import { ExcelService } from '../../excel/service/excel.service';
 import { ResultExporter } from '../../excel/service/result-exporter';
 import { PipelineExecutor } from '../../pipeline/pipeline-executor';
 import { AuditService } from '../../audit/service/audit.service';
+import { MappingTablesService } from '../../mapping-tables/service/mapping-tables.service';
 import type { ExecutionContext, PipelineConfig, DecimalConfig, EvalConfig } from '@tallia/shared';
 import type { CreateScoreDto } from '../repository/scores.repository';
 
@@ -24,6 +25,7 @@ export class ScoresApplication {
     private readonly resultExporter: ResultExporter,
     private readonly pipelineExecutor: PipelineExecutor,
     private readonly auditService: AuditService,
+    private readonly mappingTablesService: MappingTablesService,
   ) {}
 
   async calculate(evaluationId: string, tenantId: string, userId?: string) {
@@ -52,6 +54,19 @@ export class ScoresApplication {
       config,
       defaultDecimal,
     };
+
+    // D유형: mappingTable을 context에 주입
+    if (config.type === 'D') {
+      const mappingTable = await this.mappingTablesService.findByEvaluation(evaluationId, tenantId);
+      if (mappingTable) {
+        (context as any).mappingTable = {
+          entries: mappingTable.entries.map((e) => ({
+            conditions: e.conditions as Record<string, string | number>,
+            score: e.score,
+          })),
+        };
+      }
+    }
 
     const scores: CreateScoreDto[] = [];
     const errors: { examineeNo: string; message: string }[] = [];
@@ -183,6 +198,7 @@ export class ScoresApplication {
   /**
    * raw flat 데이터를 파이프라인 블록이 기대하는 형태로 변환
    * A유형: { 인성_위원1: 96, ... } → { items: ['인성','전공적합성'], data: [[96,95,89],[87,85,95]] }
+   * B유형: parseTypeB가 이미 { subjects: [{subjectId, examType, answers}] } 구조로 반환하므로 pass-through
    * 기타: 그대로 반환
    */
   private transformInput(rawData: Record<string, unknown>, config: EvalConfig, committeeCount?: number): unknown {
@@ -204,7 +220,13 @@ export class ScoresApplication {
       return { items, data: matrix };
     }
 
-    // B/C/D 유형은 flat 그대로
+    if (config.type === 'B') {
+      // parseTypeB가 이미 { subjects: [{subjectId, examType, answers}] } 구조로 반환.
+      // rawData 자체가 TypeBRowData이므로 그대로 반환.
+      return rawData;
+    }
+
+    // C/D 유형은 flat 그대로
     return rawData;
   }
 }

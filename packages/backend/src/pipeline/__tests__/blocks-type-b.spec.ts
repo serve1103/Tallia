@@ -3,6 +3,7 @@ import type { BlockInput, ExecutionContext } from '@tallia/shared';
 import { autoGradeBlock } from '../blocks/type-b/auto-grade';
 import { sumBySubjectBlock, subjectFailCheckBlock, subjectSumBlock } from '../blocks/type-b/b-aggregate-blocks';
 
+// 단일 과목 컨텍스트
 const bContext: ExecutionContext = {
   evaluationType: 'B',
   config: {
@@ -21,39 +22,168 @@ const bContext: ExecutionContext = {
   defaultDecimal: { method: 'round', places: 2 },
 };
 
-function input(data: unknown): BlockInput {
-  return { data, context: bContext };
+// 다과목 × 다시험유형 컨텍스트 (영어 A형/B형, 수학 A형)
+const multiSubjectContext: ExecutionContext = {
+  evaluationType: 'B',
+  config: {
+    type: 'B',
+    subjects: [
+      {
+        id: 'eng', name: '영어', questionCount: 3, maxScore: 100, failThreshold: 40,
+        examTypes: [
+          {
+            id: 'eA', name: '영어A형', questionCount: 3, answerKey: [
+              { questionNo: 1, answers: ['3'], score: 10 },
+              { questionNo: 2, answers: ['1', '4'], score: 10 },
+              { questionNo: 3, answers: ['2'], score: 10 },
+            ],
+          },
+          {
+            id: 'eB', name: '영어B형', questionCount: 3, answerKey: [
+              { questionNo: 1, answers: ['5'], score: 10 },
+              { questionNo: 2, answers: ['2'], score: 10 },
+              { questionNo: 3, answers: ['4'], score: 10 },
+            ],
+          },
+        ],
+        questionErrors: [],
+      },
+      {
+        id: 'math', name: '수학', questionCount: 2, maxScore: 100, failThreshold: 30,
+        examTypes: [
+          {
+            id: 'mA', name: '수학A형', questionCount: 2, answerKey: [
+              { questionNo: 1, answers: ['2'], score: 20 },
+              { questionNo: 2, answers: ['3'], score: 20 },
+            ],
+          },
+        ],
+        questionErrors: [
+          { questionNo: 2, handling: 'all_correct' }, // 수학 2번 문제 오류 → 전원 정답
+        ],
+      },
+    ],
+    totalFailThreshold: 60,
+  } as never,
+  defaultDecimal: { method: 'round', places: 2 },
+};
+
+function input(data: unknown, ctx = bContext): BlockInput {
+  return { data, context: ctx };
 }
 
-describe('auto_grade', () => {
-  it('정답 채점', () => {
-    const answers = { answers: [
-      { qNo: 1, answer: '3' },
-      { qNo: 2, answer: '4' }, // 복수정답 중 하나
-      { qNo: 3, answer: '5' }, // 오답
-    ]};
-    const result = autoGradeBlock.execute(input(answers), {});
+describe('auto_grade — 단일 과목', () => {
+  it('정답·복수정답·오답 채점', () => {
+    const data = {
+      subjects: [{
+        subjectId: 'eng',
+        examType: 't1',
+        answers: { 1: '3', 2: '4', 3: '5' }, // Q1 정답, Q2 복수정답 중 하나, Q3 오답
+      }],
+    };
+    const result = autoGradeBlock.execute(input(data), {});
     const scores = (result.data as { scores: { qNo: number; correct: boolean; score: number }[] }).scores;
-    expect(scores[0].correct).toBe(true);
-    expect(scores[0].score).toBe(10);
-    expect(scores[1].correct).toBe(true); // 복수정답
-    expect(scores[1].score).toBe(10);
-    expect(scores[2].correct).toBe(false);
-    expect(scores[2].score).toBe(0);
+    expect(scores).toHaveLength(3);
+    expect(scores[0]).toMatchObject({ qNo: 1, correct: true, score: 10 });
+    expect(scores[1]).toMatchObject({ qNo: 2, correct: true, score: 10 }); // 복수정답
+    expect(scores[2]).toMatchObject({ qNo: 3, correct: false, score: 0 });
+  });
+
+  it('subjects 배열이 비어 있으면 빈 scores 반환', () => {
+    const result = autoGradeBlock.execute(input({ subjects: [] }), {});
+    expect((result.data as any).scores).toHaveLength(0);
   });
 });
 
-describe('sum_by_subject', () => {
-  it('과목별 합산', () => {
-    const scores = { scores: [
-      { qNo: 1, correct: true, score: 10 },
-      { qNo: 2, correct: true, score: 10 },
-      { qNo: 3, correct: false, score: 0 },
-    ]};
+describe('auto_grade — 다과목 × 다시험유형', () => {
+  it('영어A형 + 수학A형: 과목별 answerKey 각각 적용', () => {
+    const data = {
+      subjects: [
+        { subjectId: 'eng', examType: 'eA', answers: { 1: '3', 2: '1', 3: '9' } },  // Q1,Q2 정답, Q3 오답
+        { subjectId: 'math', examType: 'mA', answers: { 1: '2', 2: '9' } },          // Q1 정답, Q2 오답(but all_correct)
+      ],
+    };
+    const result = autoGradeBlock.execute(input(data, multiSubjectContext), {});
+    const scores = (result.data as { scores: { qNo: number; correct: boolean; score: number; __subjectId: string }[] }).scores;
+
+    // 영어 3문항 + 수학 2문항 = 총 5항목
+    expect(scores).toHaveLength(5);
+
+    const engScores = scores.filter((s) => s.__subjectId === 'eng');
+    const mathScores = scores.filter((s) => s.__subjectId === 'math');
+
+    expect(engScores).toHaveLength(3);
+    expect(engScores[0]).toMatchObject({ qNo: 1, correct: true, score: 10 });
+    expect(engScores[1]).toMatchObject({ qNo: 2, correct: true, score: 10 }); // '1'은 영어A형 정답
+    expect(engScores[2]).toMatchObject({ qNo: 3, correct: false, score: 0 });
+
+    expect(mathScores).toHaveLength(2);
+    expect(mathScores[0]).toMatchObject({ qNo: 1, correct: true, score: 20 });  // 정답
+    expect(mathScores[1]).toMatchObject({ qNo: 2, correct: true, score: 20 }); // all_correct 오류 처리
+  });
+
+  it('영어B형: 다른 시험유형의 answerKey 사용', () => {
+    const data = {
+      subjects: [
+        { subjectId: 'eng', examType: 'eB', answers: { 1: '5', 2: '2', 3: '9' } }, // Q1,Q2 정답, Q3 오답
+        { subjectId: 'math', examType: 'mA', answers: { 1: '9', 2: '3' } },          // Q1 오답, Q2 all_correct
+      ],
+    };
+    const result = autoGradeBlock.execute(input(data, multiSubjectContext), {});
+    const scores = (result.data as { scores: { qNo: number; correct: boolean; score: number; __subjectId: string }[] }).scores;
+
+    const engScores = scores.filter((s) => s.__subjectId === 'eng');
+    expect(engScores[0]).toMatchObject({ qNo: 1, correct: true, score: 10 });   // 영어B형 Q1=5
+    expect(engScores[1]).toMatchObject({ qNo: 2, correct: true, score: 10 });   // 영어B형 Q2=2
+    expect(engScores[2]).toMatchObject({ qNo: 3, correct: false, score: 0 });
+
+    const mathScores = scores.filter((s) => s.__subjectId === 'math');
+    expect(mathScores[0]).toMatchObject({ qNo: 1, correct: false, score: 0 });  // 오답
+    expect(mathScores[1]).toMatchObject({ qNo: 2, correct: true, score: 20 });  // all_correct
+  });
+
+  it('config에 없는 과목은 건너뜀', () => {
+    const data = {
+      subjects: [
+        { subjectId: 'unknown', examType: 'x', answers: { 1: '1' } },
+        { subjectId: 'eng', examType: 'eA', answers: { 1: '3', 2: '1', 3: '2' } },
+      ],
+    };
+    const result = autoGradeBlock.execute(input(data, multiSubjectContext), {});
+    const scores = (result.data as { scores: { __subjectId: string }[] }).scores;
+    expect(scores.every((s) => s.__subjectId === 'eng')).toBe(true);
+  });
+});
+
+describe('sum_by_subject — __subjectId 기준 그룹핑', () => {
+  it('다과목 scores를 subjectId 기준으로 집계', () => {
+    const scores = {
+      scores: [
+        { qNo: 1, correct: true, score: 10, __subjectId: 'eng' },
+        { qNo: 2, correct: true, score: 10, __subjectId: 'eng' },
+        { qNo: 3, correct: false, score: 0, __subjectId: 'eng' },
+        { qNo: 1, correct: true, score: 20, __subjectId: 'math' },
+        { qNo: 2, correct: true, score: 20, __subjectId: 'math' },
+      ],
+    };
+    const result = sumBySubjectBlock.execute(input(scores, multiSubjectContext), {});
+    const subjects = (result.data as { subjects: { id: string; name: string; score: number }[] }).subjects;
+    expect(subjects).toHaveLength(2);
+    expect(subjects[0]).toMatchObject({ id: 'eng', name: '영어', score: 20 });
+    expect(subjects[1]).toMatchObject({ id: 'math', name: '수학', score: 40 });
+  });
+
+  it('하위 호환: __subjectId 없으면 questionCount 슬라이스', () => {
+    const scores = {
+      scores: [
+        { qNo: 1, correct: true, score: 10 },
+        { qNo: 2, correct: true, score: 10 },
+        { qNo: 3, correct: false, score: 0 },
+      ],
+    };
     const result = sumBySubjectBlock.execute(input(scores), {});
     const subjects = (result.data as { subjects: { name: string; score: number }[] }).subjects;
-    expect(subjects[0].name).toBe('영어');
-    expect(subjects[0].score).toBe(20);
+    expect(subjects[0]).toMatchObject({ name: '영어', score: 20 });
   });
 });
 

@@ -13,9 +13,18 @@ async function bootstrap() {
   // 보안 헤더
   app.use(helmet());
 
-  // CORS — GET/POST만, 프론트엔드 도메인만
+  // CORS — GET/POST만. FRONTEND_ORIGIN 쉼표 구분 리스트 + 사설 IP(dev) 허용.
+  const originEnv = config.getOrThrow<string>('FRONTEND_ORIGIN');
+  const explicitOrigins = originEnv.split(',').map((s) => s.trim()).filter(Boolean);
+  const devLanRegexes = [
+    /^http:\/\/localhost:\d+$/,
+    /^http:\/\/127\.0\.0\.1:\d+$/,
+    /^http:\/\/10\.\d+\.\d+\.\d+:\d+$/,
+    /^http:\/\/192\.168\.\d+\.\d+:\d+$/,
+    /^http:\/\/172\.(1[6-9]|2\d|3[0-1])\.\d+\.\d+:\d+$/,
+  ];
   app.enableCors({
-    origin: config.getOrThrow<string>('FRONTEND_ORIGIN'),
+    origin: [...explicitOrigins, ...devLanRegexes],
     methods: ['GET', 'POST'],
     credentials: true,
   });

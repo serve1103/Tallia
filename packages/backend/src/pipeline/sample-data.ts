@@ -46,17 +46,28 @@ function buildTypeASample(config: Extract<EvalConfig, { type: 'A' }>): unknown {
 }
 
 function buildTypeBSample(config: Extract<EvalConfig, { type: 'B' }>): unknown {
-  const subject = config.subjects[0];
-  if (!subject) {
-    return { subjectId: 's1', examType: 'A', answers: { 1: '3', 2: '1', 3: '4' } };
+  if (config.subjects.length === 0) {
+    // 설정된 과목이 없는 경우 최소 샘플
+    return { subjects: [{ subjectId: 's1', examType: 'A', answers: { 1: '3', 2: '1', 3: '4' } }] };
   }
-  const examType = subject.examTypes[0]?.id ?? 'A';
-  const count = Math.min(subject.questionCount, 5);
-  const answers: Record<number, string> = {};
-  for (let i = 1; i <= count; i++) {
-    answers[i] = String(Math.floor(Math.random() * 5) + 1);
-  }
-  return { subjectId: subject.id, examType, answers };
+
+  // 다과목: 모든 과목에 대해 첫 번째 시험유형으로 샘플 생성
+  const subjects = config.subjects.map((subject) => {
+    const examType = subject.examTypes[0]?.id ?? 'A';
+    const answerKey = subject.examTypes[0]?.answerKey;
+    // answerKey가 있으면 그 문항 번호 기준, 없으면 questionCount 기준
+    const qNos = answerKey
+      ? answerKey.map((k) => k.questionNo)
+      : Array.from({ length: Math.min(subject.questionCount, 5) }, (_, i) => i + 1);
+
+    const answers: Record<number, string> = {};
+    for (const qNo of qNos) {
+      answers[qNo] = String(Math.floor(Math.random() * 5) + 1);
+    }
+    return { subjectId: subject.id, examType, answers };
+  });
+
+  return { subjects };
 }
 
 function buildTypeCSample(config: Extract<EvalConfig, { type: 'C' }>): unknown {
