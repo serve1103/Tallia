@@ -19,6 +19,9 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
         ...(filter.academicYear && { academicYear: filter.academicYear }),
         ...(filter.admissionType && { admissionType: filter.admissionType }),
         ...(filter.type && { type: filter.type }),
+        ...(filter.onlyDeleted
+          ? { deletedAt: { not: null } }
+          : { deletedAt: null }),
       },
       orderBy: { createdAt: 'desc' },
     }) as unknown as EvaluationEntity[];
@@ -26,7 +29,7 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
 
   async findById(id: string, tenantId: string): Promise<EvaluationEntity | null> {
     return this.prisma.evaluation.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId, deletedAt: null },
     }) as unknown as EvaluationEntity | null;
   }
 
@@ -48,7 +51,7 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
 
   async update(id: string, tenantId: string, dto: UpdateEvaluationDto): Promise<EvaluationEntity> {
     await this.prisma.evaluation.updateMany({
-      where: { id, tenantId },
+      where: { id, tenantId, deletedAt: null },
       data: {
         ...dto,
       },
@@ -62,6 +65,27 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
   }
 
   async delete(id: string, tenantId: string): Promise<void> {
+    // soft delete — deletedAt 설정
+    await this.prisma.evaluation.updateMany({
+      where: { id, tenantId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async restore(id: string, tenantId: string): Promise<EvaluationEntity> {
+    await this.prisma.evaluation.updateMany({
+      where: { id, tenantId, deletedAt: { not: null } },
+      data: { deletedAt: null },
+    });
+
+    const restored = await this.prisma.evaluation.findFirst({
+      where: { id, tenantId },
+    });
+
+    return restored as unknown as EvaluationEntity;
+  }
+
+  async hardDelete(id: string, tenantId: string): Promise<void> {
     // 자식 레코드(FK) 먼저 삭제 후 본인 삭제. 하나의 트랜잭션으로 원자 실행.
     await this.prisma.$transaction(async (tx) => {
       await tx.score.deleteMany({ where: { evaluationId: id, tenantId } });
@@ -79,9 +103,9 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
   }
 
   async copy(id: string, tenantId: string): Promise<EvaluationEntity> {
-    // 원본 평가 조회 (해당 테넌트 소속만)
+    // 원본 평가 조회 (해당 테넌트 소속만, 삭제된 것 제외)
     const source = await this.prisma.evaluation.findFirstOrThrow({
-      where: { id, tenantId },
+      where: { id, tenantId, deletedAt: null },
       include: {
         mappingTable: {
           include: { entries: true },
@@ -136,11 +160,10 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
     return copied as unknown as EvaluationEntity;
   }
 
-  /** 같은 테넌트 내에서 유니크한 복사본 이름 생성 */
+  /** 같은 테넌트 내에서 유니크한 복사본 이름 생성 (삭제된 평가 제외) */
   private async resolveUniqueCopyName(baseName: string, tenantId: string): Promise<string> {
     // baseName = "원본 (복사)"
     // 이미 존재하면 "원본 (복사 2)", "원본 (복사 3)" ... 으로 증가
-    // DB startsWith 대신 후보 이름을 직접 조회하여 정확한 매칭 보장
     const stemName = baseName.replace(/ \(복사\)$/, ''); // "원본"
 
     // baseName과 "(복사 N)" 패턴 이름 모두 조회
@@ -153,6 +176,7 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
       where: {
         tenantId,
         name: { in: candidates },
+        deletedAt: null,
       },
       select: { name: true },
     });

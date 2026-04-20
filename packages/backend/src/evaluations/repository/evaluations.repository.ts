@@ -14,6 +14,7 @@ export interface EvaluationEntity {
   status: string;
   needsRecalculation: boolean;
   copiedFromId: string | null;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +48,7 @@ export interface EvaluationFilter {
   academicYear?: string;
   admissionType?: string;
   type?: string;
+  onlyDeleted?: boolean;
 }
 
 export interface EvaluationsRepository {
@@ -55,6 +57,8 @@ export interface EvaluationsRepository {
   create(dto: CreateEvaluationDto): Promise<EvaluationEntity>;
   update(id: string, tenantId: string, dto: UpdateEvaluationDto): Promise<EvaluationEntity>;
   delete(id: string, tenantId: string): Promise<void>;
+  restore(id: string, tenantId: string): Promise<EvaluationEntity>;
+  hardDelete(id: string, tenantId: string): Promise<void>;
   copy(id: string, tenantId: string): Promise<EvaluationEntity>;
 }
 

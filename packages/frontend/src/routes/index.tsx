@@ -15,6 +15,7 @@ import { ResultListPage } from './results/ResultListPage';
 import { ResultDetailPage } from './results/ResultDetailPage';
 import { TenantListPage } from './admin/TenantListPage';
 import { TenantDetailPage } from './admin/TenantDetailPage';
+import { TrashPage } from './trash/TrashPage';
 import { NotFoundPage } from './NotFoundPage';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
       { path: '/evaluations/:id/pipeline', element: <PipelinePage /> },
       { path: '/evaluations/:id/results', element: <ResultListPage /> },
       { path: '/evaluations/:id/results/:examineeNo', element: <ResultDetailPage /> },
+      { path: '/trash', element: <TrashPage /> },
       { path: '/admin/tenants', element: <TenantListPage /> },
       { path: '/admin/tenants/:tenantId', element: <TenantDetailPage /> },
     ],

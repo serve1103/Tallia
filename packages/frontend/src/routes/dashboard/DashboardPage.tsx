@@ -27,7 +27,7 @@ export function DashboardPage() {
 
   const handleDelete = (id: string) => {
     deleteMutation.mutate(id, {
-      onSuccess: () => message.success('삭제되었습니다'),
+      onSuccess: () => message.success('휴지통으로 이동되었습니다. 휴지통에서 복원 또는 영구 삭제할 수 있습니다.'),
       onError: () => message.error('삭제에 실패했습니다'),
     });
   };

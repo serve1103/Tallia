@@ -62,10 +62,11 @@ model Evaluation {
   defaultDecimal     Json?    @map("default_decimal")
   convertedMax       Decimal? @map("converted_max") @db.Decimal(10, 2)
   status             String   @default("draft") @db.VarChar(20)
-  needsRecalculation Boolean  @default(false) @map("needs_recalculation")
-  copiedFromId       String?  @map("copied_from_id") @db.Uuid
-  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz()
+  needsRecalculation Boolean   @default(false) @map("needs_recalculation")
+  copiedFromId       String?   @map("copied_from_id") @db.Uuid
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz()
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
 
   tenant        Tenant         @relation(fields: [tenantId], references: [id])
   copiedFrom    Evaluation?    @relation("EvaluationCopy", fields: [copiedFromId], references: [id])
@@ -76,6 +77,7 @@ model Evaluation {
 
   @@index([tenantId], map: "idx_evaluations_tenant")
   @@index([tenantId, academicYear], map: "idx_evaluations_tenant_year")
+  @@index([deletedAt], map: "idx_evaluations_deleted_at")
   @@map("evaluations")
 }
 
