@@ -15,6 +15,7 @@ export type {
   ItemDefinition,
   SubItemDefinition,
   AnswerKeyEntry,
+  ScoreRange,
   ExamType,
   QuestionError,
   SubjectDef,

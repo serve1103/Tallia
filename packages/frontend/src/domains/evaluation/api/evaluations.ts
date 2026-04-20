@@ -1,5 +1,5 @@
 import { apiClient } from '../../../shared/lib/api-client';
-import type { Evaluation, EvalConfig, EvaluationType } from '@tallia/shared';
+import type { Evaluation, EvalConfig, EvaluationType, ScoreRange } from '@tallia/shared';
 import type { PaginatedResponse } from '../../../shared/types/api';
 
 interface FetchParams {
@@ -62,13 +62,17 @@ export async function saveAnswerKey(
   subjectId: string,
   examType: string,
   answerKey: AnswerKeyEntry[],
+  scoreRanges?: ScoreRange[],
 ): Promise<void> {
   await apiClient.post(`/evaluations/${evaluationId}/answer-key/save`, {
     subjectId,
     examType,
     answerKey,
+    scoreRanges,
   });
 }
+
+export type { ScoreRange };
 
 export async function reportQuestionError(
   evaluationId: string,

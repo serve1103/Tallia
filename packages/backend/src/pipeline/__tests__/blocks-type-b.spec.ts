@@ -155,6 +155,92 @@ describe('auto_grade — 다과목 × 다시험유형', () => {
   });
 });
 
+describe('auto_grade — resolveScore 배점 우선순위', () => {
+  const scoreCtx: ExecutionContext = {
+    evaluationType: 'B',
+    config: {
+      type: 'B',
+      subjects: [{
+        id: 's1', name: '국어', questionCount: 5, maxScore: 100, failThreshold: null,
+        examTypes: [{
+          id: 'et1', name: '기본', questionCount: 5,
+          scoreRanges: [
+            { start: 1, end: 3, score: 15 },
+            { start: 4, end: 5, score: 25 },
+          ],
+          answerKey: [
+            { questionNo: 1, answers: ['1'], score: 0 },  // score=0 → 구간 배점 15
+            { questionNo: 2, answers: ['2'], score: 0 },  // score=0 → 구간 배점 15
+            { questionNo: 3, answers: ['3'], score: 20 }, // override 20
+            { questionNo: 4, answers: ['4'], score: 0 },  // score=0 → 구간 배점 25
+            { questionNo: 5, answers: ['5'], score: 0 },  // score=0 → 구간 배점 25
+          ],
+        }],
+        questionErrors: [],
+      }],
+      totalFailThreshold: null,
+    } as never,
+    defaultDecimal: { method: 'round', places: 2 },
+  };
+
+  it('구간 배점 적용 — 모두 정답', () => {
+    const data = {
+      subjects: [{
+        subjectId: 's1', examType: 'et1',
+        answers: { 1: '1', 2: '2', 3: '3', 4: '4', 5: '5' },
+      }],
+    };
+    const result = autoGradeBlock.execute(input(data, scoreCtx), {});
+    const scores = (result.data as { scores: { qNo: number; score: number }[] }).scores;
+    expect(scores.find((s) => s.qNo === 1)?.score).toBe(15);  // 구간
+    expect(scores.find((s) => s.qNo === 3)?.score).toBe(20);  // override
+    expect(scores.find((s) => s.qNo === 4)?.score).toBe(25);  // 구간
+  });
+
+  it('override 배점 — score > 0 이면 구간보다 우선', () => {
+    const data = {
+      subjects: [{
+        subjectId: 's1', examType: 'et1',
+        answers: { 1: '9', 2: '9', 3: '3', 4: '9', 5: '9' }, // Q3만 정답
+      }],
+    };
+    const result = autoGradeBlock.execute(input(data, scoreCtx), {});
+    const scores = (result.data as { scores: { qNo: number; score: number }[] }).scores;
+    expect(scores.find((s) => s.qNo === 3)?.score).toBe(20); // override 정답
+    expect(scores.find((s) => s.qNo === 1)?.score).toBe(0);  // 오답 → 0
+  });
+
+  it('fallback 균등 배점 — scoreRanges 없고 score=0', () => {
+    const fallbackCtx: ExecutionContext = {
+      evaluationType: 'B',
+      config: {
+        type: 'B',
+        subjects: [{
+          id: 'f1', name: '수학', questionCount: 4, maxScore: 100, failThreshold: null,
+          examTypes: [{
+            id: 'fe1', name: '기본', questionCount: 4,
+            answerKey: [
+              { questionNo: 1, answers: ['1'], score: 0 },
+              { questionNo: 2, answers: ['2'], score: 0 },
+            ],
+          }],
+          questionErrors: [],
+        }],
+        totalFailThreshold: null,
+      } as never,
+      defaultDecimal: { method: 'round', places: 2 },
+    };
+    const data = {
+      subjects: [{ subjectId: 'f1', examType: 'fe1', answers: { 1: '1', 2: '9' } }],
+    };
+    const result = autoGradeBlock.execute(input(data, fallbackCtx), {});
+    const scores = (result.data as { scores: { qNo: number; score: number }[] }).scores;
+    // fallback: 100 / 4 = 25
+    expect(scores.find((s) => s.qNo === 1)?.score).toBe(25); // 정답
+    expect(scores.find((s) => s.qNo === 2)?.score).toBe(0);  // 오답
+  });
+});
+
 describe('sum_by_subject — __subjectId 기준 그룹핑', () => {
   it('다과목 scores를 subjectId 기준으로 집계', () => {
     const scores = {

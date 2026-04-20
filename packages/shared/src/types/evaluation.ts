@@ -42,11 +42,18 @@ export interface AnswerKeyEntry {
   score: number;
 }
 
+export interface ScoreRange {
+  start: number;
+  end: number;
+  score: number;
+}
+
 export interface ExamType {
   id: string;
   name: string;
   questionCount: number;
   answerKey?: AnswerKeyEntry[];
+  scoreRanges?: ScoreRange[];
 }
 
 export interface QuestionError {

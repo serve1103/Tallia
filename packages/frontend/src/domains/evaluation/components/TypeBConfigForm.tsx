@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, InputNumber, Button, Card, Space, Divider, Input, Tabs } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { TypeBConfig, SubjectDef, ExamType } from '@tallia/shared';
+import type { TypeBConfig, SubjectDef, ExamType, ScoreRange } from '@tallia/shared';
 import { ExamTypeManager } from './ExamTypeManager';
 import { AnswerKeyEditor } from './AnswerKeyEditor';
 import { QuestionErrorManager } from './QuestionErrorManager';
@@ -74,11 +74,12 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
     subjectId: string,
     examType: string,
     answerKey: AnswerKeyEntry[],
+    scoreRanges: ScoreRange[],
   ) => {
     if (!evaluationId) return;
     setAnswerKeySaving(true);
     try {
-      await saveAnswerKey(evaluationId, subjectId, examType, answerKey);
+      await saveAnswerKey(evaluationId, subjectId, examType, answerKey, scoreRanges);
     } finally {
       setAnswerKeySaving(false);
     }
@@ -173,33 +174,61 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
                     }
                   />
 
-                  {examTypes.length > 0 && (
-                    <div style={{ marginTop: 16 }}>
-                      <Tabs
-                        size="small"
-                        items={examTypes.map((typeName) => {
-                          const examTypeDef = subjectDef?.examTypes?.find(
-                            (et) => et.name === typeName,
-                          );
-                          return {
-                            key: typeName,
-                            label: `${typeName}형 정답지`,
-                            children: (
-                              <AnswerKeyEditor
-                                evaluationId={evaluationId ?? ''}
-                                subjectId={subjectId}
-                                examType={typeName}
-                                questionCount={questionCount}
-                                existingAnswerKey={examTypeDef?.answerKey}
-                                onSave={handleSaveAnswerKey}
-                                saving={answerKeySaving}
-                              />
-                            ),
-                          };
-                        })}
-                      />
-                    </div>
-                  )}
+                  {(() => {
+                    // 유형이 없으면 "기본" 하나로 표시 (탭 헤더 숨김)
+                    const displayTypes = examTypes.length > 0 ? examTypes : ['기본'];
+                    const hideTabs = displayTypes.length === 1 && displayTypes[0] === '기본' && examTypes.length === 0;
+                    const subjectMaxScore =
+                      form.getFieldValue(['subjects', name, 'maxScore']) ?? subjectDef?.maxScore ?? 100;
+                    return (
+                      <div style={{ marginTop: 16 }}>
+                        {hideTabs ? (
+                          <div>
+                            <div style={{ marginBottom: 8, fontSize: 13, color: '#888', fontWeight: 500 }}>
+                              정답지 (기본 유형)
+                            </div>
+                            <AnswerKeyEditor
+                              evaluationId={evaluationId ?? ''}
+                              subjectId={subjectId}
+                              subjectMaxScore={subjectMaxScore}
+                              examType="기본"
+                              questionCount={questionCount}
+                              existingAnswerKey={subjectDef?.examTypes?.find((et) => et.name === '기본')?.answerKey}
+                              existingScoreRanges={subjectDef?.examTypes?.find((et) => et.name === '기본')?.scoreRanges}
+                              onSave={handleSaveAnswerKey}
+                              saving={answerKeySaving}
+                            />
+                          </div>
+                        ) : (
+                          <Tabs
+                            size="small"
+                            items={displayTypes.map((typeName) => {
+                              const examTypeDef = subjectDef?.examTypes?.find(
+                                (et) => et.name === typeName,
+                              );
+                              return {
+                                key: typeName,
+                                label: `${typeName}형 정답지`,
+                                children: (
+                                  <AnswerKeyEditor
+                                    evaluationId={evaluationId ?? ''}
+                                    subjectId={subjectId}
+                                    subjectMaxScore={subjectMaxScore}
+                                    examType={typeName}
+                                    questionCount={questionCount}
+                                    existingAnswerKey={examTypeDef?.answerKey}
+                                    existingScoreRanges={examTypeDef?.scoreRanges}
+                                    onSave={handleSaveAnswerKey}
+                                    saving={answerKeySaving}
+                                  />
+                                ),
+                              };
+                            })}
+                          />
+                        )}
+                      </div>
+                    );
+                  })()}
                 </Card>
               );
             })}

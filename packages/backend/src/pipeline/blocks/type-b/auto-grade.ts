@@ -12,9 +12,29 @@ const definition: BlockDefinition = {
 };
 
 interface AnswerKeyEntry { questionNo: number; answers: string[]; score: number }
+interface ScoreRange { start: number; end: number; score: number }
 interface QuestionError { questionNo: number; handling: 'all_correct' | 'exclude' }
-interface ExamTypeDef { id: string; answerKey?: AnswerKeyEntry[] }
-interface SubjectDef { id: string; examTypes: ExamTypeDef[]; questionErrors: QuestionError[] }
+interface ExamTypeDef { id: string; answerKey?: AnswerKeyEntry[]; scoreRanges?: ScoreRange[] }
+interface SubjectDef { id: string; questionCount?: number; maxScore?: number; examTypes: ExamTypeDef[]; questionErrors: QuestionError[] }
+
+/**
+ * 배점 결정 우선순위:
+ * 1. key.score > 0 → 개별 override
+ * 2. examType.scoreRanges 에서 qNo 가 속한 구간 → 구간 배점
+ * 3. fallback: subject.maxScore / subject.questionCount → 균등 분배
+ */
+function resolveScore(
+  qNo: number,
+  key: AnswerKeyEntry,
+  examType: ExamTypeDef,
+  subject: SubjectDef,
+): number {
+  if (key.score > 0) return key.score;
+  const range = examType.scoreRanges?.find((r) => qNo >= r.start && qNo <= r.end);
+  if (range) return range.score;
+  const qc = subject.questionCount ?? 1;
+  return qc > 0 ? Math.round((( subject.maxScore ?? 0) / qc) * 100) / 100 : 0;
+}
 
 /** B유형 블록 입력: 과목별 답안 배열 */
 interface SubjectAnswerInput {
@@ -71,7 +91,7 @@ export const autoGradeBlock: BlockHandler = {
 
         const error = questionErrors.find((e) => e.questionNo === key.questionNo);
         if (error?.handling === 'all_correct') {
-          allScores.push({ qNo: key.questionNo, correct: true, score: key.score, __subjectId: subjectInput.subjectId });
+          allScores.push({ qNo: key.questionNo, correct: true, score: resolveScore(key.questionNo, key, examTypeDef ?? { id: '' }, subjectConfig), __subjectId: subjectInput.subjectId });
           continue;
         }
         if (error?.handling === 'exclude') {
@@ -81,7 +101,8 @@ export const autoGradeBlock: BlockHandler = {
 
         // 복수정답: answers 배열 중 하나라도 일치하면 정답
         const correct = key.answers.includes(studentAnswer);
-        allScores.push({ qNo: key.questionNo, correct, score: correct ? key.score : 0, __subjectId: subjectInput.subjectId });
+        const resolvedScore = resolveScore(key.questionNo, key, examTypeDef ?? { id: '' }, subjectConfig);
+        allScores.push({ qNo: key.questionNo, correct, score: correct ? resolvedScore : 0, __subjectId: subjectInput.subjectId });
       }
 
       // answerKey에 없는 문항(수험자가 응답했지만 키 없음)은 0점 처리

@@ -85,7 +85,7 @@ export class EvaluationsController {
   async saveAnswerKey(
     @Param('id') id: string,
     @CurrentTenant() tenantId: string,
-    @Body() body: { subjectId: string; examType?: string; answerKey: unknown[] },
+    @Body() body: { subjectId: string; examType?: string; answerKey: unknown[]; scoreRanges?: unknown[] },
   ) {
     if (!body.subjectId || !body.answerKey) {
       throw new BadRequestException('subjectId와 answerKey는 필수입니다');
@@ -96,6 +96,7 @@ export class EvaluationsController {
       body.subjectId,
       body.answerKey,
       body.examType,
+      body.scoreRanges,
     );
     return { data: result };
   }
