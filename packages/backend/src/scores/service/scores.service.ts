@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { SCORES_REPOSITORY } from '../repository/scores.repository';
-import type { ScoresRepository, ScoreFilter, CreateScoreDto } from '../repository/scores.repository';
+import type { ScoresRepository, ScoreFilter, CreateScoreDto, ScoreStats } from '../repository/scores.repository';
 
 @Injectable()
 export class ScoresService {
@@ -22,5 +22,9 @@ export class ScoresService {
 
   async deleteByEvaluation(evaluationId: string, tenantId: string) {
     return this.repo.deleteByEvaluation(evaluationId, tenantId);
+  }
+
+  async getStats(evaluationId: string, tenantId: string): Promise<ScoreStats> {
+    return this.repo.getStats(evaluationId, tenantId);
   }
 }

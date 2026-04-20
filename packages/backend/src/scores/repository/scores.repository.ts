@@ -42,11 +42,19 @@ export interface ScoreFilter {
   failOnly?: boolean;
 }
 
+export interface ScoreStats {
+  total: number;
+  average: number | null;
+  failCount: number;
+  max: number | null;
+}
+
 export interface ScoresRepository {
   findAll(filter: ScoreFilter): Promise<{ data: ScoreEntity[]; total: number }>;
   findByExamineeNo(evaluationId: string, examineeNo: string, tenantId: string): Promise<ScoreEntity | null>;
   upsertBatch(scores: CreateScoreDto[]): Promise<number>;
   deleteByEvaluation(evaluationId: string, tenantId: string): Promise<number>;
+  getStats(evaluationId: string, tenantId: string): Promise<ScoreStats>;
 }
 
 export const SCORES_REPOSITORY = Symbol('SCORES_REPOSITORY');

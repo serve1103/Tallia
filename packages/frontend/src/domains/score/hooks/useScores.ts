@@ -4,13 +4,27 @@ import {
   fetchCalculateStatus,
   fetchResults,
   fetchResultDetail,
+  fetchResultStats,
   downloadResults,
 } from '../api/scores';
 
-export function useResults(evaluationId: string | undefined, page: number, limit: number) {
+export function useResults(
+  evaluationId: string | undefined,
+  page: number,
+  limit: number,
+  failOnly?: boolean,
+) {
   return useQuery({
-    queryKey: ['evaluations', evaluationId, 'results', { page, limit }],
-    queryFn: () => fetchResults(evaluationId!, { page, limit }),
+    queryKey: ['evaluations', evaluationId, 'results', { page, limit, failOnly }],
+    queryFn: () => fetchResults(evaluationId!, { page, limit, failOnly }),
+    enabled: !!evaluationId,
+  });
+}
+
+export function useResultStats(evaluationId: string | undefined) {
+  return useQuery({
+    queryKey: ['evaluations', evaluationId, 'results', 'stats'],
+    queryFn: () => fetchResultStats(evaluationId!),
     enabled: !!evaluationId,
   });
 }
@@ -38,13 +52,15 @@ export function useCalculateScores(evaluationId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId, 'results'] });
       queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId, 'calculate'] });
+      queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId] });
     },
   });
 }
 
 export function useDownloadResults(evaluationId: string) {
   return useMutation({
-    mutationFn: () => downloadResults(evaluationId),
+    mutationFn: (opts: { includeIntermediate?: boolean } = {}) =>
+      downloadResults(evaluationId, opts.includeIntermediate ?? false),
     onSuccess: (blob) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

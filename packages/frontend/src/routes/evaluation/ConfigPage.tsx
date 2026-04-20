@@ -2,11 +2,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Spin, message, Button, Space } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { EvaluationTabs } from '../../shared/components/EvaluationTabs';
-import { useEvaluation, useEvalConfig, useSaveEvalConfig } from '../../domains/evaluation/hooks/useEvaluations';
+import {
+  useEvaluation,
+  useEvalConfig,
+  useSaveEvalConfig,
+  useUpdateEvaluation,
+} from '../../domains/evaluation/hooks/useEvaluations';
 import { TypeAConfigForm } from '../../domains/evaluation/components/TypeAConfigForm';
 import { TypeBConfigForm } from '../../domains/evaluation/components/TypeBConfigForm';
 import { TypeCConfigForm } from '../../domains/evaluation/components/TypeCConfigForm';
 import { TypeDConfigForm } from '../../domains/evaluation/components/TypeDConfigForm';
+import {
+  DEFAULT_COMMON_SETTINGS,
+  type CommonSettings,
+} from '../../domains/evaluation/components/CommonSettingsCard';
 import { getEvalTypeLabel } from '../../domains/evaluation/models/evaluation';
 
 export function ConfigPage() {
@@ -15,30 +24,73 @@ export function ConfigPage() {
   const { data: evaluation, isLoading } = useEvaluation(id);
   const { data: config, isLoading: configLoading } = useEvalConfig(id);
   const saveMutation = useSaveEvalConfig();
+  const updateMutation = useUpdateEvaluation();
 
   if (isLoading || configLoading) return <Spin />;
   if (!evaluation || !id) return <Typography.Text>평가를 찾을 수 없습니다</Typography.Text>;
 
-  const handleSave = (newConfig: unknown) => {
-    saveMutation.mutate(
-      { id, config: newConfig },
-      {
-        onSuccess: () => message.success('설정이 저장되었습니다'),
-        onError: () => message.error('저장에 실패했습니다'),
-      },
-    );
+  const initialSettings: CommonSettings = {
+    convertedMax: evaluation.convertedMax ?? DEFAULT_COMMON_SETTINGS.convertedMax,
+    defaultDecimal: evaluation.defaultDecimal ?? DEFAULT_COMMON_SETTINGS.defaultDecimal,
+    blockOverrides: DEFAULT_COMMON_SETTINGS.blockOverrides,
+  };
+
+  const handleSave = async (newConfig: unknown, commonSettings: CommonSettings) => {
+    try {
+      await Promise.all([
+        saveMutation.mutateAsync({ id, config: newConfig }),
+        updateMutation.mutateAsync({
+          id,
+          convertedMax: commonSettings.convertedMax,
+          defaultDecimal: commonSettings.defaultDecimal,
+        }),
+      ]);
+      message.success('설정이 저장되었습니다');
+    } catch {
+      message.error('저장에 실패했습니다');
+    }
   };
 
   const renderForm = () => {
+    const loading = saveMutation.isPending || updateMutation.isPending;
     switch (evaluation.type) {
       case 'A':
-        return <TypeAConfigForm value={config?.type === 'A' ? config : undefined} onSave={handleSave} loading={saveMutation.isPending} />;
+        return (
+          <TypeAConfigForm
+            value={config?.type === 'A' ? config : undefined}
+            commonSettings={initialSettings}
+            onSave={handleSave}
+            loading={loading}
+          />
+        );
       case 'B':
-        return <TypeBConfigForm value={config?.type === 'B' ? config : undefined} onSave={handleSave} loading={saveMutation.isPending} />;
+        return (
+          <TypeBConfigForm
+            evaluationId={id}
+            value={config?.type === 'B' ? config : undefined}
+            commonSettings={initialSettings}
+            onSave={handleSave}
+            loading={loading}
+          />
+        );
       case 'C':
-        return <TypeCConfigForm value={config?.type === 'C' ? config : undefined} onSave={handleSave} loading={saveMutation.isPending} />;
+        return (
+          <TypeCConfigForm
+            value={config?.type === 'C' ? config : undefined}
+            commonSettings={initialSettings}
+            onSave={handleSave}
+            loading={loading}
+          />
+        );
       case 'D':
-        return <TypeDConfigForm value={config?.type === 'D' ? config : undefined} onSave={handleSave} loading={saveMutation.isPending} />;
+        return (
+          <TypeDConfigForm
+            value={config?.type === 'D' ? config : undefined}
+            commonSettings={initialSettings}
+            onSave={handleSave}
+            loading={loading}
+          />
+        );
     }
   };
 

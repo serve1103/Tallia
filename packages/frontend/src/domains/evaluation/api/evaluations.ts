@@ -56,3 +56,27 @@ export async function fetchEvalConfig(id: string): Promise<EvalConfig> {
 export async function saveEvalConfig(id: string, config: unknown): Promise<void> {
   await apiClient.post(`/evaluations/${id}/config/save`, { config });
 }
+
+export async function saveAnswerKey(
+  evaluationId: string,
+  subjectId: string,
+  answerKey: AnswerKeyEntry[],
+): Promise<void> {
+  await apiClient.post(`/evaluations/${evaluationId}/answer-key/save`, {
+    subjectId,
+    answerKey,
+  });
+}
+
+export async function reportQuestionError(
+  evaluationId: string,
+  payload: { subjectId: string; questionNo: number; handling: 'all_correct' | 'exclude' },
+): Promise<void> {
+  await apiClient.post(`/evaluations/${evaluationId}/question-error`, payload);
+}
+
+export interface AnswerKeyEntry {
+  questionNo: number;
+  answers: string[];
+  score: number;
+}

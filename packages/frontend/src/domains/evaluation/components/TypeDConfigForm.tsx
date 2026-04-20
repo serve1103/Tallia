@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Form, InputNumber, Select, Button, Space, Divider, Input, Card } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TypeDConfig, ColumnDef } from '@tallia/shared';
+import { CommonSettingsCard, DEFAULT_COMMON_SETTINGS } from './CommonSettingsCard';
+import type { CommonSettings } from './CommonSettingsCard';
 
 interface Props {
   value?: TypeDConfig;
-  onSave: (config: TypeDConfig) => void;
+  commonSettings?: CommonSettings;
+  onSave: (config: TypeDConfig, commonSettings: CommonSettings) => void;
   loading?: boolean;
 }
 
@@ -18,8 +22,9 @@ const MAPPING_TYPE_OPTIONS = [
 
 const emptyColumn: ColumnDef = { key: '', label: '', type: 'text' };
 
-export function TypeDConfigForm({ value, onSave, loading }: Props) {
+export function TypeDConfigForm({ value, commonSettings, onSave, loading }: Props) {
   const [form] = Form.useForm();
+  const [settings, setSettings] = useState<CommonSettings>(commonSettings ?? DEFAULT_COMMON_SETTINGS);
 
   const handleFinish = (values: { mappingType: string; inputColumns: Record<string, unknown>[]; maxScore: number; totalFailThreshold?: number | null }) => {
     const config: TypeDConfig = {
@@ -32,7 +37,7 @@ export function TypeDConfigForm({ value, onSave, loading }: Props) {
       maxScore: values.maxScore,
       totalFailThreshold: values.totalFailThreshold ?? null,
     };
-    onSave(config);
+    onSave(config, settings);
   };
 
   return (
@@ -46,7 +51,7 @@ export function TypeDConfigForm({ value, onSave, loading }: Props) {
         <Form.Item name="mappingType" label="변환표 유형" rules={[{ required: true }]}>
           <Select options={MAPPING_TYPE_OPTIONS} style={{ width: 200 }} />
         </Form.Item>
-        <Form.Item name="maxScore" label="환산 만점" rules={[{ required: true }]}>
+        <Form.Item name="maxScore" label="원점수 만점" rules={[{ required: true }]}>
           <InputNumber min={0} />
         </Form.Item>
         <Form.Item name="totalFailThreshold" label="과락 기준">
@@ -81,6 +86,8 @@ export function TypeDConfigForm({ value, onSave, loading }: Props) {
           </>
         )}
       </Form.List>
+
+      <CommonSettingsCard value={settings} onChange={setSettings} />
 
       <Form.Item style={{ marginTop: 24 }}>
         <Button type="primary" htmlType="submit" loading={loading}>

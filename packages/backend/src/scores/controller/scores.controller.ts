@@ -21,6 +21,12 @@ export class ScoresController {
     return { data: { status: 'idle' } };
   }
 
+  @Get('results/stats')
+  async getResultStats(@Param('id') id: string, @CurrentTenant() tenantId: string) {
+    const stats = await this.scoresApp.getStats(id, tenantId);
+    return { data: stats };
+  }
+
   @Get('results')
   async getResults(
     @Param('id') id: string,

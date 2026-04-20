@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Form, Input, InputNumber, Select, Button, Card, Space, Typography, Divider } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TypeAConfig, ItemDefinition } from '@tallia/shared';
+import { CommonSettingsCard, DEFAULT_COMMON_SETTINGS } from './CommonSettingsCard';
+import type { CommonSettings } from './CommonSettingsCard';
 
 interface Props {
   value?: TypeAConfig;
-  onSave: (config: TypeAConfig) => void;
+  commonSettings?: CommonSettings;
+  onSave: (config: TypeAConfig, commonSettings: CommonSettings) => void;
   loading?: boolean;
 }
 
@@ -16,8 +20,9 @@ const emptyItem: ItemDefinition = {
   failThreshold: null,
 };
 
-export function TypeAConfigForm({ value, onSave, loading }: Props) {
+export function TypeAConfigForm({ value, commonSettings, onSave, loading }: Props) {
   const [form] = Form.useForm();
+  const [settings, setSettings] = useState<CommonSettings>(commonSettings ?? DEFAULT_COMMON_SETTINGS);
 
   const handleFinish = (values: { maxCommitteeCount: number; dataType: string; items: Record<string, unknown>[] }) => {
     const config: TypeAConfig = {
@@ -29,7 +34,7 @@ export function TypeAConfigForm({ value, onSave, loading }: Props) {
         id: item.id || `item-${idx}`,
       })) as ItemDefinition[],
     };
-    onSave(config);
+    onSave(config, settings);
   };
 
   return (
@@ -78,6 +83,8 @@ export function TypeAConfigForm({ value, onSave, loading }: Props) {
           </>
         )}
       </Form.List>
+
+      <CommonSettingsCard value={settings} onChange={setSettings} />
 
       <Form.Item style={{ marginTop: 24 }}>
         <Button type="primary" htmlType="submit" loading={loading}>

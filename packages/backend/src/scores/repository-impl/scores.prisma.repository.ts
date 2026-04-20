@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { ScoresRepository, ScoreEntity, ScoreFilter, CreateScoreDto } from '../repository/scores.repository';
+import type { ScoresRepository, ScoreEntity, ScoreFilter, CreateScoreDto, ScoreStats } from '../repository/scores.repository';
 
 @Injectable()
 export class ScoresPrismaRepository implements ScoresRepository {
@@ -81,5 +81,29 @@ export class ScoresPrismaRepository implements ScoresRepository {
       where: { evaluationId, tenantId },
     });
     return count;
+  }
+
+  async getStats(evaluationId: string, tenantId: string): Promise<ScoreStats> {
+    const where = { evaluationId, tenantId, errorFlag: false };
+
+    const [aggregate, total, failCount] = await Promise.all([
+      this.prisma.score.aggregate({
+        where,
+        _avg: { convertedScore: true },
+        _max: { convertedScore: true },
+        _count: true,
+      }),
+      this.prisma.score.count({ where: { evaluationId, tenantId } }),
+      this.prisma.score.count({ where: { evaluationId, tenantId, failFlag: true } }),
+    ]);
+
+    const avg = aggregate._avg.convertedScore;
+    const max = aggregate._max.convertedScore;
+    return {
+      total,
+      average: avg != null ? Number(avg) : null,
+      failCount,
+      max: max != null ? Number(max) : null,
+    };
   }
 }
