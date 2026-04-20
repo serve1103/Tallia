@@ -53,7 +53,13 @@ export class EvaluationsApplication {
     return this.evaluationsService.saveConfig(id, tenantId, config);
   }
 
-  async saveAnswerKey(id: string, tenantId: string, subjectId: string, answerKey: unknown[]) {
+  async saveAnswerKey(
+    id: string,
+    tenantId: string,
+    subjectId: string,
+    answerKey: unknown[],
+    examType?: string,
+  ) {
     const evaluation = await this.evaluationsService.findById(id, tenantId);
     const config = evaluation.config as Record<string, unknown>;
 
@@ -65,8 +71,18 @@ export class EvaluationsApplication {
     const subject = subjects.find((s) => s.id === subjectId);
     if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
 
-    // 정답지를 과목 내 examTypes에 저장
-    subject.answerKey = answerKey;
+    const examTypes = (subject.examTypes as Array<Record<string, unknown>>) ?? [];
+    if (examTypes.length === 0) {
+      throw new BadRequestException('과목에 시험유형이 등록되지 않았습니다');
+    }
+
+    // examType(name 또는 id)이 주어지면 해당 유형에만 저장, 아니면 첫 번째 유형에 저장
+    const target = examType
+      ? examTypes.find((et) => et.name === examType || et.id === examType)
+      : examTypes[0];
+    if (!target) throw new NotFoundException('시험유형을 찾을 수 없습니다');
+
+    target.answerKey = answerKey;
     return this.evaluationsService.saveConfig(id, tenantId, config);
   }
 

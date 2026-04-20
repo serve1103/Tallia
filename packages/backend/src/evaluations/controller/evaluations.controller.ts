@@ -85,12 +85,18 @@ export class EvaluationsController {
   async saveAnswerKey(
     @Param('id') id: string,
     @CurrentTenant() tenantId: string,
-    @Body() body: { subjectId: string; answerKey: unknown[] },
+    @Body() body: { subjectId: string; examType?: string; answerKey: unknown[] },
   ) {
     if (!body.subjectId || !body.answerKey) {
       throw new BadRequestException('subjectId와 answerKey는 필수입니다');
     }
-    const result = await this.evaluationsApp.saveAnswerKey(id, tenantId, body.subjectId, body.answerKey);
+    const result = await this.evaluationsApp.saveAnswerKey(
+      id,
+      tenantId,
+      body.subjectId,
+      body.answerKey,
+      body.examType,
+    );
     return { data: result };
   }
 

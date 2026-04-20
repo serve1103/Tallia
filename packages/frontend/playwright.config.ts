@@ -30,12 +30,18 @@ export default defineConfig({
     // 3단계: 인증 필요 테스트 (저장된 세션 재사용)
     {
       name: 'authenticated',
-      testMatch: /evaluation(|-flow)\.spec\.ts/,
+      testMatch: /(evaluation(|-flow)|features)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         browserName: 'chromium',
         storageState: authFile,
       },
+    },
+    // 4단계: platform_admin 테스트 (각 테스트 내에서 직접 로그인)
+    {
+      name: 'admin',
+      testMatch: /admin\.spec\.ts/,
+      use: { browserName: 'chromium' },
     },
   ],
   webServer: [
