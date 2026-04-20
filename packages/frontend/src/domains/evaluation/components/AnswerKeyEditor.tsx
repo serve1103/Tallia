@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Input, Select, Button, InputNumber, Card, Space, message, Upload } from 'antd';
 import { SaveOutlined, PlusOutlined, DeleteOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import type { AnswerKeyEntry, ScoreRange } from '../api/evaluations';
@@ -61,6 +62,7 @@ export function AnswerKeyEditor({
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setCells(buildInitialCells(questionCount, existingAnswerKey));
@@ -119,11 +121,11 @@ export function AnswerKeyEditor({
     setUploading(true);
     try {
       await uploadAnswerKey(evaluationId, subjectId, file, examType);
-      message.success('엑셀 업로드 완료. 저장 버튼을 눌러 반영하세요.');
-      // Reload page data by triggering parent re-fetch via page reload is not ideal;
-      // instead we notify via message and the user can refresh or we trigger invalidation
-      // via window event for react-query listeners
-      window.dispatchEvent(new CustomEvent('answer-key-uploaded', { detail: { evaluationId, subjectId, examType } }));
+      // 업로드 = 서버 저장 완료. 평가 config 쿼리를 invalidate해서
+      // existingAnswerKey가 새 값으로 내려오고 cells state가 갱신되게 함.
+      await queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId, 'config'] });
+      await queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId] });
+      message.success('엑셀 업로드가 완료되었습니다');
     } catch {
       message.error('엑셀 업로드에 실패했습니다');
     } finally {

@@ -188,6 +188,7 @@ export class EvaluationsApplication {
   ) {
     const { answerKey } = await this.answerKeyUploadParser.parse(buffer);
 
-    return this.saveAnswerKey(id, tenantId, subjectId, answerKey, examType, []);
+    // scoreRanges는 undefined 전달 — 기존 저장된 값 유지
+    return this.saveAnswerKey(id, tenantId, subjectId, answerKey, examType);
   }
 }
