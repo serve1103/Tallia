@@ -30,7 +30,7 @@ export default defineConfig({
     // 3단계: 인증 필요 테스트 (저장된 세션 재사용)
     {
       name: 'authenticated',
-      testMatch: /evaluation\.spec\.ts/,
+      testMatch: /evaluation(|-flow)\.spec\.ts/,
       dependencies: ['setup'],
       use: {
         browserName: 'chromium',

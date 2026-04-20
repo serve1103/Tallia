@@ -55,11 +55,5 @@ test.describe('인증', () => {
     await expect(page.getByText('찾을 수 없습니다')).toBeVisible();
   });
 
-  test('platform_admin vs tenant_admin — 사이드바 메뉴 차이', async ({ page }) => {
-    // tenant_admin 로그인 → admin 메뉴 안 보임
-    await login(page, 'admin@korea.ac.kr', 'Tenant1234!');
-    await expect(page.getByText('대학 관리')).not.toBeVisible();
-
-    // TODO: platform_admin 로그인은 별도 테스트 (rate limiting 고려)
-  });
+  // '사이드바 메뉴 차이' 테스트는 rate limit 회피를 위해 evaluation.spec.ts(authenticated 프로젝트)로 이동
 });
