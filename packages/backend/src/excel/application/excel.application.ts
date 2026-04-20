@@ -5,7 +5,7 @@ import { TemplateGenerator } from '../service/template-generator';
 import { UploadParser } from '../service/upload-parser';
 import { ResultExporter } from '../service/result-exporter';
 import { EvaluationsService } from '../../evaluations/service/evaluations.service';
-import type { EvalConfig } from '@tallia/shared';
+import type { EvalConfig, TypeBConfig, TypeCConfig } from '@tallia/shared';
 
 @Injectable()
 export class ExcelApplication {
@@ -29,7 +29,18 @@ export class ExcelApplication {
   }
 
   async upload(evaluationId: string, tenantId: string, userId: string, file: Express.Multer.File, skipErrors = false) {
-    const parseResult = await this.uploadParser.parse(file.buffer);
+    const evaluation = await this.evaluationsService.findById(evaluationId, tenantId);
+    const config = evaluation.config as unknown as EvalConfig;
+
+    // 평가 유형별 파서 분기
+    let parseResult;
+    if (config.type === 'B') {
+      parseResult = await this.uploadParser.parseTypeB(file.buffer, config as TypeBConfig);
+    } else if (config.type === 'C' && (config as TypeCConfig).committeeCount > 1) {
+      parseResult = await this.uploadParser.parseTypeC(file.buffer, config as TypeCConfig);
+    } else {
+      parseResult = await this.uploadParser.parse(file.buffer);
+    }
 
     const rows = skipErrors
       ? parseResult.rows.filter((_, idx) => {
