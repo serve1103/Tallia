@@ -11,6 +11,7 @@ export class ScoresPrismaRepository implements ScoresRepository {
       tenantId: filter.tenantId,
       evaluationId: filter.evaluationId,
     };
+    if (filter.uploadId) where.uploadId = filter.uploadId;
     if (filter.failOnly) where.failFlag = true;
 
     const [data, total] = await Promise.all([
@@ -28,9 +29,12 @@ export class ScoresPrismaRepository implements ScoresRepository {
     return { data: data as unknown as ScoreEntity[], total };
   }
 
-  async findByExamineeNo(evaluationId: string, examineeNo: string, tenantId: string): Promise<ScoreEntity | null> {
+  async findByExamineeNo(evaluationId: string, examineeNo: string, tenantId: string, uploadId?: string): Promise<ScoreEntity | null> {
+    const where: Record<string, unknown> = { evaluationId, examineeNo, tenantId };
+    if (uploadId) where.uploadId = uploadId;
     const score = await this.prisma.score.findFirst({
-      where: { evaluationId, examineeNo, tenantId },
+      where,
+      orderBy: { calculatedAt: 'desc' },
     });
     return score as unknown as ScoreEntity | null;
   }
@@ -83,8 +87,10 @@ export class ScoresPrismaRepository implements ScoresRepository {
     return count;
   }
 
-  async getStats(evaluationId: string, tenantId: string): Promise<ScoreStats> {
-    const where = { evaluationId, tenantId, errorFlag: false };
+  async getStats(evaluationId: string, tenantId: string, uploadId?: string): Promise<ScoreStats> {
+    const baseWhere: Record<string, unknown> = { evaluationId, tenantId };
+    if (uploadId) baseWhere.uploadId = uploadId;
+    const where = { ...baseWhere, errorFlag: false };
 
     const [aggregate, total, failCount] = await Promise.all([
       this.prisma.score.aggregate({
@@ -93,8 +99,8 @@ export class ScoresPrismaRepository implements ScoresRepository {
         _max: { convertedScore: true },
         _count: true,
       }),
-      this.prisma.score.count({ where: { evaluationId, tenantId } }),
-      this.prisma.score.count({ where: { evaluationId, tenantId, failFlag: true } }),
+      this.prisma.score.count({ where: baseWhere }),
+      this.prisma.score.count({ where: { ...baseWhere, failFlag: true } }),
     ]);
 
     const avg = aggregate._avg.convertedScore;

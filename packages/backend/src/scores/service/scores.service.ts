@@ -10,8 +10,8 @@ export class ScoresService {
     return this.repo.findAll(filter);
   }
 
-  async findByExamineeNo(evaluationId: string, examineeNo: string, tenantId: string) {
-    const score = await this.repo.findByExamineeNo(evaluationId, examineeNo, tenantId);
+  async findByExamineeNo(evaluationId: string, examineeNo: string, tenantId: string, uploadId?: string) {
+    const score = await this.repo.findByExamineeNo(evaluationId, examineeNo, tenantId, uploadId);
     if (!score) throw new NotFoundException('수험자 결과를 찾을 수 없습니다');
     return score;
   }
@@ -24,7 +24,7 @@ export class ScoresService {
     return this.repo.deleteByEvaluation(evaluationId, tenantId);
   }
 
-  async getStats(evaluationId: string, tenantId: string): Promise<ScoreStats> {
-    return this.repo.getStats(evaluationId, tenantId);
+  async getStats(evaluationId: string, tenantId: string, uploadId?: string): Promise<ScoreStats> {
+    return this.repo.getStats(evaluationId, tenantId, uploadId);
   }
 }

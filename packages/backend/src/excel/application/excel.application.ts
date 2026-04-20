@@ -50,10 +50,13 @@ export class ExcelApplication {
         })
       : parseResult.rows;
 
+    // multer는 originalname을 latin1로 디코딩하므로 한글은 깨짐 → utf8 복원
+    const fileName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+
     const upload = await this.excelService.createUpload({
       tenantId,
       evaluationId,
-      fileName: file.originalname,
+      fileName,
       fileSize: file.size,
       rowCount: rows.length,
       rawData: rows,

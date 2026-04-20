@@ -154,7 +154,6 @@ export class EvaluationsApplication {
     if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
 
     const subjectName = String(subject.name ?? subjectId);
-    const questionCount = Number(subject.questionCount ?? 0);
 
     // examType 매칭하여 기존 answerKey 추출
     const examTypes = (subject.examTypes as Array<Record<string, unknown>>) ?? [];
@@ -162,6 +161,9 @@ export class EvaluationsApplication {
       ? examTypes.find((et) => et.name === examType || et.id === examType)
       : examTypes[0];
     const existingAnswerKey = (targetExamType?.answerKey as AnswerKeyEntry[] | undefined) ?? [];
+
+    // 시험유형별 문항수 우선, 없으면 과목 문항수 사용
+    const questionCount = Number(targetExamType?.questionCount ?? subject.questionCount ?? 0);
 
     const examTypeName = targetExamType ? String(targetExamType.name ?? examType ?? '기본') : (examType ?? '기본');
     const sheetName = `${subjectName}_${examTypeName}`;

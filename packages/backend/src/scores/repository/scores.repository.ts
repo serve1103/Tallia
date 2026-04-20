@@ -40,6 +40,8 @@ export interface ScoreFilter {
   limit: number;
   sort?: string;
   failOnly?: boolean;
+  /** 지정 시 해당 업로드의 점수만 조회 (이전 재업로드 점수 제외) */
+  uploadId?: string;
 }
 
 export interface ScoreStats {
@@ -51,10 +53,10 @@ export interface ScoreStats {
 
 export interface ScoresRepository {
   findAll(filter: ScoreFilter): Promise<{ data: ScoreEntity[]; total: number }>;
-  findByExamineeNo(evaluationId: string, examineeNo: string, tenantId: string): Promise<ScoreEntity | null>;
+  findByExamineeNo(evaluationId: string, examineeNo: string, tenantId: string, uploadId?: string): Promise<ScoreEntity | null>;
   upsertBatch(scores: CreateScoreDto[]): Promise<number>;
   deleteByEvaluation(evaluationId: string, tenantId: string): Promise<number>;
-  getStats(evaluationId: string, tenantId: string): Promise<ScoreStats>;
+  getStats(evaluationId: string, tenantId: string, uploadId?: string): Promise<ScoreStats>;
 }
 
 export const SCORES_REPOSITORY = Symbol('SCORES_REPOSITORY');

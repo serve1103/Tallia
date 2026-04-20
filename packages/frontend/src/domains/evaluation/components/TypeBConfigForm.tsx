@@ -3,6 +3,7 @@ import { Form, InputNumber, Button, Card, Space, Divider, Input, Tabs } from 'an
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TypeBConfig, SubjectDef, ExamType, ScoreRange } from '@tallia/shared';
 import { ExamTypeManager } from './ExamTypeManager';
+import type { ExamTypeEntry } from './ExamTypeManager';
 import { AnswerKeyEditor } from './AnswerKeyEditor';
 import { QuestionErrorManager } from './QuestionErrorManager';
 import { saveAnswerKey, reportQuestionError } from '../api/evaluations';
@@ -26,10 +27,10 @@ const emptySubject: Omit<SubjectDef, 'examTypes' | 'questionErrors'> = {
   failThreshold: null,
 };
 
-function buildExamTypeMap(subjects: SubjectDef[]): Record<string, string[]> {
-  const map: Record<string, string[]> = {};
+function buildExamTypeMap(subjects: SubjectDef[]): Record<string, ExamTypeEntry[]> {
+  const map: Record<string, ExamTypeEntry[]> = {};
   for (const s of subjects) {
-    map[s.id] = (s.examTypes ?? []).map((et) => et.name);
+    map[s.id] = (s.examTypes ?? []).map((et) => ({ name: et.name, questionCount: et.questionCount }));
   }
   return map;
 }
@@ -40,8 +41,8 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
   const [answerKeySaving, setAnswerKeySaving] = useState(false);
   const [errorSaving, setErrorSaving] = useState(false);
 
-  // examTypes per subject: subjectId -> string[]
-  const [examTypeMap, setExamTypeMap] = useState<Record<string, string[]>>(
+  // examTypes per subject: subjectId -> ExamTypeEntry[]
+  const [examTypeMap, setExamTypeMap] = useState<Record<string, ExamTypeEntry[]>>(
     () => buildExamTypeMap(value?.subjects ?? []),
   );
 
@@ -50,13 +51,15 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
       type: 'B',
       subjects: values.subjects.map((s: Record<string, unknown>, idx: number) => {
         const subjectId = (s.id as string) || `subj-${idx}`;
-        const typeNames = examTypeMap[subjectId] ?? [];
+        const entries = examTypeMap[subjectId] ?? [];
         const existingExamTypes: ExamType[] = (value?.subjects ?? [])
           .find((es) => es.id === subjectId)
           ?.examTypes ?? [];
-        const examTypes: ExamType[] = typeNames.map((name) => {
-          const existing = existingExamTypes.find((et) => et.name === name);
-          return existing ?? { id: `et-${name}`, name, questionCount: (s.questionCount as number) ?? 0 };
+        const examTypes: ExamType[] = entries.map((entry) => {
+          const existing = existingExamTypes.find((et) => et.name === entry.name);
+          return existing
+            ? { ...existing, questionCount: entry.questionCount }
+            : { id: `et-${entry.name}`, name: entry.name, questionCount: entry.questionCount };
         });
         return {
           ...s,
@@ -141,9 +144,9 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
             {fields.map(({ key, name, ...rest }) => {
               const subjectId =
                 form.getFieldValue(['subjects', name, 'id']) || `subj-${name}`;
-              const examTypes = examTypeMap[subjectId] ?? [];
+              const examTypeEntries = examTypeMap[subjectId] ?? [];
               const subjectDef = currentSubjects.find((s) => s.id === subjectId);
-              const questionCount =
+              const subjectQuestionCount =
                 form.getFieldValue(['subjects', name, 'questionCount']) ?? subjectDef?.questionCount ?? 0;
 
               return (
@@ -168,21 +171,21 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
                     시험유형
                   </Divider>
                   <ExamTypeManager
-                    examTypes={examTypes}
-                    onChange={(types) =>
-                      setExamTypeMap((prev) => ({ ...prev, [subjectId]: types }))
+                    items={examTypeEntries}
+                    onChange={(entries) =>
+                      setExamTypeMap((prev) => ({ ...prev, [subjectId]: entries }))
                     }
+                    defaultQuestionCount={subjectQuestionCount}
                   />
 
                   {(() => {
                     // 유형이 없으면 "기본" 하나로 표시 (탭 헤더 숨김)
-                    const displayTypes = examTypes.length > 0 ? examTypes : ['기본'];
-                    const hideTabs = displayTypes.length === 1 && displayTypes[0] === '기본' && examTypes.length === 0;
+                    const hasTypes = examTypeEntries.length > 0;
                     const subjectMaxScore =
                       form.getFieldValue(['subjects', name, 'maxScore']) ?? subjectDef?.maxScore ?? 100;
                     return (
                       <div style={{ marginTop: 16 }}>
-                        {hideTabs ? (
+                        {!hasTypes ? (
                           <div>
                             <div style={{ marginBottom: 8, fontSize: 13, color: '#888', fontWeight: 500 }}>
                               정답지 (기본 유형)
@@ -192,7 +195,7 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
                               subjectId={subjectId}
                               subjectMaxScore={subjectMaxScore}
                               examType="기본"
-                              questionCount={questionCount}
+                              questionCount={subjectQuestionCount}
                               existingAnswerKey={subjectDef?.examTypes?.find((et) => et.name === '기본')?.answerKey}
                               existingScoreRanges={subjectDef?.examTypes?.find((et) => et.name === '기본')?.scoreRanges}
                               onSave={handleSaveAnswerKey}
@@ -202,20 +205,22 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
                         ) : (
                           <Tabs
                             size="small"
-                            items={displayTypes.map((typeName) => {
+                            items={examTypeEntries.map((entry) => {
                               const examTypeDef = subjectDef?.examTypes?.find(
-                                (et) => et.name === typeName,
+                                (et) => et.name === entry.name,
                               );
+                              // 시험유형별 문항수 우선, 없으면 과목 문항수 사용
+                              const etQuestionCount = entry.questionCount > 0 ? entry.questionCount : subjectQuestionCount;
                               return {
-                                key: typeName,
-                                label: `${typeName}형 정답지`,
+                                key: entry.name,
+                                label: `${entry.name}형 정답지`,
                                 children: (
                                   <AnswerKeyEditor
                                     evaluationId={evaluationId ?? ''}
                                     subjectId={subjectId}
                                     subjectMaxScore={subjectMaxScore}
-                                    examType={typeName}
-                                    questionCount={questionCount}
+                                    examType={entry.name}
+                                    questionCount={etQuestionCount}
                                     existingAnswerKey={examTypeDef?.answerKey}
                                     existingScoreRanges={examTypeDef?.scoreRanges}
                                     onSave={handleSaveAnswerKey}
