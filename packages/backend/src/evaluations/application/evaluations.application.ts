@@ -59,6 +59,7 @@ export class EvaluationsApplication {
     subjectId: string,
     answerKey: unknown[],
     examType?: string,
+    scoreRanges?: unknown[],
   ) {
     const evaluation = await this.evaluationsService.findById(id, tenantId);
     const config = evaluation.config as Record<string, unknown>;
@@ -72,8 +73,17 @@ export class EvaluationsApplication {
     if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
 
     const examTypes = (subject.examTypes as Array<Record<string, unknown>>) ?? [];
+
+    // examTypes가 비어있고 examType이 "기본"이면 자동 생성
     if (examTypes.length === 0) {
-      throw new BadRequestException('과목에 시험유형이 등록되지 않았습니다');
+      const defaultName = examType ?? '기본';
+      const newExamType: Record<string, unknown> = {
+        id: `et-${defaultName}`,
+        name: defaultName,
+        questionCount: (subject.questionCount as number) ?? 0,
+      };
+      subject.examTypes = [newExamType];
+      examTypes.push(newExamType);
     }
 
     // examType(name 또는 id)이 주어지면 해당 유형에만 저장, 아니면 첫 번째 유형에 저장
@@ -83,6 +93,9 @@ export class EvaluationsApplication {
     if (!target) throw new NotFoundException('시험유형을 찾을 수 없습니다');
 
     target.answerKey = answerKey;
+    if (scoreRanges !== undefined) {
+      target.scoreRanges = scoreRanges;
+    }
     return this.evaluationsService.saveConfig(id, tenantId, config);
   }
 

@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Input, Select, Button, message } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
-import type { AnswerKeyEntry } from '../api/evaluations';
+import { Input, Select, Button, InputNumber, Card, Space, message } from 'antd';
+import { SaveOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import type { AnswerKeyEntry, ScoreRange } from '../api/evaluations';
 
 interface AnswerCell {
   answer: string;
   multi: boolean;
+  scoreOverride: number | null;
 }
 
 interface Props {
   evaluationId: string;
   subjectId: string;
+  subjectMaxScore: number;
   examType: string;
   questionCount: number;
   existingAnswerKey?: AnswerKeyEntry[];
-  onSave: (subjectId: string, examType: string, answerKey: AnswerKeyEntry[]) => Promise<void>;
+  existingScoreRanges?: ScoreRange[];
+  onSave: (subjectId: string, examType: string, answerKey: AnswerKeyEntry[], scoreRanges: ScoreRange[]) => Promise<void>;
   saving?: boolean;
 }
 
@@ -25,29 +28,57 @@ function buildInitialCells(questionCount: number, existing?: AnswerKeyEntry[]): 
     cells[i] = {
       answer: entry ? entry.answers.join(',') : '',
       multi: entry ? entry.answers.length > 1 : false,
+      scoreOverride: entry && entry.score > 0 ? entry.score : null,
     };
   }
   return cells;
 }
 
+/** scoreRanges 에서 qNo 에 해당하는 구간 배점 반환. 없으면 균등 분배값 반환. */
+function computeDefaultScore(qNo: number, scoreRanges: ScoreRange[], subjectMaxScore: number, questionCount: number): number {
+  const range = scoreRanges.find((r) => qNo >= r.start && qNo <= r.end);
+  if (range) return range.score;
+  const qc = questionCount > 0 ? questionCount : 1;
+  return Math.round((subjectMaxScore / qc) * 100) / 100;
+}
+
 export function AnswerKeyEditor({
   subjectId,
+  subjectMaxScore,
   examType,
   questionCount,
   existingAnswerKey,
+  existingScoreRanges,
   onSave,
   saving,
 }: Props) {
   const [cells, setCells] = useState<Record<number, AnswerCell>>(() =>
     buildInitialCells(questionCount, existingAnswerKey),
   );
+  const [scoreRanges, setScoreRanges] = useState<ScoreRange[]>(existingScoreRanges ?? []);
 
   useEffect(() => {
     setCells(buildInitialCells(questionCount, existingAnswerKey));
   }, [questionCount, existingAnswerKey]);
 
+  useEffect(() => {
+    setScoreRanges(existingScoreRanges ?? []);
+  }, [existingScoreRanges]);
+
   const updateCell = (n: number, patch: Partial<AnswerCell>) => {
     setCells((prev) => ({ ...prev, [n]: { ...prev[n], ...patch } }));
+  };
+
+  const addRange = () => {
+    setScoreRanges((prev) => [...prev, { start: 1, end: questionCount, score: 1 }]);
+  };
+
+  const updateRange = (idx: number, patch: Partial<ScoreRange>) => {
+    setScoreRanges((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  };
+
+  const removeRange = (idx: number) => {
+    setScoreRanges((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSave = async () => {
@@ -58,10 +89,10 @@ export function AnswerKeyEditor({
         answers: cell.multi
           ? cell.answer.split(',').map((s) => s.trim()).filter(Boolean)
           : [cell.answer.trim()],
-        score: 0,
+        score: cell.scoreOverride ?? 0,
       }));
     try {
-      await onSave(subjectId, examType, answerKey);
+      await onSave(subjectId, examType, answerKey, scoreRanges);
       message.success(`${examType}형 정답지 저장 완료`);
     } catch {
       message.error('정답지 저장에 실패했습니다');
@@ -78,8 +109,68 @@ export function AnswerKeyEditor({
 
   return (
     <div>
+      {/* 구간 배점 편집기 */}
+      <Card
+        size="small"
+        title="구간 배점"
+        style={{ marginBottom: 16 }}
+        extra={
+          <Button size="small" icon={<PlusOutlined />} onClick={addRange}>
+            구간 추가
+          </Button>
+        }
+      >
+        {scoreRanges.length === 0 ? (
+          <div style={{ fontSize: 13, color: '#888' }}>
+            구간 없음 — 균등 분배 ({Math.round((subjectMaxScore / (questionCount || 1)) * 100) / 100}점/문항) 또는 문항별 override 사용
+          </div>
+        ) : (
+          <Space direction="vertical" style={{ width: '100%' }}>
+            {scoreRanges.map((range, idx) => (
+              <Space key={idx} align="center">
+                <span style={{ fontSize: 13, color: '#555' }}>시작</span>
+                <InputNumber
+                  size="small"
+                  min={1}
+                  max={questionCount}
+                  value={range.start}
+                  onChange={(v) => updateRange(idx, { start: v ?? 1 })}
+                  style={{ width: 70 }}
+                />
+                <span style={{ fontSize: 13, color: '#888' }}>~</span>
+                <span style={{ fontSize: 13, color: '#555' }}>끝</span>
+                <InputNumber
+                  size="small"
+                  min={1}
+                  max={questionCount}
+                  value={range.end}
+                  onChange={(v) => updateRange(idx, { end: v ?? questionCount })}
+                  style={{ width: 70 }}
+                />
+                <span style={{ fontSize: 13, color: '#555' }}>배점</span>
+                <InputNumber
+                  size="small"
+                  min={0}
+                  value={range.score}
+                  onChange={(v) => updateRange(idx, { score: v ?? 0 })}
+                  style={{ width: 70 }}
+                />
+                <Button
+                  size="small"
+                  type="text"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => removeRange(idx)}
+                />
+              </Space>
+            ))}
+          </Space>
+        )}
+      </Card>
+
+      {/* 문항 그리드 */}
       <div style={{ marginBottom: 8, fontSize: 13, color: '#888' }}>
-        문항별 정답 입력, 복수정답은 쉼표 구분 (예: 1,3)
+        문항별 정답 입력. 복수정답은 쉼표 구분 (예: 1,3). 배점 입력 시 문항 override 적용.
       </div>
       <div
         style={{
@@ -90,7 +181,8 @@ export function AnswerKeyEditor({
         }}
       >
         {rows.flat().map((n) => {
-          const cell = cells[n] ?? { answer: '', multi: false };
+          const cell = cells[n] ?? { answer: '', multi: false, scoreOverride: null };
+          const defaultScore = computeDefaultScore(n, scoreRanges, subjectMaxScore, questionCount);
           return (
             <div
               key={n}
@@ -123,6 +215,14 @@ export function AnswerKeyEditor({
                   { value: 'single', label: '단일' },
                   { value: 'multi', label: '복수' },
                 ]}
+              />
+              <InputNumber
+                size="small"
+                min={0}
+                value={cell.scoreOverride ?? undefined}
+                placeholder={`자동:${defaultScore}`}
+                onChange={(v) => updateCell(n, { scoreOverride: v !== null && v !== undefined ? v : null })}
+                style={{ width: '100%' }}
               />
             </div>
           );
