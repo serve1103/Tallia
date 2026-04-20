@@ -31,7 +31,10 @@ export function ResultListPage() {
       onSuccess: (result) => {
         message.success(`계산 완료: 성공 ${result.successCount}건, 오류 ${result.errorCount}건`);
       },
-      onError: () => message.error('계산에 실패했습니다'),
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error?.message ?? '계산에 실패했습니다';
+        message.error(msg);
+      },
     });
   };
 

@@ -63,9 +63,12 @@ export class ScoresApplication {
           ? (config as any).maxCommitteeCount
           : undefined;
 
+        // raw flat 데이터를 블록이 기대하는 형태로 변환
+        const pipelineInput = this.transformInput(row.data, config, committeeCount);
+
         const result = this.pipelineExecutor.executeConfig(
           pipelineConfig,
-          row.data,
+          pipelineInput,
           context,
           committeeCount,
         );
@@ -171,5 +174,33 @@ export class ScoresApplication {
         ipAddress: '',
       }).catch(() => {});
     }
+  }
+
+  /**
+   * raw flat 데이터를 파이프라인 블록이 기대하는 형태로 변환
+   * A유형: { 인성_위원1: 96, ... } → { items: ['인성','전공적합성'], data: [[96,95,89],[87,85,95]] }
+   * 기타: 그대로 반환
+   */
+  private transformInput(rawData: Record<string, unknown>, config: EvalConfig, committeeCount?: number): unknown {
+    if (config.type === 'A') {
+      const aConfig = config as any;
+      const items: string[] = aConfig.items.map((i: any) => i.name);
+      const maxC = committeeCount ?? aConfig.maxCommitteeCount ?? 3;
+
+      // items × committees 매트릭스 구성
+      const matrix: number[][] = items.map((itemName: string) => {
+        const row: number[] = [];
+        for (let c = 1; c <= maxC; c++) {
+          const key = `${itemName}_위원${c}`;
+          row.push(Number(rawData[key]) || 0);
+        }
+        return row;
+      });
+
+      return { items, data: matrix };
+    }
+
+    // B/C/D 유형은 flat 그대로
+    return rawData;
   }
 }
