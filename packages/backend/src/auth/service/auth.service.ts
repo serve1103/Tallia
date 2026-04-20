@@ -1,4 +1,4 @@
-import { Injectable, Inject, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, UnauthorizedException, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -28,6 +28,10 @@ export class AuthService {
   ) {}
 
   async signup(email: string, password: string, name: string, inviteCode?: string) {
+    if (!password || password.length < 8 || password.length > 128) {
+      throw new BadRequestException('비밀번호는 8~128자여야 합니다');
+    }
+
     const existing = await this.authRepo.findByEmail(email);
     if (existing) {
       throw new ConflictException('이미 등록된 이메일입니다');
@@ -103,6 +107,10 @@ export class AuthService {
   }
 
   async resetPassword(userId: string, newPassword: string): Promise<void> {
+    if (!newPassword || newPassword.length < 8 || newPassword.length > 128) {
+      throw new BadRequestException('비밀번호는 8~128자여야 합니다');
+    }
+
     const user = await this.authRepo.findById(userId);
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다');
