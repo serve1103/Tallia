@@ -8,6 +8,8 @@ import { TypeAConfigHandler } from './service/config-handlers/type-a.handler';
 import { TypeBConfigHandler } from './service/config-handlers/type-b.handler';
 import { TypeCConfigHandler } from './service/config-handlers/type-c.handler';
 import { TypeDConfigHandler } from './service/config-handlers/type-d.handler';
+import { AnswerKeyTemplateGenerator } from '../excel/service/answer-key-template-generator';
+import { AnswerKeyUploadParser } from '../excel/service/answer-key-upload-parser';
 
 @Module({
   controllers: [EvaluationsController],
@@ -22,6 +24,8 @@ import { TypeDConfigHandler } from './service/config-handlers/type-d.handler';
     TypeBConfigHandler,
     TypeCConfigHandler,
     TypeDConfigHandler,
+    AnswerKeyTemplateGenerator,
+    AnswerKeyUploadParser,
   ],
   exports: [EvaluationsService],
 })
