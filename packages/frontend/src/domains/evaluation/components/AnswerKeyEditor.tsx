@@ -246,7 +246,7 @@ export function AnswerKeyEditor({
           </Upload>
         </Space>
         <div style={{ fontSize: 12, color: '#888', marginTop: 6 }}>
-          엑셀로 일괄 입력/수정 가능. 업로드 후 저장 버튼을 눌러 반영하세요.
+          엑셀 업로드 시 즉시 저장됩니다. 화면에서 수정한 경우에만 아래 저장 버튼을 누르세요.
         </div>
       </Card>
 
