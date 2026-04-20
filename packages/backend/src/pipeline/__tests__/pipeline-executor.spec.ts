@@ -72,4 +72,74 @@ describe('PipelineExecutor', () => {
     expect(result.intermediateResults).toHaveLength(0);
     expect((result.finalData as { value: number }).value).toBe(100);
   });
+
+  describe('executeConditional: A유형 조건부 파이프라인', () => {
+    const makeBlock = (type: string): import('@tallia/shared').PipelineBlock => ({
+      type,
+      params: {},
+      decimal: null,
+    });
+
+    // 5명용: sum_by_committee → committee_average → normalize_to_max
+    const pipeline5 = [makeBlock('sum_by_committee'), makeBlock('committee_average'), makeBlock('normalize_to_max')];
+    // 3명용: committee_average → normalize_to_max
+    const pipeline3 = [makeBlock('committee_average'), makeBlock('normalize_to_max')];
+    // 2명용: committee_sum → normalize_to_max
+    const pipeline2 = [makeBlock('committee_sum'), makeBlock('normalize_to_max')];
+
+    const conditionalConfig: import('@tallia/shared').TypeAPipelineConfig = {
+      conditions: [
+        { committeeCount: 5, blocks: pipeline5 },
+        { committeeCount: 3, blocks: pipeline3 },
+        { committeeCount: 2, blocks: pipeline2 },
+      ],
+    };
+
+    const aContext: import('@tallia/shared').ExecutionContext = {
+      evaluationType: 'A',
+      config: { type: 'A', maxCommitteeCount: 5, dataType: 'score', items: [] } as never,
+      defaultDecimal: { method: 'round', places: 2 },
+    };
+
+    const initialData = { items: ['항목1'], data: [[80, 90, 85, 78, 82]] };
+
+    it('위원 5명 → conditions[5] 블록 선택', () => {
+      const result = executor.executeConditional(conditionalConfig, 5, initialData, aContext);
+      expect(result.intermediateResults).toHaveLength(3);
+      expect(result.intermediateResults[0].blockType).toBe('sum_by_committee');
+    });
+
+    it('위원 4명 → 가장 가까운 하위 조건 (3명) 선택', () => {
+      const result = executor.executeConditional(conditionalConfig, 4, initialData, aContext);
+      // 4명 → 4 >= 3 이므로 3명 파이프라인 선택
+      expect(result.intermediateResults).toHaveLength(2);
+      expect(result.intermediateResults[0].blockType).toBe('committee_average');
+    });
+
+    it('위원 3명 → conditions[3] 블록 선택', () => {
+      const result = executor.executeConditional(conditionalConfig, 3, initialData, aContext);
+      expect(result.intermediateResults).toHaveLength(2);
+      expect(result.intermediateResults[0].blockType).toBe('committee_average');
+    });
+
+    it('위원 2명 → conditions[2] 블록 선택', () => {
+      const data2 = { items: ['항목1'], data: [[80, 90]] };
+      const result = executor.executeConditional(conditionalConfig, 2, data2, aContext);
+      expect(result.intermediateResults).toHaveLength(2);
+      expect(result.intermediateResults[0].blockType).toBe('committee_sum');
+    });
+
+    it('executeConfig: TypeAPipelineConfig + committeeCount → executeConditional 경로', () => {
+      const result = executor.executeConfig(conditionalConfig, initialData, aContext, 5);
+      expect(result.intermediateResults[0].blockType).toBe('sum_by_committee');
+    });
+
+    it('executeConfig: StandardPipelineConfig → 표준 실행 경로', () => {
+      const standardConfig: import('@tallia/shared').StandardPipelineConfig = {
+        blocks: [makeBlock('committee_average'), makeBlock('normalize_to_max')],
+      };
+      const result = executor.executeConfig(standardConfig, initialData, aContext);
+      expect(result.intermediateResults).toHaveLength(2);
+    });
+  });
 });

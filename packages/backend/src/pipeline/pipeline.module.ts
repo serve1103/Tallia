@@ -25,7 +25,7 @@ import { gradeToScoreBlock } from './blocks/type-a/grade-to-score';
 import { autoGradeBlock } from './blocks/type-b/auto-grade';
 import { sumBySubjectBlock, subjectFailCheckBlock, subjectSumBlock, subjectWeightedSumBlock } from './blocks/type-b/b-aggregate-blocks';
 // C유형 블록
-import { subQuestionSumBlock, subQuestionWeightedSumBlock, questionWeightBlock, questionSumBlock, questionWeightedSumBlock, subQuestionFailCheckBlock, questionFailCheckBlock } from './blocks/type-c/c-question-blocks';
+import { subQuestionSumBlock, subQuestionWeightedSumBlock, questionWeightBlock, questionSumBlock, questionWeightedSumBlock, subQuestionFailCheckBlock, questionFailCheckBlock, committeeAveragePerQuestionBlock } from './blocks/type-c/c-question-blocks';
 // D유형 블록
 import { mappingLookupBlock } from './blocks/type-d/mapping-lookup';
 import {
@@ -97,6 +97,7 @@ export class PipelineModule implements OnModuleInit {
     this.registry.register('question_weighted_sum', questionWeightedSumBlock);
     this.registry.register('sub_question_fail_check', subQuestionFailCheckBlock);
     this.registry.register('question_fail_check', questionFailCheckBlock);
+    this.registry.register('committee_average_per_question', committeeAveragePerQuestionBlock);
     // D유형
     this.registry.register('mapping_lookup', mappingLookupBlock);
   }

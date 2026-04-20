@@ -66,23 +66,96 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
   }
 
   async copy(id: string, tenantId: string): Promise<EvaluationEntity> {
+    // 원본 평가 조회 (해당 테넌트 소속만)
     const source = await this.prisma.evaluation.findFirstOrThrow({
       where: { id, tenantId },
+      include: {
+        mappingTable: {
+          include: { entries: true },
+        },
+      },
     });
 
-    return this.prisma.evaluation.create({
+    // 이름 중복 방지: "(복사)", "(복사 2)", "(복사 3)" 순으로 증가
+    const baseName = `${source.name} (복사)`;
+    const copiedName = await this.resolveUniqueCopyName(baseName, tenantId);
+
+    // 새 평가 생성 — scores/score_uploads/audit_logs는 복사하지 않음
+    const copied = await this.prisma.evaluation.create({
       data: {
         tenantId: source.tenantId,
-        name: `${source.name} (복사)`,
+        name: copiedName,
         type: source.type,
         academicYear: source.academicYear,
         admissionType: source.admissionType,
-        config: source.config as any,
-        pipelineConfig: source.pipelineConfig as any,
-        defaultDecimal: source.defaultDecimal as any,
+        config: JSON.parse(JSON.stringify(source.config)),
+        pipelineConfig: JSON.parse(JSON.stringify(source.pipelineConfig)),
+        defaultDecimal: source.defaultDecimal != null
+          ? JSON.parse(JSON.stringify(source.defaultDecimal))
+          : undefined,
         convertedMax: source.convertedMax,
+        status: 'draft',
+        needsRecalculation: true,
         copiedFromId: source.id,
       },
-    }) as unknown as EvaluationEntity;
+    });
+
+    // D유형: mapping_table과 entries도 함께 복사
+    if (source.mappingTable) {
+      const { mappingType, columnsDef, entries } = source.mappingTable;
+      await this.prisma.mappingTable.create({
+        data: {
+          tenantId,
+          evaluationId: copied.id,
+          mappingType,
+          columnsDef: JSON.parse(JSON.stringify(columnsDef)),
+          entries: {
+            create: entries.map((e) => ({
+              conditions: JSON.parse(JSON.stringify(e.conditions)),
+              score: e.score,
+              sortOrder: e.sortOrder,
+            })),
+          },
+        },
+      });
+    }
+
+    return copied as unknown as EvaluationEntity;
+  }
+
+  /** 같은 테넌트 내에서 유니크한 복사본 이름 생성 */
+  private async resolveUniqueCopyName(baseName: string, tenantId: string): Promise<string> {
+    // baseName = "원본 (복사)"
+    // 이미 존재하면 "원본 (복사 2)", "원본 (복사 3)" ... 으로 증가
+    // DB startsWith 대신 후보 이름을 직접 조회하여 정확한 매칭 보장
+    const stemName = baseName.replace(/ \(복사\)$/, ''); // "원본"
+
+    // baseName과 "(복사 N)" 패턴 이름 모두 조회
+    const candidates = [baseName];
+    for (let n = 2; n <= 100; n++) {
+      candidates.push(`${stemName} (복사 ${n})`);
+    }
+
+    const existing = await this.prisma.evaluation.findMany({
+      where: {
+        tenantId,
+        name: { in: candidates },
+      },
+      select: { name: true },
+    });
+
+    if (existing.length === 0) return baseName;
+
+    const takenNames = new Set(existing.map((e) => e.name));
+    if (!takenNames.has(baseName)) return baseName;
+
+    // suffix 숫자 증가
+    for (let counter = 2; counter <= 100; counter++) {
+      const candidate = `${stemName} (복사 ${counter})`;
+      if (!takenNames.has(candidate)) return candidate;
+    }
+
+    // 100개 초과 시 타임스탬프 fallback
+    return `${stemName} (복사 ${Date.now()})`;
   }
 }
