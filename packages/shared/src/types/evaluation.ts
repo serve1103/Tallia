@@ -139,6 +139,7 @@ export interface Evaluation {
   status: EvaluationStatus;
   needsRecalculation: boolean;
   copiedFromId?: string;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

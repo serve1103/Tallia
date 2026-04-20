@@ -35,7 +35,12 @@ export class EvaluationsController {
     @Query('academic_year') academicYear?: string,
     @Query('admission_type') admissionType?: string,
     @Query('type') type?: string,
+    @Query('trash') trash?: string,
   ) {
+    if (trash === 'true') {
+      const evaluations = await this.evaluationsApp.findTrash(tenantId);
+      return { data: evaluations };
+    }
     const evaluations = await this.evaluationsApp.findAll({ tenantId, academicYear, admissionType, type });
     return { data: evaluations };
   }
@@ -59,6 +64,18 @@ export class EvaluationsController {
   @Post(':id/delete')
   async delete(@Param('id') id: string, @CurrentTenant() tenantId: string) {
     await this.evaluationsApp.delete(id, tenantId);
+    return { data: { deleted: true } };
+  }
+
+  @Post(':id/restore')
+  async restore(@Param('id') id: string, @CurrentTenant() tenantId: string) {
+    const evaluation = await this.evaluationsApp.restore(id, tenantId);
+    return { data: evaluation };
+  }
+
+  @Post(':id/hard-delete')
+  async hardDelete(@Param('id') id: string, @CurrentTenant() tenantId: string) {
+    await this.evaluationsApp.hardDelete(id, tenantId);
     return { data: { deleted: true } };
   }
 

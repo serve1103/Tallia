@@ -3,6 +3,7 @@ import { Layout, Menu, Typography, Avatar, Result } from 'antd';
 import {
   HomeOutlined,
   BankOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../domains/auth/stores/authStore';
@@ -11,6 +12,7 @@ const { Sider, Header, Content } = Layout;
 
 const menuItems = [
   { key: '/dashboard', icon: <HomeOutlined />, label: '대시보드' },
+  { key: '/trash', icon: <DeleteOutlined />, label: '휴지통' },
 ];
 
 const adminItems = [

@@ -8,6 +8,7 @@ interface FetchParams {
   type?: EvaluationType;
   academicYear?: string;
   admissionType?: string;
+  trash?: boolean;
 }
 
 export async function fetchEvaluations(params: FetchParams): Promise<PaginatedResponse<Evaluation>> {
@@ -18,6 +19,7 @@ export async function fetchEvaluations(params: FetchParams): Promise<PaginatedRe
       type: params.type,
       academic_year: params.academicYear,
       admission_type: params.admissionType,
+      ...(params.trash ? { trash: 'true' } : {}),
     },
   });
   const items = data.data;
@@ -41,6 +43,15 @@ export async function updateEvaluation(id: string, input: Partial<Evaluation>): 
 
 export async function deleteEvaluation(id: string): Promise<void> {
   await apiClient.post(`/evaluations/${id}/delete`);
+}
+
+export async function restoreEvaluation(id: string): Promise<Evaluation> {
+  const { data } = await apiClient.post(`/evaluations/${id}/restore`);
+  return data.data;
+}
+
+export async function hardDeleteEvaluation(id: string): Promise<void> {
+  await apiClient.post(`/evaluations/${id}/hard-delete`);
 }
 
 export async function copyEvaluation(id: string): Promise<Evaluation> {

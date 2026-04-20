@@ -6,6 +6,8 @@ import {
   createEvaluation,
   updateEvaluation,
   deleteEvaluation,
+  restoreEvaluation,
+  hardDeleteEvaluation,
   copyEvaluation,
   fetchEvalConfig,
   saveEvalConfig,
@@ -17,6 +19,7 @@ interface EvalFilters {
   type?: EvaluationType;
   academicYear?: string;
   admissionType?: string;
+  trash?: boolean;
 }
 
 export function useEvaluations(filters: EvalFilters) {
@@ -90,6 +93,26 @@ export function useSaveEvalConfig() {
       saveEvalConfig(id, config),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['evaluations', variables.id] });
+    },
+  });
+}
+
+export function useRestoreEvaluation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: restoreEvaluation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['evaluations'] });
+    },
+  });
+}
+
+export function useHardDeleteEvaluation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: hardDeleteEvaluation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['evaluations'] });
     },
   });
 }

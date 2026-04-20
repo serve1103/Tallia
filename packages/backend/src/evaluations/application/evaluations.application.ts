@@ -24,6 +24,10 @@ export class EvaluationsApplication {
     return this.evaluationsService.findAll(filter);
   }
 
+  async findTrash(tenantId: string) {
+    return this.evaluationsService.findTrash(tenantId);
+  }
+
   async findById(id: string, tenantId: string) {
     return this.evaluationsService.findById(id, tenantId);
   }
@@ -52,6 +56,28 @@ export class EvaluationsApplication {
 
   async delete(id: string, tenantId: string) {
     return this.evaluationsService.delete(id, tenantId);
+  }
+
+  async restore(id: string, tenantId: string) {
+    return this.evaluationsService.restore(id, tenantId);
+  }
+
+  async hardDelete(id: string, tenantId: string) {
+    // 30일 경과 후에만 영구 삭제 허용
+    const trash = await this.evaluationsService.findTrash(tenantId);
+    const evaluation = trash.find((e) => e.id === id);
+    if (!evaluation) throw new NotFoundException('평가를 찾을 수 없습니다');
+
+    if (!evaluation.deletedAt) {
+      throw new BadRequestException('삭제되지 않은 평가입니다');
+    }
+
+    const daysSinceDelete = (Date.now() - new Date(evaluation.deletedAt).getTime()) / (1000 * 60 * 60 * 24);
+    if (daysSinceDelete < 30) {
+      throw new BadRequestException('삭제 30일 후에 영구 삭제 가능합니다');
+    }
+
+    return this.evaluationsService.hardDelete(id, tenantId);
   }
 
   async copy(id: string, tenantId: string) {

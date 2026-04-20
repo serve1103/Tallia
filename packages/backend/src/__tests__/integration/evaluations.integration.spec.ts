@@ -125,6 +125,94 @@ describe('Evaluations Integration', () => {
     await prisma.evaluation.delete({ where: { id: eval1.id } });
   });
 
+  describe('소프트 삭제 / 복원 / 영구 삭제 (repository)', () => {
+    it('repo.delete() → findAll에서 제외, findById에서 제외', async () => {
+      const ev = await prisma.evaluation.create({
+        data: {
+          tenantId,
+          name: '소프트삭제 테스트',
+          type: 'A',
+          config: { type: 'A', maxCommitteeCount: 3, dataType: 'score', items: [] },
+          pipelineConfig: { blocks: [] },
+          status: 'draft',
+          needsRecalculation: false,
+        },
+      });
+
+      // 삭제 전 목록에 포함
+      const beforeDelete = await repo.findAll({ tenantId });
+      expect(beforeDelete.find((e) => e.id === ev.id)).toBeDefined();
+
+      // soft delete
+      await repo.delete(ev.id, tenantId);
+
+      // deletedAt이 설정됨
+      const raw = await prisma.evaluation.findUnique({ where: { id: ev.id } });
+      expect(raw).not.toBeNull();
+      expect(raw!.deletedAt).not.toBeNull();
+
+      // 기본 목록에서 제외
+      const afterDelete = await repo.findAll({ tenantId });
+      expect(afterDelete.find((e) => e.id === ev.id)).toBeUndefined();
+
+      // findById에서 제외
+      const found = await repo.findById(ev.id, tenantId);
+      expect(found).toBeNull();
+
+      // 휴지통 목록에서는 보임
+      const trash = await repo.findAll({ tenantId, onlyDeleted: true });
+      expect(trash.find((e) => e.id === ev.id)).toBeDefined();
+
+      // cleanup
+      await prisma.evaluation.delete({ where: { id: ev.id } });
+    });
+
+    it('repo.restore() → 기본 목록에 다시 포함', async () => {
+      const ev = await prisma.evaluation.create({
+        data: {
+          tenantId,
+          name: '복원 테스트',
+          type: 'B',
+          config: { type: 'B', subjects: [], totalFailThreshold: null },
+          pipelineConfig: { blocks: [] },
+          status: 'draft',
+          needsRecalculation: false,
+        },
+      });
+
+      await repo.delete(ev.id, tenantId);
+      const restored = await repo.restore(ev.id, tenantId);
+
+      expect(restored.deletedAt).toBeNull();
+
+      const inList = await repo.findAll({ tenantId });
+      expect(inList.find((e) => e.id === ev.id)).toBeDefined();
+
+      // cleanup
+      await prisma.evaluation.delete({ where: { id: ev.id } });
+    });
+
+    it('repo.hardDelete() → DB에서 실제 제거', async () => {
+      const ev = await prisma.evaluation.create({
+        data: {
+          tenantId,
+          name: '영구삭제 테스트',
+          type: 'A',
+          config: { type: 'A', maxCommitteeCount: 3, dataType: 'score', items: [] },
+          pipelineConfig: { blocks: [] },
+          status: 'draft',
+          needsRecalculation: false,
+        },
+      });
+
+      await repo.delete(ev.id, tenantId);
+      await repo.hardDelete(ev.id, tenantId);
+
+      const raw = await prisma.evaluation.findUnique({ where: { id: ev.id } });
+      expect(raw).toBeNull();
+    });
+  });
+
   describe('평가 복사 (repository copy())', () => {
     it('원본/사본 ID가 다르고 config·pipelineConfig 내용이 동일하다', async () => {
       const sourceConfig = { type: 'C', committeeCount: 2, questions: [{ id: 'q1', maxScore: 10 }], totalFailThreshold: null };
