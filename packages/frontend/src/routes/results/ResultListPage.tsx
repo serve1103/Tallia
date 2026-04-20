@@ -1,68 +1,75 @@
-import { Typography, Select, Space, Button, message } from 'antd';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PlayCircleOutlined } from '@ant-design/icons';
-import { useEvaluations } from '../../domains/evaluation/hooks/useEvaluations';
+import { Typography, Space, Button, message, Spin } from 'antd';
+import { useParams, useNavigate } from 'react-router-dom';
+import { PlayCircleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { useEvaluation } from '../../domains/evaluation/hooks/useEvaluations';
 import { getEvalTypeLabel } from '../../domains/evaluation/models/evaluation';
 import { ScoreTable } from '../../domains/score/components/ScoreTable';
 import { DownloadButton } from '../../domains/score/components/DownloadButton';
 import { useCalculateScores } from '../../domains/score/hooks/useScores';
+import { EvaluationTabs } from '../../shared/components/EvaluationTabs';
 
 export function ResultListPage() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [selectedEvalId, setSelectedEvalId] = useState<string>();
-  const { data: evaluations } = useEvaluations({ page: 1, limit: 100 });
-  const calculateMutation = useCalculateScores(selectedEvalId ?? '');
+  const { data: evaluation, isLoading } = useEvaluation(id);
+  const calculateMutation = useCalculateScores(id ?? '');
+
+  if (!id) {
+    return (
+      <div>
+        <Typography.Title level={3}>결과 조회</Typography.Title>
+        <Typography.Text type="secondary">대시보드에서 평가를 선택해주세요.</Typography.Text>
+      </div>
+    );
+  }
+
+  if (isLoading) return <Spin />;
+  if (!evaluation) return <Typography.Text>평가를 찾을 수 없습니다</Typography.Text>;
 
   const handleCalculate = () => {
-    if (!selectedEvalId) return;
     calculateMutation.mutate(undefined, {
       onSuccess: (result) => {
         message.success(`계산 완료: 성공 ${result.successCount}건, 오류 ${result.errorCount}건`);
       },
-      onError: () => message.error('계산에 실패했습니다'),
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error?.message ?? '계산에 실패했습니다';
+        message.error(msg);
+      },
     });
   };
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Typography.Title level={3} style={{ letterSpacing: '-0.03em', margin: 0 }}>
-          결과 조회
-        </Typography.Title>
+      <Space style={{ marginBottom: 16 }}>
+        <Button icon={<ArrowLeftOutlined />} type="text" onClick={() => navigate('/dashboard')}>
+          목록으로
+        </Button>
+      </Space>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            {evaluation.name}
+          </Typography.Title>
+          <Typography.Text type="secondary">{getEvalTypeLabel(evaluation.type)}</Typography.Text>
+        </div>
         <Space>
-          <Select
-            placeholder="평가 선택"
-            style={{ width: 300 }}
-            value={selectedEvalId}
-            onChange={setSelectedEvalId}
-            options={evaluations?.data.map((e) => ({
-              label: `${e.name} (${getEvalTypeLabel(e.type)})`,
-              value: e.id,
-            }))}
-          />
-          {selectedEvalId && (
-            <>
-              <Button
-                icon={<PlayCircleOutlined />}
-                onClick={handleCalculate}
-                loading={calculateMutation.isPending}
-              >
-                계산 실행
-              </Button>
-              <DownloadButton evaluationId={selectedEvalId} />
-            </>
-          )}
+          <Button
+            icon={<PlayCircleOutlined />}
+            onClick={handleCalculate}
+            loading={calculateMutation.isPending}
+          >
+            계산 실행
+          </Button>
+          <DownloadButton evaluationId={id} />
         </Space>
       </div>
-      {selectedEvalId ? (
-        <ScoreTable
-          evaluationId={selectedEvalId}
-          onSelectExaminee={(no) => navigate(`/evaluations/${selectedEvalId}/results/${no}`)}
-        />
-      ) : (
-        <Typography.Text type="secondary">평가를 선택하세요</Typography.Text>
-      )}
+
+      <EvaluationTabs evaluationId={id} activeKey="results" />
+
+      <ScoreTable
+        evaluationId={id}
+        onSelectExaminee={(no) => navigate(`/evaluations/${id}/results/${no}`)}
+      />
     </div>
   );
 }

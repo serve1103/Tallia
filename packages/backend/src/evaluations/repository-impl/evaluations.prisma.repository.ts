@@ -47,13 +47,18 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
   }
 
   async update(id: string, tenantId: string, dto: UpdateEvaluationDto): Promise<EvaluationEntity> {
-    return this.prisma.evaluation.update({
-      where: { id },
+    await this.prisma.evaluation.updateMany({
+      where: { id, tenantId },
       data: {
         ...dto,
-        // tenant_id 조건은 service에서 사전 검증
       },
-    }) as unknown as EvaluationEntity;
+    });
+
+    const updated = await this.prisma.evaluation.findFirst({
+      where: { id, tenantId },
+    });
+
+    return updated as unknown as EvaluationEntity;
   }
 
   async delete(id: string, tenantId: string): Promise<void> {

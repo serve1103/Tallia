@@ -23,9 +23,19 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 export const router = createBrowserRouter([
   {
-    element: <AuthLayout />,
+    element: (
+      <PublicOnlyRoute>
+        <AuthLayout />
+      </PublicOnlyRoute>
+    ),
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/signup', element: <SignupPage /> },
@@ -44,7 +54,6 @@ export const router = createBrowserRouter([
       { path: '/evaluations/:id/config', element: <ConfigPage /> },
       { path: '/evaluations/:id/upload', element: <UploadPage /> },
       { path: '/evaluations/:id/pipeline', element: <PipelinePage /> },
-      { path: '/results', element: <ResultListPage /> },
       { path: '/evaluations/:id/results', element: <ResultListPage /> },
       { path: '/evaluations/:id/results/:examineeNo', element: <ResultDetailPage /> },
       { path: '/admin/tenants', element: <TenantListPage /> },

@@ -71,11 +71,20 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
   };
 
   const handleValidate = () => {
+    if (store.blocks.length === 0) {
+      message.warning('블록을 먼저 추가해주세요');
+      return;
+    }
     validateMutation.mutate(store.blocks, {
       onSuccess: (result) => {
         store.setValidationResult(result);
-        if (result.valid) message.success('유효성 검증 통과');
+        if (result.valid) {
+          message.success('유효성 검증 통과');
+        } else {
+          message.error(`검증 실패: ${result.errors.length}건의 오류`);
+        }
       },
+      onError: () => message.error('검증 요청에 실패했습니다'),
     });
   };
 

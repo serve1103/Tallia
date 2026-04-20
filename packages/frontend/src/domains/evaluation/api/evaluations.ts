@@ -11,8 +11,17 @@ interface FetchParams {
 }
 
 export async function fetchEvaluations(params: FetchParams): Promise<PaginatedResponse<Evaluation>> {
-  const { data } = await apiClient.get('/evaluations', { params });
-  return data;
+  const { data } = await apiClient.get('/evaluations', {
+    params: {
+      page: params.page,
+      limit: params.limit,
+      type: params.type,
+      academic_year: params.academicYear,
+      admission_type: params.admissionType,
+    },
+  });
+  const items = data.data;
+  return { data: items, meta: { total: items.length } };
 }
 
 export async function fetchEvaluation(id: string): Promise<Evaluation> {
@@ -45,5 +54,5 @@ export async function fetchEvalConfig(id: string): Promise<EvalConfig> {
 }
 
 export async function saveEvalConfig(id: string, config: unknown): Promise<void> {
-  await apiClient.post(`/evaluations/${id}/config/save`, config);
+  await apiClient.post(`/evaluations/${id}/config/save`, { config });
 }

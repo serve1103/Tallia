@@ -32,6 +32,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(
@@ -65,5 +66,13 @@ export class AuthController {
   async resetPassword(@Body() body: { userId: string; newPassword: string }) {
     await this.authApp.resetPassword(body.userId, body.newPassword);
     return { data: { reset: true } };
+  }
+
+  @Public()
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refreshToken');
+    return { data: { success: true } };
   }
 }

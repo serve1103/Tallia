@@ -1,49 +1,101 @@
 import { test, expect } from '@playwright/test';
 
-async function login(page: any) {
-  await page.goto('/login');
-  await page.getByRole('textbox', { name: '이메일' }).fill('admin@korea.ac.kr');
-  await page.locator('input[type="password"]').fill('Tenant1234!');
-  await page.getByRole('button', { name: '로그인' }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-  await expect(page.getByRole('heading', { name: '평가 관리' })).toBeVisible({ timeout: 10000 });
-}
+// storageState로 이미 인증됨 (setup.ts에서 세션 저장)
+// 매번 로그인하지 않음
 
-test.describe('평가 관리 흐름', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page);
+test.describe('평가 CRUD', () => {
+  test('대시보드에 평가 목록이 표시된다', async ({ page }) => {
+    await page.goto('/dashboard');
+    await expect(page.getByRole('heading', { name: '평가 관리' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.ant-table')).toBeVisible();
   });
 
-  test('대시보드 — 평가 목록 표시', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: '평가 관리' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '평가 생성' })).toBeVisible();
-  });
-
-  test('평가 생성 페이지 이동', async ({ page }) => {
-    await page.getByRole('button', { name: '평가 생성' }).click();
-    await expect(page).toHaveURL(/\/evaluations\/create/);
-    await expect(page.getByText('평가명')).toBeVisible();
-    await expect(page.getByText('평가 유형')).toBeVisible();
-  });
-
-  test.fixme('평가 생성 폼 작성 (Ant Select 드롭다운 타이밍)', async ({ page }) => {
+  test('평가 생성 → 설정 페이지 이동', async ({ page }) => {
     await page.goto('/evaluations/create');
+    await expect(page.getByText('평가명')).toBeVisible();
+
+    // 폼 작성
     await page.getByPlaceholder('예: 2026학년도 수시 면접평가').fill('E2E 테스트 평가');
-
-    // Select 열고 선택 후 닫기
     await page.locator('.ant-select-selector').click();
-    await page.locator('.ant-select-item-option-content').filter({ hasText: 'A. 위원 평가' }).click();
+    await page.locator('.ant-select-item-option').filter({ hasText: 'A. 위원 평가' }).click();
 
-    // Select 닫힌 후 나머지 필드 채우기
-    await expect(page.getByPlaceholder('예: 2026')).toBeVisible({ timeout: 3000 });
-    await page.getByPlaceholder('예: 2026').fill('2026');
-    await page.getByPlaceholder('예: 수시, 정시').fill('수시');
+    // 생성 버튼
+    await page.getByRole('button', { name: '생성' }).click();
+
+    // 설정 페이지로 이동
+    await expect(page).toHaveURL(/\/evaluations\/.*\/config/, { timeout: 10000 });
   });
 
-  test.fixme('사이드바 네비게이션 (rate limiting으로 login 실패)', async ({ page }) => {
-    // 결과 조회로 이동
-    await page.locator('.ant-menu-item').filter({ hasText: '결과 조회' }).click();
-    await expect(page).toHaveURL(/\/results/, { timeout: 5000 });
-    await expect(page.getByRole('heading', { name: '결과 조회' })).toBeVisible({ timeout: 5000 });
+  test('평가 설정 저장 후 성공 메시지', async ({ page }) => {
+    await page.goto('/evaluations/create');
+    await page.getByPlaceholder('예: 2026학년도 수시 면접평가').fill('설정 저장 테스트');
+    await page.locator('.ant-select-selector').click();
+    await page.locator('.ant-select-item-option').filter({ hasText: 'A. 위원 평가' }).click();
+    await page.getByRole('button', { name: '생성' }).click();
+    await expect(page).toHaveURL(/\/evaluations\/.*\/config/, { timeout: 10000 });
+
+    // 설정 저장
+    await page.getByRole('button', { name: '설정 저장' }).click();
+    await expect(page.locator('.ant-message')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('대시보드에서 평가 복사', async ({ page }) => {
+    await page.goto('/dashboard');
+    await expect(page.locator('.ant-table')).toBeVisible({ timeout: 10000 });
+
+    const copyBtn = page.getByRole('button', { name: '복사' }).first();
+    if (await copyBtn.isVisible()) {
+      await copyBtn.click();
+      await expect(page.locator('.ant-message')).toBeVisible({ timeout: 5000 });
+    }
+  });
+
+  test('대시보드에서 평가 삭제', async ({ page }) => {
+    await page.goto('/dashboard');
+    await expect(page.locator('.ant-table')).toBeVisible({ timeout: 10000 });
+
+    const deleteBtn = page.getByRole('button', { name: '삭제' }).first();
+    if (await deleteBtn.isVisible()) {
+      await deleteBtn.click();
+      // Popconfirm — "확인" 또는 OK 버튼
+      await page.locator('.ant-popover .ant-btn-primary, .ant-popconfirm-buttons .ant-btn-primary').click();
+      await expect(page.locator('.ant-message')).toBeVisible({ timeout: 5000 });
+    }
+  });
+});
+
+test.describe('네비게이션', () => {
+  test('평가 탭 — 설정 → 계산과정 → 업로드 → 결과', async ({ page }) => {
+    await page.goto('/dashboard');
+    await expect(page.locator('.ant-table')).toBeVisible({ timeout: 10000 });
+
+    // 첫 번째 평가 클릭 → 설정 페이지
+    const evalLink = page.locator('.ant-table a, .ant-table .ant-btn-link').first();
+    if (await evalLink.isVisible()) {
+      await evalLink.click();
+      await expect(page).toHaveURL(/\/evaluations\/.*\/config/, { timeout: 5000 });
+
+      // 탭 이동: 계산 과정
+      await page.getByRole('tab', { name: '계산 과정' }).click();
+      await expect(page).toHaveURL(/\/pipeline/, { timeout: 5000 });
+
+      // 탭 이동: 엑셀 업로드
+      await page.getByRole('tab', { name: '엑셀 업로드' }).click();
+      await expect(page).toHaveURL(/\/upload/, { timeout: 5000 });
+
+      // 탭 이동: 결과 조회
+      await page.getByRole('tab', { name: '결과 조회' }).click();
+      await expect(page).toHaveURL(/\/results/, { timeout: 5000 });
+    }
+  });
+
+  test('평가 생성 후 뒤로가기 → 대시보드', async ({ page }) => {
+    await page.goto('/dashboard');
+    await expect(page.getByRole('heading', { name: '평가 관리' })).toBeVisible({ timeout: 10000 });
+
+    await page.getByRole('button', { name: '평가 생성' }).click();
+    await expect(page).toHaveURL(/\/create/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/dashboard/);
   });
 });

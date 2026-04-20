@@ -14,14 +14,20 @@ export class EvaluationsApplication {
     return this.evaluationsService.findById(id, tenantId);
   }
 
-  async create(tenantId: string, body: { name: string; type: string; academicYear?: string; admissionType?: string; config: unknown; pipelineConfig?: unknown }) {
+  async create(tenantId: string, body: { name: string; type: string; academicYear?: string; admissionType?: string; config?: unknown; pipelineConfig?: unknown }) {
+    const defaultConfigs: Record<string, unknown> = {
+      A: { type: 'A', maxCommitteeCount: 3, dataType: 'score', items: [] },
+      B: { type: 'B', subjects: [], totalFailThreshold: null },
+      C: { type: 'C', committeeCount: 2, questions: [], totalFailThreshold: null },
+      D: { type: 'D', mappingType: 'custom', inputColumns: [], maxScore: 100, totalFailThreshold: null },
+    };
     return this.evaluationsService.create({
       tenantId,
       name: body.name,
       type: body.type,
       academicYear: body.academicYear,
       admissionType: body.admissionType,
-      config: body.config as any,
+      config: (body.config ?? defaultConfigs[body.type] ?? {}) as any,
       pipelineConfig: (body.pipelineConfig as any) ?? { blocks: [] },
     });
   }

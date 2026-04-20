@@ -28,7 +28,9 @@ describe('Evaluations API', () => {
   it('fetchEvaluations — GET /evaluations', async () => {
     mockGet.mockResolvedValue({ data: { data: [], meta: { total: 0 } } });
     const result = await fetchEvaluations({ page: 1, limit: 20 });
-    expect(mockGet).toHaveBeenCalledWith('/evaluations', { params: { page: 1, limit: 20 } });
+    expect(mockGet).toHaveBeenCalledWith('/evaluations', {
+      params: { page: 1, limit: 20, type: undefined, academic_year: undefined, admission_type: undefined },
+    });
     expect(result).toEqual({ data: [], meta: { total: 0 } });
   });
 
@@ -36,7 +38,7 @@ describe('Evaluations API', () => {
     mockGet.mockResolvedValue({ data: { data: [], meta: { total: 0 } } });
     await fetchEvaluations({ page: 1, limit: 20, type: 'A', academicYear: '2026' });
     expect(mockGet).toHaveBeenCalledWith('/evaluations', {
-      params: { page: 1, limit: 20, type: 'A', academicYear: '2026' },
+      params: { page: 1, limit: 20, type: 'A', academic_year: '2026', admission_type: undefined },
     });
   });
 
@@ -88,6 +90,6 @@ describe('Evaluations API', () => {
     const config = { type: 'A', items: [] };
     mockPost.mockResolvedValue({ data: { data: { success: true } } });
     await saveEvalConfig('e1', config);
-    expect(mockPost).toHaveBeenCalledWith('/evaluations/e1/config/save', config);
+    expect(mockPost).toHaveBeenCalledWith('/evaluations/e1/config/save', { config });
   });
 });

@@ -1,4 +1,9 @@
 import { defineConfig } from '@playwright/test';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const authFile = path.join(__dirname, 'e2e', '.auth', 'tenant-admin.json');
 
 export default defineConfig({
   testDir: './e2e',
@@ -11,7 +16,27 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'chromium', use: { browserName: 'chromium' } },
+    // 1단계: 로그인 세션 저장 (1회만)
+    {
+      name: 'setup',
+      testMatch: /setup\.ts/,
+    },
+    // 2단계: 인증 불필요 테스트
+    {
+      name: 'no-auth',
+      testMatch: /auth\.spec\.ts/,
+      use: { browserName: 'chromium' },
+    },
+    // 3단계: 인증 필요 테스트 (저장된 세션 재사용)
+    {
+      name: 'authenticated',
+      testMatch: /evaluation\.spec\.ts/,
+      dependencies: ['setup'],
+      use: {
+        browserName: 'chromium',
+        storageState: authFile,
+      },
+    },
   ],
   webServer: [
     {

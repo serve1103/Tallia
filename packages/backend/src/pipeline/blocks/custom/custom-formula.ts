@@ -28,7 +28,14 @@ function validateExpression(expression: string): void {
         throw new Error(`허용되지 않은 변수/함수: ${name}`);
       }
     }
-    if (n.type === 'FunctionAssignmentNode' || n.type === 'AccessorNode') {
+    // IndexNode, ObjectNode, ConditionalNode 차단 — 임의 객체 생성/접근 방지 (mathjs all 로딩 위험 완화)
+    if (
+      n.type === 'FunctionAssignmentNode' ||
+      n.type === 'AccessorNode' ||
+      n.type === 'IndexNode' ||
+      n.type === 'ObjectNode' ||
+      n.type === 'ConditionalNode'
+    ) {
       throw new Error('함수 정의와 프로퍼티 접근은 허용되지 않습니다');
     }
   });
