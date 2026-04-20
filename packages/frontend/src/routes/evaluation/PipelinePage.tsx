@@ -2,22 +2,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Button, Space, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useEvaluation } from '../../domains/evaluation/hooks/useEvaluations';
-import { usePipelineConfig } from '../../domains/pipeline/hooks/usePipeline';
+import { usePipelineConfig, useBlockDefinitions } from '../../domains/pipeline/hooks/usePipeline';
 import { PipelineBuilder } from '../../domains/pipeline/components/PipelineBuilder';
 import { getEvalTypeLabel } from '../../domains/evaluation/models/evaluation';
 import { EvaluationTabs } from '../../shared/components/EvaluationTabs';
-
-import type { BlockDefinition } from '@tallia/shared';
-
-const BLOCK_DEFINITIONS: BlockDefinition[] = [];
 
 export function PipelinePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: evaluation, isLoading } = useEvaluation(id);
   const { data: pipelineConfig, isLoading: pipelineLoading } = usePipelineConfig(id);
+  const { data: definitions, isLoading: defsLoading } = useBlockDefinitions(id);
 
-  if (isLoading || pipelineLoading) return <Spin />;
+  if (isLoading || pipelineLoading || defsLoading) return <Spin />;
   if (!evaluation || !id) return <Typography.Text>평가를 찾을 수 없습니다</Typography.Text>;
 
   return (
@@ -38,7 +35,7 @@ export function PipelinePage() {
         evaluationId={id}
         evalType={evaluation.type}
         initialConfig={pipelineConfig ?? null}
-        definitions={BLOCK_DEFINITIONS}
+        definitions={definitions ?? []}
       />
     </div>
   );

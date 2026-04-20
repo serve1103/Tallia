@@ -14,6 +14,13 @@ export class PipelineController {
     private readonly evaluationsService: EvaluationsService,
   ) {}
 
+  @Get('blocks')
+  async getBlockDefinitions(@Param('id') id: string, @CurrentTenant() tenantId: string) {
+    const evaluation = await this.evaluationsService.findById(id, tenantId);
+    const definitions = this.registry.getByType(evaluation.type as EvaluationType);
+    return { data: definitions };
+  }
+
   @Get()
   async getPipeline(@Param('id') id: string, @CurrentTenant() tenantId: string) {
     const evaluation = await this.evaluationsService.findById(id, tenantId);

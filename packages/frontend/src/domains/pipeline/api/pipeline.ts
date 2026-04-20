@@ -1,5 +1,10 @@
 import { apiClient } from '../../../shared/lib/api-client';
-import type { PipelineConfig, PipelineBlock, ValidationResult } from '@tallia/shared';
+import type { PipelineConfig, PipelineBlock, BlockDefinition, ValidationResult } from '@tallia/shared';
+
+export async function fetchBlockDefinitions(evaluationId: string): Promise<BlockDefinition[]> {
+  const { data } = await apiClient.get(`/evaluations/${evaluationId}/pipeline/blocks`);
+  return data.data;
+}
 
 export async function fetchPipeline(evaluationId: string): Promise<PipelineConfig> {
   const { data } = await apiClient.get(`/evaluations/${evaluationId}/pipeline`);

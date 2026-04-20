@@ -2,11 +2,7 @@ import React from 'react';
 import { Layout, Menu, Typography, Avatar, Result } from 'antd';
 import {
   HomeOutlined,
-  FileTextOutlined,
-  UploadOutlined,
-  BarChartOutlined,
   BankOutlined,
-  SettingOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../domains/auth/stores/authStore';
@@ -15,14 +11,10 @@ const { Sider, Header, Content } = Layout;
 
 const menuItems = [
   { key: '/dashboard', icon: <HomeOutlined />, label: '대시보드' },
-  { key: '/evaluations', icon: <FileTextOutlined />, label: '평가 관리' },
-  { key: '/upload', icon: <UploadOutlined />, label: '엑셀 업로드' },
-  { key: '/results', icon: <BarChartOutlined />, label: '결과 조회' },
 ];
 
 const adminItems = [
   { key: '/admin/tenants', icon: <BankOutlined />, label: '대학 관리' },
-  { key: '/admin/settings', icon: <SettingOutlined />, label: '설정' },
 ];
 
 class ErrorBoundary extends React.Component<

@@ -1,6 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchPipeline, savePipeline, validatePipelineApi, previewPipeline } from '../api/pipeline';
+import { fetchBlockDefinitions, fetchPipeline, savePipeline, validatePipelineApi, previewPipeline } from '../api/pipeline';
 import type { PipelineBlock, PipelineConfig } from '@tallia/shared';
+
+export function useBlockDefinitions(evaluationId: string | undefined) {
+  return useQuery({
+    queryKey: ['evaluations', evaluationId, 'pipeline', 'blocks'],
+    queryFn: () => fetchBlockDefinitions(evaluationId!),
+    enabled: !!evaluationId,
+  });
+}
 
 export function usePipelineConfig(evaluationId: string | undefined) {
   return useQuery({
