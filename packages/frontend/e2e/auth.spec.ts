@@ -1,13 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
-
-// 공용 로그인 헬퍼
-export async function login(page: Page, email: string, password: string) {
-  await page.goto('/login');
-  await page.getByRole('textbox', { name: '이메일' }).fill(email);
-  await page.locator('input[type="password"]').fill(password);
-  await page.getByRole('button', { name: '로그인' }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 10000 });
-}
+import { test, expect } from '@playwright/test';
+import { login } from './helpers';
 
 test.describe('인증', () => {
   test('로그인 페이지 렌더링', async ({ page }) => {
