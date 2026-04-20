@@ -86,3 +86,38 @@ export interface AnswerKeyEntry {
   answers: string[];
   score: number;
 }
+
+export async function downloadAnswerKeyTemplate(
+  evaluationId: string,
+  subjectId: string,
+  examType?: string,
+): Promise<void> {
+  const params: Record<string, string> = { subjectId };
+  if (examType) params.examType = examType;
+  const query = new URLSearchParams(params).toString();
+  const { data } = await apiClient.get(`/evaluations/${evaluationId}/answer-key/template?${query}`, {
+    responseType: 'blob',
+  });
+  const url = URL.createObjectURL(new Blob([data]));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `answer_key_${subjectId}_${examType ?? '기본'}.xlsx`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function uploadAnswerKey(
+  evaluationId: string,
+  subjectId: string,
+  file: File,
+  examType?: string,
+): Promise<void> {
+  const params: Record<string, string> = { subjectId };
+  if (examType) params.examType = examType;
+  const query = new URLSearchParams(params).toString();
+  const formData = new FormData();
+  formData.append('file', file);
+  await apiClient.post(`/evaluations/${evaluationId}/answer-key/upload?${query}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}

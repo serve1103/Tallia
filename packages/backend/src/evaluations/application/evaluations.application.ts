@@ -1,11 +1,24 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import type { Response } from 'express';
 import { EvaluationsService } from '../service/evaluations.service';
 import type { EvaluationFilter } from '../repository/evaluations.repository';
 import { getDefaultPipeline } from '../../pipeline/default-pipelines';
+import { AnswerKeyTemplateGenerator } from '../../excel/service/answer-key-template-generator';
+import { AnswerKeyUploadParser } from '../../excel/service/answer-key-upload-parser';
+
+export interface AnswerKeyEntry {
+  questionNo: number;
+  answers: string[];
+  score: number;
+}
 
 @Injectable()
 export class EvaluationsApplication {
-  constructor(private readonly evaluationsService: EvaluationsService) {}
+  constructor(
+    private readonly evaluationsService: EvaluationsService,
+    private readonly answerKeyTemplateGenerator: AnswerKeyTemplateGenerator,
+    private readonly answerKeyUploadParser: AnswerKeyUploadParser,
+  ) {}
 
   async findAll(filter: EvaluationFilter) {
     return this.evaluationsService.findAll(filter);
@@ -120,5 +133,61 @@ export class EvaluationsApplication {
     subject.questionErrors = errors;
 
     return this.evaluationsService.saveConfig(id, tenantId, config);
+  }
+
+  async downloadAnswerKeyTemplate(
+    id: string,
+    tenantId: string,
+    subjectId: string,
+    examType: string | undefined,
+    res: Response,
+  ) {
+    const evaluation = await this.evaluationsService.findById(id, tenantId);
+    const config = evaluation.config as Record<string, unknown>;
+
+    if (config?.type !== 'B') {
+      throw new BadRequestException('정답지 양식은 B유형에서만 사용 가능합니다');
+    }
+
+    const subjects = (config.subjects as Array<Record<string, unknown>>) ?? [];
+    const subject = subjects.find((s) => s.id === subjectId);
+    if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
+
+    const subjectName = String(subject.name ?? subjectId);
+    const questionCount = Number(subject.questionCount ?? 0);
+
+    // examType 매칭하여 기존 answerKey 추출
+    const examTypes = (subject.examTypes as Array<Record<string, unknown>>) ?? [];
+    const targetExamType = examType
+      ? examTypes.find((et) => et.name === examType || et.id === examType)
+      : examTypes[0];
+    const existingAnswerKey = (targetExamType?.answerKey as AnswerKeyEntry[] | undefined) ?? [];
+
+    const examTypeName = targetExamType ? String(targetExamType.name ?? examType ?? '기본') : (examType ?? '기본');
+    const sheetName = `${subjectName}_${examTypeName}`;
+
+    const workbook = await this.answerKeyTemplateGenerator.generate(
+      sheetName,
+      questionCount,
+      existingAnswerKey,
+    );
+
+    const safeFilename = `answer_key_${id}_${subjectId}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=${safeFilename}`);
+    await workbook.xlsx.write(res);
+    res.end();
+  }
+
+  async uploadAnswerKey(
+    id: string,
+    tenantId: string,
+    subjectId: string,
+    examType: string | undefined,
+    buffer: Buffer,
+  ) {
+    const { answerKey } = await this.answerKeyUploadParser.parse(buffer);
+
+    return this.saveAnswerKey(id, tenantId, subjectId, answerKey, examType, []);
   }
 }

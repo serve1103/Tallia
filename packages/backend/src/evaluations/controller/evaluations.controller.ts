@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Param, Query, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
+  Res,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 
 import { CurrentTenant } from '../../common/decorators/current-tenant.decorator';
 import { EvaluationsApplication } from '../application/evaluations.application';
@@ -98,6 +111,55 @@ export class EvaluationsController {
       body.examType,
       body.scoreRanges,
     );
+    return { data: result };
+  }
+
+  // --- B유형 정답지 엑셀 ---
+
+  private static readonly ALLOWED_MIME_TYPES = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel',
+  ];
+
+  @Get(':id/answer-key/template')
+  async downloadAnswerKeyTemplate(
+    @Param('id') id: string,
+    @CurrentTenant() tenantId: string,
+    @Query('subjectId') subjectId: string,
+    @Query('examType') examType: string | undefined,
+    @Res() res: Response,
+  ) {
+    if (!subjectId) throw new BadRequestException('subjectId는 필수입니다');
+    await this.evaluationsApp.downloadAnswerKeyTemplate(id, tenantId, subjectId, examType, res);
+  }
+
+  @Post(':id/answer-key/upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 10 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const allowed = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.ms-excel',
+        ];
+        if (allowed.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('xlsx 또는 xls 파일만 업로드할 수 있습니다'), false);
+        }
+      },
+    }),
+  )
+  async uploadAnswerKey(
+    @Param('id') id: string,
+    @CurrentTenant() tenantId: string,
+    @Query('subjectId') subjectId: string,
+    @Query('examType') examType: string | undefined,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!subjectId) throw new BadRequestException('subjectId는 필수입니다');
+    if (!file) throw new BadRequestException('파일이 없습니다');
+    const result = await this.evaluationsApp.uploadAnswerKey(id, tenantId, subjectId, examType, file.buffer);
     return { data: result };
   }
 

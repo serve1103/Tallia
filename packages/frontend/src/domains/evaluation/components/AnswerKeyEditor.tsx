@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Input, Select, Button, InputNumber, Card, Space, message } from 'antd';
-import { SaveOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { useState, useEffect, useRef } from 'react';
+import { Input, Select, Button, InputNumber, Card, Space, message, Upload } from 'antd';
+import { SaveOutlined, PlusOutlined, DeleteOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
 import type { AnswerKeyEntry, ScoreRange } from '../api/evaluations';
+import { downloadAnswerKeyTemplate, uploadAnswerKey } from '../api/evaluations';
 
 interface AnswerCell {
   answer: string;
@@ -43,6 +44,7 @@ function computeDefaultScore(qNo: number, scoreRanges: ScoreRange[], subjectMaxS
 }
 
 export function AnswerKeyEditor({
+  evaluationId,
   subjectId,
   subjectMaxScore,
   examType,
@@ -56,6 +58,9 @@ export function AnswerKeyEditor({
     buildInitialCells(questionCount, existingAnswerKey),
   );
   const [scoreRanges, setScoreRanges] = useState<ScoreRange[]>(existingScoreRanges ?? []);
+  const [uploading, setUploading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   useEffect(() => {
     setCells(buildInitialCells(questionCount, existingAnswerKey));
@@ -99,6 +104,48 @@ export function AnswerKeyEditor({
     }
   };
 
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      await downloadAnswerKeyTemplate(evaluationId, subjectId, examType);
+    } catch {
+      message.error('양식 다운로드에 실패했습니다');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      await uploadAnswerKey(evaluationId, subjectId, file, examType);
+      message.success('엑셀 업로드 완료. 저장 버튼을 눌러 반영하세요.');
+      // Reload page data by triggering parent re-fetch via page reload is not ideal;
+      // instead we notify via message and the user can refresh or we trigger invalidation
+      // via window event for react-query listeners
+      window.dispatchEvent(new CustomEvent('answer-key-uploaded', { detail: { evaluationId, subjectId, examType } }));
+    } catch {
+      message.error('엑셀 업로드에 실패했습니다');
+    } finally {
+      setUploading(false);
+    }
+    return false; // prevent antd auto-upload
+  };
+
+  const focusInput = (n: number) => {
+    inputRefs.current[n]?.focus();
+  };
+
+  const handleAnswerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, n: number) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      e.preventDefault();
+      const next = n + 1;
+      if (next <= questionCount) {
+        focusInput(next);
+      }
+    }
+  };
+
   // Render in rows of 10
   const rows: number[][] = [];
   for (let start = 1; start <= questionCount; start += 10) {
@@ -136,6 +183,7 @@ export function AnswerKeyEditor({
                   value={range.start}
                   onChange={(v) => updateRange(idx, { start: v ?? 1 })}
                   style={{ width: 70 }}
+                  tabIndex={-1}
                 />
                 <span style={{ fontSize: 13, color: '#888' }}>~</span>
                 <span style={{ fontSize: 13, color: '#555' }}>끝</span>
@@ -146,6 +194,7 @@ export function AnswerKeyEditor({
                   value={range.end}
                   onChange={(v) => updateRange(idx, { end: v ?? questionCount })}
                   style={{ width: 70 }}
+                  tabIndex={-1}
                 />
                 <span style={{ fontSize: 13, color: '#555' }}>배점</span>
                 <InputNumber
@@ -154,6 +203,7 @@ export function AnswerKeyEditor({
                   value={range.score}
                   onChange={(v) => updateRange(idx, { score: v ?? 0 })}
                   style={{ width: 70 }}
+                  tabIndex={-1}
                 />
                 <Button
                   size="small"
@@ -161,11 +211,41 @@ export function AnswerKeyEditor({
                   danger
                   icon={<DeleteOutlined />}
                   onClick={() => removeRange(idx)}
+                  tabIndex={-1}
                 />
               </Space>
             ))}
           </Space>
         )}
+      </Card>
+
+      {/* 정답지 엑셀 */}
+      <Card size="small" title="정답지 엑셀" style={{ marginBottom: 16 }}>
+        <Space>
+          <Button
+            size="small"
+            icon={<DownloadOutlined />}
+            loading={downloading}
+            onClick={handleDownload}
+          >
+            양식 다운로드
+          </Button>
+          <Upload
+            accept=".xlsx,.xls"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              handleUpload(file as unknown as File);
+              return false;
+            }}
+          >
+            <Button size="small" icon={<UploadOutlined />} loading={uploading}>
+              엑셀 업로드
+            </Button>
+          </Upload>
+        </Space>
+        <div style={{ fontSize: 12, color: '#888', marginTop: 6 }}>
+          엑셀로 일괄 입력/수정 가능. 업로드 후 저장 버튼을 눌러 반영하세요.
+        </div>
       </Card>
 
       {/* 문항 그리드 */}
@@ -195,9 +275,11 @@ export function AnswerKeyEditor({
             >
               <span style={{ fontSize: 12, color: '#555', fontWeight: 500 }}>{n}번</span>
               <Input
+                ref={(el) => { inputRefs.current[n] = el?.input ?? null; }}
                 size="small"
                 value={cell.answer}
                 onChange={(e) => updateCell(n, { answer: e.target.value })}
+                onKeyDown={(e) => handleAnswerKeyDown(e, n)}
                 placeholder={cell.multi ? '예: 1,3' : ''}
                 style={{
                   width: '100%',
@@ -215,6 +297,7 @@ export function AnswerKeyEditor({
                   { value: 'single', label: '단일' },
                   { value: 'multi', label: '복수' },
                 ]}
+                tabIndex={-1}
               />
               <InputNumber
                 size="small"
@@ -223,6 +306,7 @@ export function AnswerKeyEditor({
                 placeholder={`자동:${defaultScore}`}
                 onChange={(v) => updateCell(n, { scoreOverride: v !== null && v !== undefined ? v : null })}
                 style={{ width: '100%' }}
+                tabIndex={-1}
               />
             </div>
           );
