@@ -6,6 +6,45 @@
 
 ---
 
+## 진행 현황 (feat/wireframe-gaps 브랜치)
+
+### Phase A 완료 (P0)
+- 공용 설정 UI: 환산 만점 + 소수점 처리 (4개 ConfigForm 통합)
+- 결과 조회: 재계산 배너 + 통계 4카드 + 필터 + 인라인 중간결과 펼침
+- B유형: 시험유형 관리 + 정답지 10열 그리드 + 출제 오류 처리 테이블
+
+### Phase B 완료 (P1)
+- 평가 생성: 복사 드롭다운 + 유형 카드 UI
+- Dashboard: 최종 계산일 컬럼
+- A유형 등급 매핑 / C유형 산출 방식 드롭다운
+- D유형 어학유형 탭 + 매핑 엑셀 다운로드/업로드
+- 유형별 기본 파이프라인 자동 생성 (평가 생성 시)
+- 엑셀 업로드 행별 오류 테이블 + 오류 제외 저장
+- 테스트 DB 분리 (tallia_test + .env.test + jest.setup.ts)
+
+### Phase C 완료 (P2)
+- 사용자 정의 단계 템플릿 UI (5종 가이드 모달)
+- Pipeline 샘플 미리보기 실구현 (sample-data.ts + PreviewPanel)
+- 결과 조회 모바일 반응형 (ScoreCardList + useBreakpoint)
+- Prisma seed (platform_admin + 고려대 테넌트 + tenant_admin)
+
+### 결과
+- 프론트 63/63 테스트 통과
+- 백엔드 106/106 테스트 통과 (이전 6 fail → 0)
+- 빌드 모두 통과 (frontend + backend + shared)
+
+### 미완 (백로그)
+- 성능 테스트 (1K행 계산 10초, 10K엑셀 30초, 250 동시접속)
+- Chrome/Edge 호환성 공식 테스트
+- ZodValidationPipe 전역 적용 + B유형 채점 감사 로그 자동 기록
+- Refresh token 서버 측 revocation
+- ExcelJS 100K+ 스트리밍 최적화
+- 개인정보처리방침 페이지 + 데이터 보관 만료 배치
+
+---
+
+---
+
 ## 범례
 
 - **P0 (필수)**: FSD/PRD In-Scope에 명시된 핵심 기능. 없으면 제품 의미 없음
