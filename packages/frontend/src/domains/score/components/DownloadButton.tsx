@@ -4,15 +4,17 @@ import { useDownloadResults } from '../hooks/useScores';
 
 interface Props {
   evaluationId: string;
+  includeIntermediate?: boolean;
 }
 
-export function DownloadButton({ evaluationId }: Props) {
+export function DownloadButton({ evaluationId, includeIntermediate }: Props) {
   const mutation = useDownloadResults(evaluationId);
 
   const handleClick = () => {
-    mutation.mutate(undefined, {
-      onError: () => message.error('다운로드에 실패했습니다'),
-    });
+    mutation.mutate(
+      { includeIntermediate },
+      { onError: () => message.error('다운로드에 실패했습니다') },
+    );
   };
 
   return (
