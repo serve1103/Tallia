@@ -18,6 +18,7 @@ import {
   type CommonSettings,
 } from '../../domains/evaluation/components/CommonSettingsCard';
 import { getEvalTypeLabel } from '../../domains/evaluation/models/evaluation';
+import { promptNewName } from '../../shared/lib/prompt-new-name';
 
 export function ConfigPage() {
   const { id } = useParams<{ id: string }>();
@@ -36,7 +37,6 @@ export function ConfigPage() {
   const initialSettings: CommonSettings = {
     convertedMax: evaluation.convertedMax ?? DEFAULT_COMMON_SETTINGS.convertedMax,
     defaultDecimal: evaluation.defaultDecimal ?? DEFAULT_COMMON_SETTINGS.defaultDecimal,
-    blockOverrides: DEFAULT_COMMON_SETTINGS.blockOverrides,
   };
 
   const handleSave = async (newConfig: unknown, commonSettings: CommonSettings) => {
@@ -65,7 +65,29 @@ export function ConfigPage() {
     setNameDraft('');
   };
 
-  const submitEditName = async () => {
+  const tryRename = async (next: string): Promise<void> => {
+    try {
+      await updateMutation.mutateAsync({ id, name: next });
+      message.success('평가명이 변경되었습니다');
+      setEditingName(false);
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 409) {
+        const newName = await promptNewName({
+          title: '같은 이름의 평가가 이미 있습니다',
+          description: '아래에서 새 이름을 입력하세요.',
+          currentName: next,
+        });
+        if (newName) {
+          await tryRename(newName);
+        }
+      } else {
+        message.error('평가명 변경에 실패했습니다');
+      }
+    }
+  };
+
+  const submitEditName = () => {
     const next = nameDraft.trim();
     if (!next) {
       message.error('평가명을 입력하세요');
@@ -75,13 +97,7 @@ export function ConfigPage() {
       setEditingName(false);
       return;
     }
-    try {
-      await updateMutation.mutateAsync({ id, name: next });
-      message.success('평가명이 변경되었습니다');
-      setEditingName(false);
-    } catch {
-      message.error('평가명 변경에 실패했습니다');
-    }
+    void tryRename(next);
   };
 
   const renderForm = () => {

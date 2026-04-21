@@ -22,11 +22,15 @@ export class ExcelPrismaRepository implements ExcelRepository {
   }
 
   async createUpload(dto: CreateUploadDto): Promise<ScoreUploadEntity> {
-    // 기존 active 업로드 비활성화 + 신규 생성을 트랜잭션으로 원자적 처리
-    const [, upload] = await this.prisma.$transaction([
+    // 기존 active 업로드 비활성화 + 과거 계산 점수 정리 + 신규 업로드 생성 원자 처리.
+    // 과거 scores 를 남겨두면 uploadId 필터 누락 시 수험번호 중복 표시되므로 같은 트랜잭션에서 삭제.
+    const [, , upload] = await this.prisma.$transaction([
       this.prisma.scoreUpload.updateMany({
         where: { evaluationId: dto.evaluationId, tenantId: dto.tenantId, isCurrent: true },
         data: { isCurrent: false, status: 'rolled_back' },
+      }),
+      this.prisma.score.deleteMany({
+        where: { evaluationId: dto.evaluationId, tenantId: dto.tenantId },
       }),
       this.prisma.scoreUpload.create({
         data: {

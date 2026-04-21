@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Table, Select, Tag, Popconfirm, Button, InputNumber, message, Space } from 'antd';
+import { Table, Select, Popconfirm, Button, InputNumber, message, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import type { SubjectDef, QuestionError } from '@tallia/shared';
+import { StatusTag } from '../../../shared/components/StatusTag';
 
 interface ErrorRow {
   key: string;
@@ -178,9 +179,9 @@ export function QuestionErrorManager({
       width: 100,
       render: (_: unknown, row: ErrorRow) =>
         row.saved ? (
-          <Tag color="red">오류 처리됨</Tag>
+          <StatusTag variant="error">오류 처리됨</StatusTag>
         ) : (
-          <Tag>미저장</Tag>
+          <StatusTag variant="neutral">미저장</StatusTag>
         ),
     },
     {

@@ -68,8 +68,12 @@ export class EvaluationsController {
   }
 
   @Post(':id/restore')
-  async restore(@Param('id') id: string, @CurrentTenant() tenantId: string) {
-    const evaluation = await this.evaluationsApp.restore(id, tenantId);
+  async restore(
+    @Param('id') id: string,
+    @CurrentTenant() tenantId: string,
+    @Body() body: { newName?: string } = {},
+  ) {
+    const evaluation = await this.evaluationsApp.restore(id, tenantId, body.newName);
     return { data: evaluation };
   }
 
@@ -190,6 +194,19 @@ export class EvaluationsController {
       throw new BadRequestException('subjectId, questionNo, handling은 필수입니다');
     }
     const result = await this.evaluationsApp.reportQuestionError(id, tenantId, body);
+    return { data: result };
+  }
+
+  @Post(':id/question-error/remove')
+  async removeQuestionError(
+    @Param('id') id: string,
+    @CurrentTenant() tenantId: string,
+    @Body() body: { subjectId: string; questionNo: number },
+  ) {
+    if (!body.subjectId || body.questionNo == null) {
+      throw new BadRequestException('subjectId, questionNo는 필수입니다');
+    }
+    const result = await this.evaluationsApp.removeQuestionError(id, tenantId, body);
     return { data: result };
   }
 }

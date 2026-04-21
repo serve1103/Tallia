@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import type { EvaluationType } from '@tallia/shared';
 import { useCreateEvaluation, useCopyEvaluation, useEvaluations } from '../../domains/evaluation/hooks/useEvaluations';
+import { promptNewName } from '../../shared/lib/prompt-new-name';
 
 const TYPE_CARDS: { value: EvaluationType; label: string; desc: string }[] = [
   { value: 'A', label: 'A. 위원 점수 집계', desc: '서류, 면접, 실기' },
@@ -25,6 +26,35 @@ export function CreatePage() {
     setCopySourceId(value);
   };
 
+  /** 이름 중복(409)이면 Modal 로 새 이름을 받아 재시도, 그 외 오류면 토스트. */
+  const tryCreate = async (name: string, academicYear?: string, admissionType?: string): Promise<void> => {
+    if (!selectedType) return;
+    try {
+      const evaluation = await createMutation.mutateAsync({
+        name,
+        type: selectedType,
+        academicYear,
+        admissionType,
+      });
+      message.success('평가가 생성되었습니다');
+      navigate(`/evaluations/${evaluation.id}/config`);
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 409) {
+        const newName = await promptNewName({
+          title: '같은 이름의 평가가 이미 있습니다',
+          description: '아래에서 새 이름을 입력하세요.',
+          currentName: name,
+        });
+        if (newName) {
+          await tryCreate(newName, academicYear, admissionType);
+        }
+      } else {
+        message.error('생성에 실패했습니다');
+      }
+    }
+  };
+
   const handleFinish = (values: { name: string; academicYear?: string; admissionType?: string }) => {
     if (!selectedType) {
       message.error('평가 유형을 선택하세요');
@@ -42,16 +72,7 @@ export function CreatePage() {
       return;
     }
 
-    createMutation.mutate(
-      { name: values.name, type: selectedType, academicYear: values.academicYear, admissionType: values.admissionType },
-      {
-        onSuccess: (evaluation) => {
-          message.success('평가가 생성되었습니다');
-          navigate(`/evaluations/${evaluation.id}/config`);
-        },
-        onError: () => message.error('생성에 실패했습니다'),
-      },
-    );
+    void tryCreate(values.name, values.academicYear, values.admissionType);
   };
 
   const copyOptions = [

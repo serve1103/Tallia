@@ -83,7 +83,14 @@ export const subjectWeightedSumBlock: BlockHandler = {
   definition: subjectWeightedSumDef,
   execute(input: BlockInput): BlockOutput {
     const data = input.data as { subjects: { id: string; score: number }[] };
-    // 가중치는 config에서 — 현재 기본 1.0
-    return { data: { value: data.subjects.reduce((s, sub) => s + sub.score, 0) } };
+    const config = input.context.config as { subjects: { id: string; weight?: number }[] };
+    // 과목 id 매칭으로 가중치 조회, 없으면 1
+    const weightById = new Map<string, number>();
+    for (const s of config.subjects) weightById.set(s.id, s.weight ?? 1);
+    const value = data.subjects.reduce(
+      (sum, sub) => sum + sub.score * (weightById.get(sub.id) ?? 1),
+      0,
+    );
+    return { data: { value } };
   },
 };

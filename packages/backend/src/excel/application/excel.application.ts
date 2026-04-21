@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import type { Response } from 'express';
 import { ExcelService } from '../service/excel.service';
 import { TemplateGenerator } from '../service/template-generator';
@@ -49,6 +49,16 @@ export class ExcelApplication {
           return !errorRows.has(idx + 2);
         })
       : parseResult.rows;
+
+    // 파싱 결과가 완전히 비었고 검증 오류가 있으면 업로드 거절 + 오류 메시지 노출
+    if (rows.length === 0 && parseResult.errors.length > 0) {
+      const preview = parseResult.errors
+        .slice(0, 3)
+        .map((e) => `• ${e.message}`)
+        .join('\n');
+      const more = parseResult.errors.length > 3 ? `\n… 외 ${parseResult.errors.length - 3}건` : '';
+      throw new BadRequestException(`엑셀 파싱 실패:\n${preview}${more}`);
+    }
 
     // multer는 originalname을 latin1로 디코딩하므로 한글은 깨짐 → utf8 복원
     const fileName = Buffer.from(file.originalname, 'latin1').toString('utf8');

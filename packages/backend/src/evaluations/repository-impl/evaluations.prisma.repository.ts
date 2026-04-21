@@ -33,6 +33,18 @@ export class EvaluationsPrismaRepository implements EvaluationsRepository {
     }) as unknown as EvaluationEntity | null;
   }
 
+  async existsByName(tenantId: string, name: string, excludeId?: string): Promise<boolean> {
+    const count = await this.prisma.evaluation.count({
+      where: {
+        tenantId,
+        name,
+        deletedAt: null,
+        ...(excludeId ? { id: { not: excludeId } } : {}),
+      },
+    });
+    return count > 0;
+  }
+
   async create(dto: CreateEvaluationDto): Promise<EvaluationEntity> {
     return this.prisma.evaluation.create({
       data: {

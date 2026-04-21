@@ -89,9 +89,10 @@ describe('auto_grade — 단일 과목', () => {
     expect(scores[2]).toMatchObject({ qNo: 3, correct: false, score: 0 });
   });
 
-  it('subjects 배열이 비어 있으면 빈 scores 반환', () => {
-    const result = autoGradeBlock.execute(input({ subjects: [] }), {});
-    expect((result.data as any).scores).toHaveLength(0);
+  it('subjects 배열이 비어 있으면 명확한 오류를 던진다', () => {
+    expect(() => autoGradeBlock.execute(input({ subjects: [] }), {})).toThrow(
+      /subjects/,
+    );
   });
 });
 

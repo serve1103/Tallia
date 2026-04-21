@@ -58,8 +58,8 @@ export class EvaluationsApplication {
     return this.evaluationsService.delete(id, tenantId);
   }
 
-  async restore(id: string, tenantId: string) {
-    return this.evaluationsService.restore(id, tenantId);
+  async restore(id: string, tenantId: string, newName?: string) {
+    return this.evaluationsService.restore(id, tenantId, newName);
   }
 
   async hardDelete(id: string, tenantId: string) {
@@ -155,8 +155,36 @@ export class EvaluationsApplication {
     if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
 
     const errors = (subject.questionErrors as Array<Record<string, unknown>>) ?? [];
-    errors.push({ questionNo: body.questionNo, handling: body.handling });
+    // 동일 questionNo 가 이미 있으면 handling 만 교체 (upsert) — 중복 축적 방지
+    const existing = errors.find((e) => e.questionNo === body.questionNo);
+    if (existing) {
+      existing.handling = body.handling;
+    } else {
+      errors.push({ questionNo: body.questionNo, handling: body.handling });
+    }
     subject.questionErrors = errors;
+
+    return this.evaluationsService.saveConfig(id, tenantId, config);
+  }
+
+  async removeQuestionError(
+    id: string,
+    tenantId: string,
+    body: { subjectId: string; questionNo: number },
+  ) {
+    const evaluation = await this.evaluationsService.findById(id, tenantId);
+    const config = evaluation.config as Record<string, unknown>;
+
+    if (config?.type !== 'B') {
+      throw new BadRequestException('출제 오류는 B유형에서만 사용 가능합니다');
+    }
+
+    const subjects = (config.subjects as Array<Record<string, unknown>>) ?? [];
+    const subject = subjects.find((s) => s.id === body.subjectId);
+    if (!subject) throw new NotFoundException('과목을 찾을 수 없습니다');
+
+    const errors = (subject.questionErrors as Array<Record<string, unknown>>) ?? [];
+    subject.questionErrors = errors.filter((e) => e.questionNo !== body.questionNo);
 
     return this.evaluationsService.saveConfig(id, tenantId, config);
   }

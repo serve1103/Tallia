@@ -14,8 +14,17 @@ const definition: BlockDefinition = {
 interface AnswerKeyEntry { questionNo: number; answers: string[]; score: number }
 interface ScoreRange { start: number; end: number; score: number }
 interface QuestionError { questionNo: number; handling: 'all_correct' | 'exclude' }
-interface ExamTypeDef { id: string; answerKey?: AnswerKeyEntry[]; scoreRanges?: ScoreRange[] }
-interface SubjectDef { id: string; questionCount?: number; maxScore?: number; examTypes: ExamTypeDef[]; questionErrors: QuestionError[] }
+interface ExamTypeDef { id: string; name?: string; answerKey?: AnswerKeyEntry[]; scoreRanges?: ScoreRange[] }
+interface SubjectDef {
+  id: string;
+  questionCount?: number;
+  maxScore?: number;
+  examTypes: ExamTypeDef[];
+  questionErrors: QuestionError[];
+  /** 레거시: examTypes 이전 버전에서 subject 레벨에 저장된 정답지/구간 배점 */
+  answerKey?: AnswerKeyEntry[];
+  scoreRanges?: ScoreRange[];
+}
 
 /**
  * 배점 결정 우선순위:
@@ -53,6 +62,8 @@ interface ScoreItem {
   correct: boolean;
   score: number;
   __subjectId: string;
+  /** 출제 오류 처리가 적용된 문항임을 표시. UI 에서 배지로 노출. */
+  errorHandling?: 'all_correct' | 'exclude';
 }
 
 export const autoGradeBlock: BlockHandler = {
@@ -64,8 +75,11 @@ export const autoGradeBlock: BlockHandler = {
     const raw = input.data as { subjects?: SubjectAnswerInput[] };
 
     if (!raw.subjects || raw.subjects.length === 0) {
-      // 비어 있으면 빈 결과 반환
-      return { data: { scores: [] } };
+      // rawData 가 구 포맷(평면 { Q1,Q2,... })으로 저장된 경우 subjects 키가 없어서 여기에 빠짐.
+      // 조용히 0점 처리하면 원인 추적이 어려우므로 명확한 오류로 재업로드 유도.
+      throw new Error(
+        '업로드 데이터에 과목/답안 구조(subjects)가 없습니다. B유형 파서가 적용되기 전에 업로드된 파일일 수 있으니 엑셀을 다시 업로드해주세요.',
+      );
     }
 
     const allScores: ScoreItem[] = [];
@@ -78,9 +92,28 @@ export const autoGradeBlock: BlockHandler = {
         continue;
       }
 
-      // 수험자가 선택한 시험유형의 정답키 조회
-      const examTypeDef = subjectConfig.examTypes.find((et) => et.id === subjectInput.examType);
-      const answerKey: AnswerKeyEntry[] = examTypeDef?.answerKey ?? [];
+      // 수험자가 선택한 시험유형의 정답키 조회.
+      // parseTypeB 는 examType 에 유형 name(예: "기본","A형")을 넣고,
+      // saveAnswerKey 는 id 또는 name 중 아무거나로 저장할 수 있으므로 둘 다 매칭.
+      // 매칭 실패 시 examTypes 가 1개뿐이면 그 유형을 기본으로 사용.
+      let examTypeDef = (subjectConfig.examTypes ?? []).find(
+        (et) => et.id === subjectInput.examType || et.name === subjectInput.examType,
+      );
+      if (!examTypeDef && (subjectConfig.examTypes ?? []).length === 1) {
+        examTypeDef = subjectConfig.examTypes[0];
+      }
+      // 레거시(examTypes 이전 버전)로 subject 레벨에 저장된 answerKey/scoreRanges 도 fallback 으로 인정
+      const answerKey: AnswerKeyEntry[] =
+        examTypeDef?.answerKey ?? subjectConfig.answerKey ?? [];
+      const effectiveExamType: ExamTypeDef = examTypeDef ?? {
+        id: '',
+        scoreRanges: subjectConfig.scoreRanges,
+      };
+      if (answerKey.length === 0) {
+        throw new Error(
+          `정답지 없음: 과목 "${subjectConfig.id}" / 유형 "${subjectInput.examType}"에 저장된 정답지를 찾지 못했습니다. 평가 설정에서 해당 시험유형의 정답지를 저장한 뒤 다시 계산해주세요.`,
+        );
+      }
       const questionErrors = subjectConfig.questionErrors ?? [];
 
       // answers는 { [qNo]: answer } 형태 — answerKey 길이 기준으로 채점
@@ -91,17 +124,29 @@ export const autoGradeBlock: BlockHandler = {
 
         const error = questionErrors.find((e) => e.questionNo === key.questionNo);
         if (error?.handling === 'all_correct') {
-          allScores.push({ qNo: key.questionNo, correct: true, score: resolveScore(key.questionNo, key, examTypeDef ?? { id: '' }, subjectConfig), __subjectId: subjectInput.subjectId });
+          allScores.push({
+            qNo: key.questionNo,
+            correct: true,
+            score: resolveScore(key.questionNo, key, effectiveExamType, subjectConfig),
+            __subjectId: subjectInput.subjectId,
+            errorHandling: 'all_correct',
+          });
           continue;
         }
         if (error?.handling === 'exclude') {
-          allScores.push({ qNo: key.questionNo, correct: false, score: 0, __subjectId: subjectInput.subjectId });
+          allScores.push({
+            qNo: key.questionNo,
+            correct: false,
+            score: 0,
+            __subjectId: subjectInput.subjectId,
+            errorHandling: 'exclude',
+          });
           continue;
         }
 
         // 복수정답: answers 배열 중 하나라도 일치하면 정답
         const correct = key.answers.includes(studentAnswer);
-        const resolvedScore = resolveScore(key.questionNo, key, examTypeDef ?? { id: '' }, subjectConfig);
+        const resolvedScore = resolveScore(key.questionNo, key, effectiveExamType, subjectConfig);
         allScores.push({ qNo: key.questionNo, correct, score: correct ? resolvedScore : 0, __subjectId: subjectInput.subjectId });
       }
 

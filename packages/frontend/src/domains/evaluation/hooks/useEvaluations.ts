@@ -100,7 +100,10 @@ export function useSaveEvalConfig() {
 export function useRestoreEvaluation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: restoreEvaluation,
+    mutationFn: (input: string | { id: string; newName?: string }) => {
+      if (typeof input === 'string') return restoreEvaluation(input);
+      return restoreEvaluation(input.id, input.newName);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['evaluations'] });
     },
