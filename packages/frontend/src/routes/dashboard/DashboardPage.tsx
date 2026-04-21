@@ -1,4 +1,4 @@
-import { Typography, Table, Button, Tag, Space, Select, Input, message, Popconfirm } from 'antd';
+import { Typography, Table, Button, Space, Select, Input, message, Popconfirm } from 'antd';
 import { PlusOutlined, CopyOutlined, SearchOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -6,6 +6,7 @@ import type { Evaluation, EvaluationType } from '@tallia/shared';
 import { useEvaluations, useDeleteEvaluation, useCopyEvaluation } from '../../domains/evaluation/hooks/useEvaluations';
 import { getEvalTypeLabel, getStatusLabel, getStatusColor } from '../../domains/evaluation/models/evaluation';
 import { formatDate, formatDateTime } from '../../shared/lib/format';
+import { StatusTag } from '../../shared/components/StatusTag';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export function DashboardPage() {
       title: '유형',
       dataIndex: 'type',
       key: 'type',
-      render: (type: EvaluationType) => <Tag>{getEvalTypeLabel(type)}</Tag>,
+      render: (type: EvaluationType) => <StatusTag variant="neutral">{getEvalTypeLabel(type)}</StatusTag>,
     },
     {
       title: '학년도',
@@ -68,7 +69,7 @@ export function DashboardPage() {
       dataIndex: 'status',
       key: 'status',
       render: (status: Evaluation['status']) => (
-        <Tag color={getStatusColor(status)}>{getStatusLabel(status)}</Tag>
+        <StatusTag variant={getStatusColor(status)}>{getStatusLabel(status)}</StatusTag>
       ),
     },
     {

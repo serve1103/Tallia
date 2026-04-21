@@ -1,26 +1,16 @@
-import { useState } from 'react';
-import { Card, InputNumber, Select, Table, Button, Space, Typography, Popconfirm } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Card, InputNumber, Select, Space, Typography } from 'antd';
 import type { DecimalConfig } from '@tallia/shared';
 
 const { Text } = Typography;
 
-export interface BlockOverride {
-  blockType: string;
-  method: DecimalConfig['method'];
-  places: DecimalConfig['places'];
-}
-
 export interface CommonSettings {
   convertedMax: number;
   defaultDecimal: DecimalConfig;
-  blockOverrides: BlockOverride[];
 }
 
 interface Props {
   value: CommonSettings;
   onChange: (settings: CommonSettings) => void;
-  availableBlocks?: string[];
 }
 
 const METHOD_OPTIONS = [
@@ -39,12 +29,9 @@ const PLACES_OPTIONS = [
 export const DEFAULT_COMMON_SETTINGS: CommonSettings = {
   convertedMax: 100,
   defaultDecimal: { method: 'round', places: 2 },
-  blockOverrides: [],
 };
 
-export function CommonSettingsCard({ value, onChange, availableBlocks }: Props) {
-  const [newBlockType, setNewBlockType] = useState<string>('');
-
+export function CommonSettingsCard({ value, onChange }: Props) {
   const multiplier = value.convertedMax > 0 ? value.convertedMax / 100 : 1;
 
   const handleConvertedMaxChange = (v: number | null) => {
@@ -58,94 +45,6 @@ export function CommonSettingsCard({ value, onChange, availableBlocks }: Props) 
   const handlePlacesChange = (places: DecimalConfig['places']) => {
     onChange({ ...value, defaultDecimal: { ...value.defaultDecimal, places } });
   };
-
-  const handleAddOverride = () => {
-    if (!newBlockType.trim()) return;
-    const already = value.blockOverrides.some((o) => o.blockType === newBlockType);
-    if (already) return;
-    onChange({
-      ...value,
-      blockOverrides: [
-        ...value.blockOverrides,
-        { blockType: newBlockType, method: 'round', places: 2 },
-      ],
-    });
-    setNewBlockType('');
-  };
-
-  const handleOverrideMethodChange = (blockType: string, method: DecimalConfig['method']) => {
-    onChange({
-      ...value,
-      blockOverrides: value.blockOverrides.map((o) =>
-        o.blockType === blockType ? { ...o, method } : o,
-      ),
-    });
-  };
-
-  const handleOverridePlacesChange = (blockType: string, places: DecimalConfig['places']) => {
-    onChange({
-      ...value,
-      blockOverrides: value.blockOverrides.map((o) =>
-        o.blockType === blockType ? { ...o, places } : o,
-      ),
-    });
-  };
-
-  const handleRemoveOverride = (blockType: string) => {
-    onChange({
-      ...value,
-      blockOverrides: value.blockOverrides.filter((o) => o.blockType !== blockType),
-    });
-  };
-
-  const columns = [
-    {
-      title: '블록',
-      dataIndex: 'blockType',
-      key: 'blockType',
-    },
-    {
-      title: '처리 방식',
-      key: 'method',
-      render: (_: unknown, record: BlockOverride) => (
-        <Select
-          size="small"
-          style={{ width: 130 }}
-          value={record.method}
-          options={METHOD_OPTIONS}
-          onChange={(v) => handleOverrideMethodChange(record.blockType, v)}
-        />
-      ),
-    },
-    {
-      title: '자릿수',
-      key: 'places',
-      render: (_: unknown, record: BlockOverride) => (
-        <Select
-          size="small"
-          style={{ width: 140 }}
-          value={record.places}
-          options={PLACES_OPTIONS}
-          onChange={(v) => handleOverridePlacesChange(record.blockType, v)}
-        />
-      ),
-    },
-    {
-      title: '',
-      key: 'action',
-      width: 48,
-      render: (_: unknown, record: BlockOverride) => (
-        <Popconfirm
-          title="이 항목을 삭제하시겠습니까?"
-          onConfirm={() => handleRemoveOverride(record.blockType)}
-          okText="삭제"
-          cancelText="취소"
-        >
-          <Button type="text" danger size="small" icon={<DeleteOutlined />} />
-        </Popconfirm>
-      ),
-    },
-  ];
 
   return (
     <Card
@@ -178,13 +77,13 @@ export function CommonSettingsCard({ value, onChange, availableBlocks }: Props) 
         </div>
       </Space>
 
-      <div style={{ fontWeight: 600, marginBottom: 4 }}>소수점 처리</div>
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>기본 소수점 처리</div>
       <Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 8 }}>
-        기본값: 평가 전체에 적용. 블록별로 개별 설정도 가능.
+        모든 계산 단계에 공통 적용. 특정 단계만 다른 규칙을 쓰고 싶다면 계산 과정 페이지에서 해당 단계의 "소수점 처리" 항목을 조정하세요.
       </Text>
-      <Space wrap style={{ marginBottom: 16 }}>
+      <Space wrap style={{ marginBottom: 4 }}>
         <div>
-          <div style={{ fontSize: 13, marginBottom: 4 }}>기본 처리 방식</div>
+          <div style={{ fontSize: 13, marginBottom: 4 }}>처리 방식</div>
           <Select
             style={{ width: 160 }}
             value={value.defaultDecimal.method}
@@ -193,7 +92,7 @@ export function CommonSettingsCard({ value, onChange, availableBlocks }: Props) 
           />
         </div>
         <div>
-          <div style={{ fontSize: 13, marginBottom: 4 }}>기본 소수점 자릿수</div>
+          <div style={{ fontSize: 13, marginBottom: 4 }}>자릿수</div>
           <Select
             style={{ width: 160 }}
             value={value.defaultDecimal.places}
@@ -201,56 +100,6 @@ export function CommonSettingsCard({ value, onChange, availableBlocks }: Props) 
             onChange={handlePlacesChange}
           />
         </div>
-      </Space>
-
-      <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 13 }}>
-        블록별 개별 설정 (선택사항)
-      </div>
-      {value.blockOverrides.length > 0 && (
-        <Table
-          size="small"
-          dataSource={value.blockOverrides}
-          columns={columns}
-          rowKey="blockType"
-          pagination={false}
-          style={{ marginBottom: 8 }}
-        />
-      )}
-      <Space style={{ marginTop: 4 }}>
-        {availableBlocks ? (
-          <Select
-            placeholder="블록 선택"
-            style={{ width: 180 }}
-            value={newBlockType || undefined}
-            options={availableBlocks
-              .filter((b) => !value.blockOverrides.some((o) => o.blockType === b))
-              .map((b) => ({ label: b, value: b }))}
-            onChange={(v) => setNewBlockType(v)}
-            allowClear
-          />
-        ) : (
-          <input
-            placeholder="블록 이름 입력"
-            value={newBlockType}
-            onChange={(e) => setNewBlockType(e.target.value)}
-            style={{
-              width: 180,
-              height: 32,
-              border: '1px solid #d9d9d9',
-              borderRadius: 6,
-              padding: '0 11px',
-              fontSize: 14,
-            }}
-          />
-        )}
-        <Button
-          type="dashed"
-          icon={<PlusOutlined />}
-          onClick={handleAddOverride}
-          disabled={!newBlockType.trim()}
-        >
-          블록별 소수점 설정 추가
-        </Button>
       </Space>
     </Card>
   );

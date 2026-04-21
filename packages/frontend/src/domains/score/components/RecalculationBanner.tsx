@@ -13,7 +13,7 @@ export function RecalculationBanner({ needsRecalculation, onRecalculate, loading
     <Alert
       type="warning"
       showIcon
-      message="설정이 변경되었습니다. 파이프라인 설정이 마지막 계산 이후 수정되었습니다."
+      message="설정이 변경되었습니다. 계산 순서가 마지막 계산 이후 수정되었습니다."
       style={{ marginBottom: 16 }}
       action={
         <Button size="small" onClick={onRecalculate} loading={loading}>

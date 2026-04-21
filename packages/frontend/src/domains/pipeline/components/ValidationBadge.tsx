@@ -1,6 +1,7 @@
-import { Badge, Tooltip, Tag } from 'antd';
+import { Tooltip } from 'antd';
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import type { ValidationResult } from '@tallia/shared';
+import { StatusTag } from '../../../shared/components/StatusTag';
 
 interface Props {
   result: ValidationResult | null;
@@ -11,9 +12,9 @@ export function ValidationBadge({ result }: Props) {
 
   if (result.valid) {
     return (
-      <Tag icon={<CheckCircleOutlined />} color="success">
+      <StatusTag variant="success" icon={<CheckCircleOutlined />}>
         유효
-      </Tag>
+      </StatusTag>
     );
   }
 
@@ -23,9 +24,9 @@ export function ValidationBadge({ result }: Props) {
         <div key={i}>{e.message}</div>
       ))}
     >
-      <Tag icon={<ExclamationCircleOutlined />} color="error">
+      <StatusTag variant="error" icon={<ExclamationCircleOutlined />}>
         오류 {result.errors.length}건
-      </Tag>
+      </StatusTag>
     </Tooltip>
   );
 }
