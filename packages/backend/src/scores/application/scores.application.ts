@@ -47,7 +47,24 @@ export class ScoresApplication {
     }
 
     const config = evaluation.config as unknown as EvalConfig;
+
+    // B유형 레거시 포맷 차단: 구버전 parse() 로 저장된 rawData 는 subjects 구조가 없어
+    // auto_grade 가 조용히 0점 처리하게 됨. 여기서 명확히 오류를 내서 재업로드를 유도.
+    if (config.type === 'B') {
+      const firstRow = rawRows[0];
+      const dataShape = firstRow?.data as Record<string, unknown> | undefined;
+      const hasSubjects = Array.isArray(dataShape?.subjects);
+      if (!hasSubjects) {
+        throw new BadRequestException(
+          '업로드된 엑셀이 구 형식으로 저장되어 있습니다. 엑셀을 다시 업로드해주세요. (과목/유형별 시트 파싱이 적용되지 않은 데이터)',
+        );
+      }
+    }
     const defaultDecimal: DecimalConfig = (evaluation.defaultDecimal as unknown as DecimalConfig) ?? { method: 'round', places: 2 };
+
+    // 공용설정의 convertedMax 를 pipelineConfig 의 apply_converted_max 블록 params 에 주입.
+    // pipelineConfig 자체는 불변으로 유지(복제본에만 반영) — 저장된 블록 params 은 과거 기록 유지.
+    const effectivePipelineConfig = this.injectConvertedMax(pipelineConfig, evaluation.convertedMax);
 
     const context: ExecutionContext = {
       evaluationType: config.type,
@@ -82,7 +99,7 @@ export class ScoresApplication {
         const pipelineInput = this.transformInput(row.data, config, committeeCount);
 
         const result = this.pipelineExecutor.executeConfig(
-          pipelineConfig,
+          effectivePipelineConfig,
           pipelineInput,
           context,
           committeeCount,
@@ -151,6 +168,35 @@ export class ScoresApplication {
     }
 
     return { successCount, errorCount: errors.length, errors };
+  }
+
+  /**
+   * 공용설정 convertedMax 를 pipelineConfig 의 apply_converted_max 블록에 주입.
+   * evaluation.convertedMax 가 null 이면 원본 그대로 반환.
+   * pipelineConfig 구조는 두 형태:
+   *   - StandardPipelineConfig: { blocks: PipelineBlock[] }
+   *   - TypeAPipelineConfig:    { conditions: [{ committeeCount, blocks }] }
+   */
+  private injectConvertedMax(pipelineConfig: PipelineConfig, convertedMax: number | null): PipelineConfig {
+    if (convertedMax == null) return pipelineConfig;
+
+    const patchBlocks = (blocks: unknown[]): unknown[] =>
+      blocks.map((b) => {
+        const block = b as { type: string; params?: Record<string, unknown> };
+        if (block.type === 'apply_converted_max') {
+          return { ...block, params: { ...(block.params ?? {}), convertedMax } };
+        }
+        return block;
+      });
+
+    if ('conditions' in pipelineConfig) {
+      const pc = pipelineConfig as unknown as { conditions: Array<{ committeeCount: number; blocks: unknown[] }> };
+      return {
+        conditions: pc.conditions.map((c) => ({ ...c, blocks: patchBlocks(c.blocks) })),
+      } as unknown as PipelineConfig;
+    }
+    const pc = pipelineConfig as unknown as { blocks: unknown[] };
+    return { blocks: patchBlocks(pc.blocks) } as unknown as PipelineConfig;
   }
 
   /** 현재(최신) 업로드 ID 조회. 없으면 undefined. */

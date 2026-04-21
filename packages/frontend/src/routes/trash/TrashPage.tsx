@@ -1,8 +1,10 @@
-import { Typography, Table, Button, Tag, Space, Popconfirm, Tooltip, message } from 'antd';
+import { Typography, Table, Button, Space, Popconfirm, Tooltip, message } from 'antd';
 import type { Evaluation, EvaluationType } from '@tallia/shared';
 import { useEvaluations, useRestoreEvaluation, useHardDeleteEvaluation } from '../../domains/evaluation/hooks/useEvaluations';
 import { getEvalTypeLabel } from '../../domains/evaluation/models/evaluation';
 import { formatDate } from '../../shared/lib/format';
+import { StatusTag } from '../../shared/components/StatusTag';
+import { promptNewName } from '../../shared/lib/prompt-new-name';
 
 function getDaysRemaining(deletedAt: string): number {
   const deletedMs = new Date(deletedAt).getTime();
@@ -15,11 +17,29 @@ export function TrashPage() {
   const restoreMutation = useRestoreEvaluation();
   const hardDeleteMutation = useHardDeleteEvaluation();
 
-  const handleRestore = (id: string) => {
-    restoreMutation.mutate(id, {
-      onSuccess: () => message.success('복원되었습니다'),
-      onError: () => message.error('복원에 실패했습니다'),
-    });
+  const tryRestore = async (id: string, name: string, newName?: string): Promise<void> => {
+    try {
+      await restoreMutation.mutateAsync({ id, newName });
+      message.success('복원되었습니다');
+    } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 409) {
+        const next = await promptNewName({
+          title: '같은 이름의 활성 평가가 있습니다',
+          description: '복원할 이름을 변경하세요.',
+          currentName: newName ?? name,
+        });
+        if (next) {
+          await tryRestore(id, name, next);
+        }
+      } else {
+        message.error('복원에 실패했습니다');
+      }
+    }
+  };
+
+  const handleRestore = (record: Evaluation) => {
+    void tryRestore(record.id, record.name);
   };
 
   const handleHardDelete = (id: string) => {
@@ -42,7 +62,7 @@ export function TrashPage() {
       title: '유형',
       dataIndex: 'type',
       key: 'type',
-      render: (type: EvaluationType) => <Tag>{getEvalTypeLabel(type)}</Tag>,
+      render: (type: EvaluationType) => <StatusTag variant="neutral">{getEvalTypeLabel(type)}</StatusTag>,
     },
     {
       title: '삭제일',
@@ -56,8 +76,8 @@ export function TrashPage() {
       render: (_: unknown, record: Evaluation) => {
         if (!record.deletedAt) return '-';
         const days = getDaysRemaining(record.deletedAt);
-        if (days <= 0) return <Tag color="red">만료</Tag>;
-        return <Tag color={days <= 7 ? 'orange' : 'default'}>{days}일 남음</Tag>;
+        if (days <= 0) return <StatusTag variant="error">만료</StatusTag>;
+        return <StatusTag variant={days <= 7 ? 'warning' : 'neutral'}>{days}일 남음</StatusTag>;
       },
     },
     {
@@ -69,7 +89,7 @@ export function TrashPage() {
           <Space>
             <Popconfirm
               title="이 평가를 복원하시겠습니까?"
-              onConfirm={() => handleRestore(record.id)}
+              onConfirm={() => handleRestore(record)}
               okText="복원"
               cancelText="취소"
             >

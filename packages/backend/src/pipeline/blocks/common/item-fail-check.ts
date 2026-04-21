@@ -4,8 +4,11 @@ import type { BlockDefinition, BlockInput, BlockOutput, FailFlag } from '@tallia
 const definition: BlockDefinition = {
   type: 'item_fail_check',
   name: '항목별 과락 판정',
-  category: 'postprocess',
-  applicableTypes: ['A', 'B', 'C', 'D'],
+  // 과락 판정은 중간 과정 성격 — postprocess 에서 aggregate 로 이동.
+  category: 'aggregate',
+  // A유형 전용: config.items 를 참조하므로 A유형에서만 의미 있음.
+  // B는 subject_fail_check, C는 question_fail_check 를 사용.
+  applicableTypes: ['A'],
   inputShape: 'ARRAY',
   outputShape: 'ARRAY',
   params: [{ key: 'thresholds', label: '항목별 과락 기준', type: 'string', required: false }],

@@ -1,12 +1,13 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Form, InputNumber, Button, Card, Space, Divider, Input, Tabs } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { TypeBConfig, SubjectDef, ExamType, ScoreRange } from '@tallia/shared';
+import type { TypeBConfig, SubjectDef, ExamType, QuestionError, ScoreRange } from '@tallia/shared';
 import { ExamTypeManager } from './ExamTypeManager';
 import type { ExamTypeEntry } from './ExamTypeManager';
 import { AnswerKeyEditor } from './AnswerKeyEditor';
 import { QuestionErrorManager } from './QuestionErrorManager';
-import { saveAnswerKey, reportQuestionError } from '../api/evaluations';
+import { saveAnswerKey, reportQuestionError, removeQuestionError } from '../api/evaluations';
 import type { AnswerKeyEntry } from '../api/evaluations';
 import { CommonSettingsCard, DEFAULT_COMMON_SETTINGS } from './CommonSettingsCard';
 import type { CommonSettings } from './CommonSettingsCard';
@@ -37,6 +38,7 @@ function buildExamTypeMap(subjects: SubjectDef[]): Record<string, ExamTypeEntry[
 
 export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, loading }: Props) {
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
   const [settings, setSettings] = useState<CommonSettings>(commonSettings ?? DEFAULT_COMMON_SETTINGS);
   const [answerKeySaving, setAnswerKeySaving] = useState(false);
   const [errorSaving, setErrorSaving] = useState(false);
@@ -52,20 +54,23 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
       subjects: values.subjects.map((s: Record<string, unknown>, idx: number) => {
         const subjectId = (s.id as string) || `subj-${idx}`;
         const entries = examTypeMap[subjectId] ?? [];
-        const existingExamTypes: ExamType[] = (value?.subjects ?? [])
-          .find((es) => es.id === subjectId)
-          ?.examTypes ?? [];
+        const existingSubject = (value?.subjects ?? []).find((es) => es.id === subjectId);
+        const existingExamTypes: ExamType[] = existingSubject?.examTypes ?? [];
         const examTypes: ExamType[] = entries.map((entry) => {
           const existing = existingExamTypes.find((et) => et.name === entry.name);
           return existing
             ? { ...existing, questionCount: entry.questionCount }
             : { id: `et-${entry.name}`, name: entry.name, questionCount: entry.questionCount };
         });
+        // questionErrors 는 form 필드가 아니라 별도 엔드포인트로 관리됨 →
+        // 여기서 빈 배열로 덮어쓰면 서버에 저장된 오류 문항이 날아감.
+        // 반드시 서버 상태(existingSubject)에서 그대로 가져와 보존.
+        const existingQuestionErrors: QuestionError[] = existingSubject?.questionErrors ?? [];
         return {
           ...s,
           id: subjectId,
           examTypes,
-          questionErrors: (s.questionErrors as unknown[]) ?? [],
+          questionErrors: existingQuestionErrors,
         };
       }) as SubjectDef[],
       totalFailThreshold: values.totalFailThreshold ?? null,
@@ -93,34 +98,25 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
     setErrorSaving(true);
     try {
       await reportQuestionError(evaluationId, payload);
+      // 서버 저장 직후 evaluation config 쿼리 invalidate → value 가 새로 내려오고
+      // QuestionErrorManager 의 buildRows(subjects) 가 갱신됨
+      await queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId, 'config'] });
+      await queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId] });
     } finally {
       setErrorSaving(false);
     }
   };
 
-  // Remove error: re-save config without that error entry
   const handleRemoveError = async (subjectId: string, questionNo: number) => {
     if (!evaluationId) return;
-    const currentValues = form.getFieldsValue();
-    const subjects: SubjectDef[] = (currentValues.subjects ?? []).map((s: Record<string, unknown>, idx: number) => {
-      const sid = (s.id as string) || `subj-${idx}`;
-      const existing = (value?.subjects ?? []).find((es) => es.id === sid);
-      const updatedErrors = (existing?.questionErrors ?? []).filter(
-        (qe) => !(qe.questionNo === questionNo && sid === subjectId),
-      );
-      return {
-        ...s,
-        id: sid,
-        examTypes: existing?.examTypes ?? [],
-        questionErrors: updatedErrors,
-      };
-    });
-    const updatedConfig: TypeBConfig = {
-      type: 'B',
-      subjects,
-      totalFailThreshold: currentValues.totalFailThreshold ?? null,
-    };
-    onSave(updatedConfig, settings);
+    setErrorSaving(true);
+    try {
+      await removeQuestionError(evaluationId, { subjectId, questionNo });
+      await queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId, 'config'] });
+      await queryClient.invalidateQueries({ queryKey: ['evaluations', evaluationId] });
+    } finally {
+      setErrorSaving(false);
+    }
   };
 
   const currentSubjects: SubjectDef[] = value?.subjects ?? [];
@@ -160,6 +156,14 @@ export function TypeBConfigForm({ evaluationId, value, commonSettings, onSave, l
                     </Form.Item>
                     <Form.Item {...rest} name={[name, 'maxScore']} label="만점">
                       <InputNumber min={0} />
+                    </Form.Item>
+                    <Form.Item
+                      {...rest}
+                      name={[name, 'weight']}
+                      label="가중치"
+                      tooltip="과목 가중합산 단계에서 사용. 비워두면 1로 처리."
+                    >
+                      <InputNumber min={0} step={0.1} placeholder="1" style={{ width: 90 }} />
                     </Form.Item>
                     <Form.Item {...rest} name={[name, 'failThreshold']} label="과락 기준">
                       <InputNumber min={0} placeholder="없음" />

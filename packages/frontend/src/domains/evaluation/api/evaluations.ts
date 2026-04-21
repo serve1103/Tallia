@@ -45,8 +45,11 @@ export async function deleteEvaluation(id: string): Promise<void> {
   await apiClient.post(`/evaluations/${id}/delete`);
 }
 
-export async function restoreEvaluation(id: string): Promise<Evaluation> {
-  const { data } = await apiClient.post(`/evaluations/${id}/restore`);
+export async function restoreEvaluation(
+  id: string,
+  newName?: string,
+): Promise<Evaluation> {
+  const { data } = await apiClient.post(`/evaluations/${id}/restore`, newName ? { newName } : {});
   return data.data;
 }
 
@@ -90,6 +93,13 @@ export async function reportQuestionError(
   payload: { subjectId: string; questionNo: number; handling: 'all_correct' | 'exclude' },
 ): Promise<void> {
   await apiClient.post(`/evaluations/${evaluationId}/question-error`, payload);
+}
+
+export async function removeQuestionError(
+  evaluationId: string,
+  payload: { subjectId: string; questionNo: number },
+): Promise<void> {
+  await apiClient.post(`/evaluations/${evaluationId}/question-error/remove`, payload);
 }
 
 export interface AnswerKeyEntry {

@@ -54,6 +54,8 @@ export interface EvaluationFilter {
 export interface EvaluationsRepository {
   findAll(filter: EvaluationFilter): Promise<EvaluationEntity[]>;
   findById(id: string, tenantId: string): Promise<EvaluationEntity | null>;
+  /** 같은 테넌트에 같은 이름의 활성(미삭제) 평가가 존재하는지. excludeId 는 자기 자신 제외용. */
+  existsByName(tenantId: string, name: string, excludeId?: string): Promise<boolean>;
   create(dto: CreateEvaluationDto): Promise<EvaluationEntity>;
   update(id: string, tenantId: string, dto: UpdateEvaluationDto): Promise<EvaluationEntity>;
   delete(id: string, tenantId: string): Promise<void>;

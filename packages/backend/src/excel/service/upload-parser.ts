@@ -105,6 +105,17 @@ export class UploadParser {
     const mergedMap = new Map<string, ParsedRow>();
     const errors: ParseError[] = [];
 
+    // 허용 시트명 예시 (오류 메시지용)
+    const expectedSheetNames: string[] = [];
+    for (const s of config.subjects) {
+      for (const et of s.examTypes ?? []) {
+        expectedSheetNames.push(`${s.name.trim()}_${et.name.trim()}`);
+      }
+      if (!s.examTypes || s.examTypes.length === 0) {
+        expectedSheetNames.push(s.name.trim());
+      }
+    }
+
     for (const sheet of workbook.worksheets) {
       const sheetName = sheet.name.trim();
 
@@ -128,6 +139,20 @@ export class UploadParser {
       headerRow.eachCell((cell, colNumber) => {
         headers[colNumber] = String(cell.value ?? '').trim();
       });
+
+      // 문항 헤더 검증: Q1, Q2, ... 패턴이 하나라도 있어야 함.
+      const qHeaders = headers.filter((h) => /^Q\d+$/i.test(h ?? ''));
+      if (qHeaders.length === 0) {
+        const preview = headers.filter(Boolean).slice(0, 8).join(', ');
+        errors.push({
+          row: 1,
+          examineeNo: '',
+          examineeName: '',
+          column: '헤더',
+          message: `[${sheetName}] 문항 헤더 형식 오류: "Q1", "Q2", ... 형식이어야 합니다. 현재 헤더: ${preview || '(비어있음)'} — 평가 설정 페이지에서 양식을 다시 다운로드해 사용해주세요.`,
+        });
+        continue;
+      }
 
       if (matchedSubject && matchedExamTypeName) {
         // {과목명}_{유형명} 시트: 시트명으로 subject/examType 확정, 시험유형 컬럼 없음
@@ -184,7 +209,13 @@ export class UploadParser {
         // 2) 과목명 시트: 기존 로직 (3열 시험유형 컬럼)
         const subject = config.subjects.find((s) => s.name.trim() === sheetName);
         if (!subject) {
-          // 등록되지 않은 시트는 건너뜀
+          errors.push({
+            row: 1,
+            examineeNo: '',
+            examineeName: '',
+            column: '시트명',
+            message: `[${sheetName}] 설정에 없는 시트입니다. 허용된 시트명: ${expectedSheetNames.join(', ') || '(설정된 과목 없음)'}`,
+          });
           continue;
         }
 

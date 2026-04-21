@@ -67,6 +67,8 @@ export interface SubjectDef {
   questionCount: number;
   maxScore: number;
   failThreshold: number | null;
+  /** 과목 가중합산(subject_weighted_sum) 블록이 참조. 미설정 시 1 로 취급. */
+  weight?: number;
   examTypes: ExamType[];
   questionErrors: QuestionError[];
 }
