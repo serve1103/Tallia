@@ -1,7 +1,8 @@
-import { Card, Tag, Button, Space, Typography, theme } from 'antd';
+import { Card, Button, Space, Typography, theme } from 'antd';
 import { DeleteOutlined, SettingOutlined, HolderOutlined } from '@ant-design/icons';
 import type { PipelineBlock, BlockDefinition } from '@tallia/shared';
-import { getCategoryColor } from '../models/pipeline';
+import { getCategoryLabel, getCategoryVariant } from '../models/pipeline';
+import { StatusTag } from '../../../shared/components/StatusTag';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -45,9 +46,12 @@ export function BlockCard({ block, index, definition, isSelected, onSelect, onRe
               {definition?.name ?? block.type}
             </Typography.Text>
             {definition && (
-              <Tag color={getCategoryColor(definition.category)} style={{ fontSize: 11 }}>
-                {definition.category}
-              </Tag>
+              <StatusTag
+                variant={getCategoryVariant(definition.category, definition.type)}
+                style={{ fontSize: 11 }}
+              >
+                {getCategoryLabel(definition.category, definition.type)}
+              </StatusTag>
             )}
           </Space>
           <Space size={4}>

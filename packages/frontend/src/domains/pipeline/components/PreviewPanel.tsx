@@ -1,23 +1,106 @@
-import { Card, Button, Alert, Table, Tag, Typography, Divider, Empty } from 'antd';
+import { Card, Button, Alert, Typography, Divider, Empty, Descriptions } from 'antd';
+import { StatusTag } from '../../../shared/components/StatusTag';
 import { PlayCircleOutlined, CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
-import { usePreviewPipeline } from '../hooks/usePipeline';
+import { usePreviewPipeline, useBlockDefinitions } from '../hooks/usePipeline';
 import type { PreviewResult } from '../api/pipeline';
+import { IntermediateStepsView, type IntermediateStep } from '../../../shared/components/IntermediateSteps';
+import { formatNumber } from '../../../shared/lib/format';
 
 interface Props {
   evaluationId: string;
 }
 
-interface StepRow {
-  key: number;
-  blockIndex: number;
-  label: string;
-  blockType: string;
-  output: string;
+/** 샘플 입력을 사람이 읽을 수 있게 요약. 유형별 shape 에 맞춰 포맷. */
+function SampleInputView({ input }: { input: unknown }) {
+  if (input == null) return <Typography.Text type="secondary">샘플 입력 없음</Typography.Text>;
+
+  // B유형: { subjects: [{ subjectId, examType, answers: {1: '3', ...} }] }
+  if (typeof input === 'object' && 'subjects' in input) {
+    const data = input as { subjects: Array<{ subjectId: string; examType: string; answers: Record<string, string> }> };
+    if (Array.isArray(data.subjects) && data.subjects.length > 0) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {data.subjects.map((s, i) => {
+            const entries = Object.entries(s.answers ?? {}).sort(
+              (a, b) => Number(a[0]) - Number(b[0]),
+            );
+            return (
+              <Descriptions key={i} size="small" bordered column={1}>
+                <Descriptions.Item label="과목 ID">{s.subjectId}</Descriptions.Item>
+                <Descriptions.Item label="시험유형">{s.examType || '-'}</Descriptions.Item>
+                <Descriptions.Item label={`응답 (${entries.length}문항)`}>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))',
+                      gap: 4,
+                    }}
+                  >
+                    {entries.map(([qNo, ans]) => (
+                      <div
+                        key={qNo}
+                        style={{
+                          fontSize: 11,
+                          padding: '2px 4px',
+                          textAlign: 'center',
+                          background: '#fafafa',
+                          borderRadius: 4,
+                        }}
+                      >
+                        <span style={{ color: '#888' }}>Q{qNo}</span>{' '}
+                        <strong>{String(ans)}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </Descriptions.Item>
+              </Descriptions>
+            );
+          })}
+        </div>
+      );
+    }
+  }
+
+  // A유형: { items: [...], data: number[][] }
+  if (typeof input === 'object' && 'items' in input && 'data' in input) {
+    const data = input as { items: string[]; data: number[][] };
+    return (
+      <table style={{ borderCollapse: 'collapse', fontSize: 12 }}>
+        <thead>
+          <tr>
+            <th style={{ padding: '4px 8px', background: '#f5f5f5', textAlign: 'left' }}>항목</th>
+            {data.data[0]?.map((_, i) => (
+              <th key={i} style={{ padding: '4px 8px', background: '#f5f5f5' }}>위원{i + 1}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.items.map((name, r) => (
+            <tr key={name}>
+              <td style={{ padding: '4px 8px', borderBottom: '1px solid #eee' }}>{name}</td>
+              {data.data[r]?.map((v, c) => (
+                <td key={c} style={{ padding: '4px 8px', borderBottom: '1px solid #eee', textAlign: 'center' }}>
+                  {v}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
+  // 그 외: pretty JSON fallback
+  return (
+    <pre style={{ fontSize: 11, background: '#fafafa', padding: 8, borderRadius: 4, margin: 0, overflow: 'auto' }}>
+      {JSON.stringify(input, null, 2)}
+    </pre>
+  );
 }
 
 export function PreviewPanel({ evaluationId }: Props) {
   const previewMutation = usePreviewPipeline(evaluationId);
+  const { data: definitions } = useBlockDefinitions(evaluationId);
 
   const handlePreview = () => {
     previewMutation.mutate();
@@ -25,39 +108,12 @@ export function PreviewPanel({ evaluationId }: Props) {
 
   const result: PreviewResult | undefined = previewMutation.data;
 
-  const stepColumns: ColumnsType<StepRow> = [
-    {
-      title: '단계',
-      dataIndex: 'blockIndex',
-      key: 'blockIndex',
-      width: 60,
-      render: (v: number) => <Tag>{v + 1}</Tag>,
-    },
-    {
-      title: '블록',
-      dataIndex: 'label',
-      key: 'label',
-      width: 160,
-    },
-    {
-      title: '출력',
-      dataIndex: 'output',
-      key: 'output',
-      render: (v: string) => (
-        <Typography.Text code style={{ fontSize: 12 }}>
-          {v}
-        </Typography.Text>
-      ),
-    },
-  ];
-
-  const stepRows: StepRow[] =
+  const steps: IntermediateStep[] =
     result?.intermediateResults?.map((r) => ({
-      key: r.blockIndex,
       blockIndex: r.blockIndex,
-      label: r.label,
       blockType: r.blockType,
-      output: JSON.stringify(r.output),
+      label: r.label,
+      output: r.output,
     })) ?? [];
 
   const finalScore =
@@ -84,7 +140,7 @@ export function PreviewPanel({ evaluationId }: Props) {
       }
     >
       {!result && !previewMutation.isPending && !previewMutation.isError && (
-        <Empty description="'샘플 미리보기 실행' 버튼을 눌러 파이프라인을 테스트하세요" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <Empty description="'샘플 미리보기 실행' 버튼을 눌러 계산 순서를 테스트하세요" image={Empty.PRESENTED_IMAGE_SIMPLE} />
       )}
 
       {previewMutation.isError && (
@@ -94,7 +150,7 @@ export function PreviewPanel({ evaluationId }: Props) {
       {result?.errorMessage && (
         <Alert
           type="warning"
-          message="파이프라인 실행 오류"
+          message="계산 오류"
           description={result.errorMessage}
           showIcon
           icon={<WarningOutlined />}
@@ -103,59 +159,37 @@ export function PreviewPanel({ evaluationId }: Props) {
 
       {result && !result.errorMessage && (
         <>
-          {/* 샘플 입력 */}
-          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          <Typography.Text strong style={{ fontSize: 12 }}>
             샘플 입력
           </Typography.Text>
-          <pre
-            style={{
-              background: '#f8f8fa',
-              padding: 8,
-              borderRadius: 4,
-              fontSize: 11,
-              marginTop: 4,
-              marginBottom: 12,
-              maxHeight: 120,
-              overflow: 'auto',
-            }}
-          >
-            {JSON.stringify(result.sampleInput, null, 2)}
-          </pre>
+          <div style={{ marginTop: 6, marginBottom: 16 }}>
+            <SampleInputView input={result.sampleInput} />
+          </div>
 
-          {/* 단계별 중간 결과 */}
-          {stepRows.length > 0 && (
+          {steps.length > 0 && (
             <>
               <Typography.Text strong style={{ fontSize: 12 }}>
                 단계별 결과
               </Typography.Text>
-              <Table<StepRow>
-                size="small"
-                columns={stepColumns}
-                dataSource={stepRows}
-                pagination={false}
-                style={{ marginTop: 6, marginBottom: 12 }}
-              />
+              <div style={{ marginTop: 6, marginBottom: 12 }}>
+                <IntermediateStepsView steps={steps} definitions={definitions} />
+              </div>
             </>
           )}
 
-          {/* 최종 점수 */}
           {finalScore != null && (
             <>
               <Divider style={{ margin: '8px 0' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <CheckCircleOutlined style={{ color: '#52c41a' }} />
                 <Typography.Text strong>최종 점수:</Typography.Text>
-                <Typography.Text
-                  strong
-                  style={{ fontSize: 18, color: '#18181b' }}
-                >
-                  {finalScore}
+                <Typography.Text strong style={{ fontSize: 18, color: '#18181b' }}>
+                  {formatNumber(finalScore)}
                 </Typography.Text>
               </div>
             </>
           )}
 
-          {/* 과락 플래그 */}
           {result.failFlags && result.failFlags.length > 0 && (
             <>
               <Divider style={{ margin: '8px 0' }} />
@@ -164,9 +198,9 @@ export function PreviewPanel({ evaluationId }: Props) {
               </Typography.Text>
               <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                 {result.failFlags.map((f, i) => (
-                  <Tag key={i} color="error">
+                  <StatusTag key={i} variant="error">
                     {f.name}: {f.value} (기준 {f.threshold})
-                  </Tag>
+                  </StatusTag>
                 ))}
               </div>
             </>

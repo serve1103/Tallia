@@ -81,8 +81,13 @@ export function TypeAConfigForm({ value, commonSettings, onSave, loading }: Prop
                   <Form.Item {...rest} name={[name, 'maxScore']} label="만점">
                     <InputNumber min={0} />
                   </Form.Item>
-                  <Form.Item {...rest} name={[name, 'weight']} label="가중치">
-                    <InputNumber min={0} step={0.1} />
+                  <Form.Item
+                    {...rest}
+                    name={[name, 'weight']}
+                    label="가중치"
+                    tooltip="항목 가중합산/가중치 적용 단계에서 사용. 비워두면 1로 처리."
+                  >
+                    <InputNumber min={0} step={0.1} placeholder="1" />
                   </Form.Item>
                   <Form.Item {...rest} name={[name, 'failThreshold']} label="과락 기준">
                     <InputNumber min={0} placeholder="없음" />

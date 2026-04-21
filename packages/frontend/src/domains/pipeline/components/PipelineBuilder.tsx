@@ -1,6 +1,8 @@
-import { Button, Space, message, Divider, theme, Switch, Typography } from 'antd';
-import { SaveOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Button, Space, message, Divider, theme, Switch, Typography, Popconfirm } from 'antd';
+import { SaveOutlined, CheckCircleOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { useEffect, useMemo, useState } from 'react';
+import { useEvalConfig, useEvaluation } from '../../evaluation/hooks/useEvaluations';
+import { buildAutoPipeline } from '../models/pipeline';
 import {
   DndContext,
   closestCenter,
@@ -38,7 +40,20 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
   const store = usePipelineStore();
   const saveMutation = useSavePipeline(evaluationId);
   const validateMutation = useValidatePipeline(evaluationId);
+  const { data: evalConfig } = useEvalConfig(evaluationId);
+  const { data: evaluation } = useEvaluation(evaluationId);
   const defMap = useMemo(() => new Map(definitions.map((d) => [d.type, d])), [definitions]);
+
+  const handleAutoBuild = () => {
+    if (!evalConfig) {
+      message.warning('평가 설정을 먼저 저장해주세요');
+      return;
+    }
+    const convertedMax = evaluation?.convertedMax ?? 100;
+    const blocks = buildAutoPipeline(evalConfig, convertedMax);
+    store.replaceBlocks(blocks);
+    message.success('계산 순서를 자동 구성했습니다. "저장"을 눌러 확정하세요');
+  };
 
   // A유형 조건부 모드 상태
   const isAType = evalType === 'A';
@@ -132,7 +147,7 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
     }
     saveMutation.mutate(config, {
       onSuccess: () => {
-        message.success('파이프라인이 저장되었습니다');
+        message.success('계산 순서가 저장되었습니다');
         store.resetDirty();
       },
       onError: () => message.error('저장에 실패했습니다'),
@@ -141,7 +156,7 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
 
   const handleValidate = () => {
     if (store.blocks.length === 0) {
-      message.warning('블록을 먼저 추가해주세요');
+      message.warning('단계를 먼저 추가해주세요');
       return;
     }
     validateMutation.mutate(store.blocks, {
@@ -181,6 +196,15 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
             )}
           </Space>
           <Space>
+            <Popconfirm
+              title="자동 구성"
+              description="현재 평가 설정(과락/가중치/만점 등)에 맞춰 계산 순서를 재생성합니다. 기존 단계 구성은 교체됩니다."
+              onConfirm={handleAutoBuild}
+              okText="구성"
+              cancelText="취소"
+            >
+              <Button icon={<ThunderboltOutlined />}>자동 구성</Button>
+            </Popconfirm>
             <Button icon={<CheckCircleOutlined />} onClick={handleValidate} loading={validateMutation.isPending}>
               검증
             </Button>
@@ -217,7 +241,7 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
 
         {store.blocks.length === 0 && (
           <div style={{ padding: 40, textAlign: 'center', color: token.colorTextTertiary, border: `2px dashed ${token.colorBorder}`, borderRadius: 8 }}>
-            오른쪽 팔레트에서 블록을 추가하세요
+            오른쪽 목록에서 단계를 추가하세요
           </div>
         )}
 
@@ -229,6 +253,7 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
         <BlockPalette
           definitions={definitions}
           evalType={evalType}
+          existingTypes={store.blocks.map((b) => b.type)}
           onAdd={(type, initialParams) => {
             const block = createEmptyBlock(type);
             if (initialParams) block.params = initialParams;
@@ -245,6 +270,11 @@ export function PipelineBuilder({ evaluationId, evalType, initialConfig, definit
         onSave={(params) => {
           if (store.selectedBlockIndex != null) {
             store.updateBlockParams(store.selectedBlockIndex, params);
+          }
+        }}
+        onDecimalChange={(decimal) => {
+          if (store.selectedBlockIndex != null) {
+            store.updateBlockDecimal(store.selectedBlockIndex, decimal);
           }
         }}
       />

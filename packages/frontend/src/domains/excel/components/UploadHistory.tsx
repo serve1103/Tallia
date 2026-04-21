@@ -1,7 +1,8 @@
-import { Table, Tag, Button, Popconfirm, message } from 'antd';
+import { Table, Button, Popconfirm, message } from 'antd';
 import type { ScoreUpload } from '@tallia/shared';
 import { useUploads, useRollbackUpload } from '../hooks/useExcel';
 import { formatDateTime, formatFileSize } from '../../../shared/lib/format';
+import { StatusTag } from '../../../shared/components/StatusTag';
 
 interface Props {
   evaluationId: string;
@@ -39,7 +40,7 @@ export function UploadHistory({ evaluationId }: Props) {
       key: 'status',
       render: (status: string) => {
         const info = STATUS_MAP[status] ?? { color: 'default', label: status };
-        return <Tag color={info.color}>{info.label}</Tag>;
+        return <StatusTag variant={info.color}>{info.label}</StatusTag>;
       },
     },
     {

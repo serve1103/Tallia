@@ -22,7 +22,7 @@ export function CustomStepTemplateModal({ open, onCancel, onSelect }: Props) {
       width={560}
     >
       <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16, fontSize: 12 }}>
-        템플릿을 선택하면 기본 파라미터로 블록이 추가됩니다. 이후 블록을 클릭해 파라미터를 수정할 수 있습니다.
+        템플릿을 선택하면 기본 파라미터로 단계가 추가됩니다. 이후 단계를 클릭해 파라미터를 수정할 수 있습니다.
       </Typography.Text>
       <Space direction="vertical" style={{ width: '100%' }} size={8}>
         {CUSTOM_STEP_TEMPLATES.map((tpl) => (

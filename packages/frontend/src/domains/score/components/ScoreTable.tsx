@@ -1,10 +1,11 @@
-import { Table, Tag, Button, Descriptions } from 'antd';
+import { Table, Button, Descriptions } from 'antd';
 import type { Score } from '@tallia/shared';
 import { useResults } from '../hooks/useScores';
 import { getScoreStatusTag } from '../models/score';
 import { formatNumber } from '../../../shared/lib/format';
 import { useState } from 'react';
 import { useBreakpoints } from '../../../shared/hooks/useBreakpoint';
+import { StatusTag } from '../../../shared/components/StatusTag';
 import { ScoreCardList } from './ScoreCardList';
 
 interface Props {
@@ -108,7 +109,7 @@ export function ScoreTable({ evaluationId, onSelectExaminee, failOnly, searchTex
       key: 'status',
       render: (_: unknown, record: Score) => {
         const tag = getScoreStatusTag(record);
-        return <Tag color={tag.color}>{tag.label}</Tag>;
+        return <StatusTag variant={tag.color}>{tag.label}</StatusTag>;
       },
     },
   ];

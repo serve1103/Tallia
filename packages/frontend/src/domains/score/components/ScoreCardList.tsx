@@ -1,9 +1,10 @@
-import { Card, Tag, Pagination, Spin, Descriptions, Typography } from 'antd';
+import { Card, Pagination, Spin, Descriptions, Typography } from 'antd';
 import type { Score } from '@tallia/shared';
 import { useResults } from '../hooks/useScores';
 import { getScoreStatusTag } from '../models/score';
 import { formatNumber } from '../../../shared/lib/format';
 import { useState } from 'react';
+import { StatusTag } from '../../../shared/components/StatusTag';
 
 const { Text } = Typography;
 
@@ -69,7 +70,7 @@ function ScoreCard({ record, onSelectExaminee }: CardItemProps) {
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-          <Tag color={tag.color}>{tag.label}</Tag>
+          <StatusTag variant={tag.color}>{tag.label}</StatusTag>
           {hasDetail && (
             <Text
               style={{ fontSize: 12, color: '#1677ff', cursor: 'pointer' }}

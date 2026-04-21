@@ -1,26 +1,20 @@
-import { Descriptions, Table, Tag, Typography, Alert } from 'antd';
-import type { Score } from '@tallia/shared';
+import { Descriptions, Typography, Alert } from 'antd';
+import type { BlockDefinition, Score } from '@tallia/shared';
 import { formatNumber } from '../../../shared/lib/format';
+import { IntermediateStepsView, type IntermediateStep } from '../../../shared/components/IntermediateSteps';
+import { StatusTag } from '../../../shared/components/StatusTag';
 import { getScoreStatusTag } from '../models/score';
 
 interface Props {
   score: Score;
+  definitions?: BlockDefinition[];
 }
 
-export function IntermediateDetail({ score }: Props) {
+export function IntermediateDetail({ score, definitions }: Props) {
   const statusTag = getScoreStatusTag(score);
-
-  const intermediateColumns = [
-    { title: '#', dataIndex: 'blockIndex', key: 'blockIndex', width: 50 },
-    { title: '블록', dataIndex: 'label', key: 'label' },
-    { title: '타입', dataIndex: 'blockType', key: 'blockType' },
-    {
-      title: '결과',
-      dataIndex: 'output',
-      key: 'output',
-      render: (v: unknown) => (typeof v === 'number' ? formatNumber(v) : JSON.stringify(v)),
-    },
-  ];
+  const steps: IntermediateStep[] = Array.isArray(score.intermediateResults)
+    ? (score.intermediateResults as IntermediateStep[])
+    : [];
 
   return (
     <div>
@@ -32,30 +26,29 @@ export function IntermediateDetail({ score }: Props) {
         <Descriptions.Item label="수험번호">{score.examineeNo}</Descriptions.Item>
         <Descriptions.Item label="수험자명">{score.examineeName}</Descriptions.Item>
         <Descriptions.Item label="원점수">{formatNumber(score.rawScore)}</Descriptions.Item>
-        <Descriptions.Item label="환산점수">{formatNumber(score.convertedScore)}</Descriptions.Item>
+        <Descriptions.Item label="환산점수">
+          <strong style={{ fontSize: 15 }}>{formatNumber(score.convertedScore)}</strong>
+        </Descriptions.Item>
         <Descriptions.Item label="상태">
-          <Tag color={statusTag.color}>{statusTag.label}</Tag>
+          <StatusTag variant={statusTag.color}>{statusTag.label}</StatusTag>
         </Descriptions.Item>
       </Descriptions>
 
       {Array.isArray(score.failReasons) && score.failReasons.length > 0 && (
-        <>
+        <div style={{ marginBottom: 16 }}>
           <Typography.Title level={5}>과락 사유</Typography.Title>
           {score.failReasons.map((f, i) => (
-            <Tag key={i} color="warning">
+            <StatusTag key={i} variant="warning" style={{ marginBottom: 4 }}>
               {f.name}: {f.value} (기준: {f.threshold})
-            </Tag>
+            </StatusTag>
           ))}
-        </>
+        </div>
       )}
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>중간 계산 결과</Typography.Title>
-      <Table
-        columns={intermediateColumns}
-        dataSource={(Array.isArray(score.intermediateResults) ? score.intermediateResults : []).map((r, i) => ({ ...r, key: i }))}
-        size="small"
-        pagination={false}
-      />
+      <Typography.Title level={5} style={{ marginTop: 16, marginBottom: 12 }}>
+        계산 과정
+      </Typography.Title>
+      <IntermediateStepsView steps={steps} definitions={definitions} />
     </div>
   );
 }
